@@ -1,10 +1,10 @@
-name: Python CI
+name: CI
 
 env:
-  # Default Python version used for all jobs other than test, which uses a
-  # matrix of supported versions. Quote the version to avoid interpretation as
-  # a floating point number.
-  PYTHON_VERSION: "3.13"
+  # Current supported uv version. The uv documentation recommends pinning
+  # this. The version should match the version used in .pre-commit-config.yaml
+  # and frozen in uv.lock. It is updated by make update-deps.
+  UV_VERSION: "0.8.12"
 
 "on":
   merge_group: {}
@@ -13,7 +13,7 @@ env:
     branches-ignore:
       # These should always correspond to pull requests, so ignore them for
       # the push trigger and let them be triggered by the pull_request
-      # trigger, avoiding running the workflow twice.  This is a minor
+      # trigger, avoiding running the workflow twice. This is a minor
       # optimization so there's no need to ensure this is comprehensive.
       - "dependabot/**"
       - "gh-readonly-queue/**"
@@ -24,10 +24,9 @@ env:
     types: [published]
 
 jobs:
-  lint:
-
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - uses: actions/checkout@v5
@@ -35,56 +34,74 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: ".python-version"
 
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
 
-  test:
+      - name: Run tox
+        run: uv run --only-group=nox nox -s lint typing test
 
+  changes:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
 
-    strategy:
-      matrix:
-        python:
-          - "3.12"
-          - "3.13"
+    permissions:
+      pull-requests: read
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+      docs-specific: ${{ steps.filter.outputs.docs-specific }}
 
     steps:
       - uses: actions/checkout@v5
 
-      - name: Run tox
-        uses: lsst-sqre/run-tox@v1
+      - uses: dorny/paths-filter@v3
+        id: filter
         with:
-          python-version: ${{ matrix.python }}
-          tox-envs: "py,typing"
-          tox-plugins: tox-uv
+          filters: |
+            docs:
+              - "CHANGELOG.md"
+              - "docs/**"
+            docs-specific:
+              - "CHANGELOG.md"
+              - "docs/**"
 
   docs:
-
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+
+    needs: changes
+    if: >
+      (needs.changes.outputs.docs == 'true')
+      || (github.event_name == 'workflow_dispatch')
 
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0 # full history for setuptools_scm
+          fetch-depth: 0 # full history for Sphinx
 
-      - name: Install Graphviz
-        run: sudo apt-get install graphviz
-
-      - name: Run tox
-        uses: lsst-sqre/run-tox@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          tox-envs: "docs"
-          # Add docs-linkcheck when the docs and PyPI package are published
-          # tox-envs: "docs,docs-linkcheck"
-          tox-plugins: tox-uv
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Install extra packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+
+      - name: Run nox
+        run: uv run --only-group=nox nox -s docs
 
       # Only attempt documentation uploads for tagged releases and pull
-      # requests from ticket branches in the same repository.  This avoids
+      # requests from ticket branches in the same repository. This avoids
       # version clutter in the docs and failures when a PR doesn't have access
       # to secrets.
       - name: Upload to LSST the Docs
@@ -95,48 +112,8 @@ jobs:
           username: ${{ secrets.LTD_USERNAME }}
           password: ${{ secrets.LTD_PASSWORD }}
         if: >
-          github.event_name != 'merge_group'
-          && (github.event_name != 'pull_request'
-              || startsWith(github.head_ref, 'tickets/'))
-  
-  test-packaging:
-
-    name: Test packaging
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [lint, test, docs]
-
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0 # full history for setuptools_scm
-
-      - name: Build and publish
-        uses: lsst-sqre/build-and-publish-to-pypi@v3
-        with:
-          upload: false
-
-  pypi:
-
-    # This job requires set up:
-    # 1. Set up a trusted publisher for PyPI
-    # 2. Set up a "pypi" environment in the repository
-    # See https://github.com/lsst-sqre/build-and-publish-to-pypi
-    name: Upload release to PyPI
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: [lint, test, docs, test-packaging]
-    environment:
-      name: pypi
-      url: https://pypi.org/p/repertoire
-    permissions:
-      id-token: write
-    if: github.event_name == 'release' && github.event.action == 'published'
-
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0 # full history for setuptools_scm
-
-      - name: Build and publish
-        uses: lsst-sqre/build-and-publish-to-pypi@v3
+          (github.event_name == 'push' && github.ref_name == 'main')
+          || (github.event_name == 'workflow_dispatch')
+          || (github.event_name == 'pull_request'
+              && startsWith(github.head_ref, 'tickets/')
+              && needs.changes.outputs.docs-specific == 'true')
