@@ -1,16 +1,14 @@
-"""Service discovery for the Rubin Science Platform"""
+"""The Repertoire service discovery service."""
 
 __all__ = ["__version__"]
 
 from importlib.metadata import PackageNotFoundError, version
 
 __version__: str
-"""The version string of repertoire
-(PEP 440 / SemVer compatible).
-"""
+"""The application version string (PEP 440 / SemVer compatible)."""
 
 try:
-    __version__ = version(__name__)
+    __version__ = version("repertoire")
 except PackageNotFoundError:
     # package is not installed
     __version__ = "0.0.0"

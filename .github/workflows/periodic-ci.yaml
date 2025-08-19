@@ -1,14 +1,14 @@
 # This is a separate run of the Python test suite that doesn't cache the tox
-# environment and runs from a schedule.  The purpose is to test compatibility
+# environment and runs from a schedule. The purpose is to test compatibility
 # with the latest versions of dependencies.
 
 name: Periodic CI
 
 env:
-  # Default Python version used for all jobs other than test, which uses a
-  # matrix of supported versions. Quote the version to avoid interpretation as
-  # a floating point number.
-  PYTHON_VERSION: "3.13"
+  # Current supported uv version. The uv documentation recommends pinning
+  # this. The version should match the version used in .pre-commit-config.yaml
+  # and frozen in uv.lock. It is updated by make update-deps.
+  UV_VERSION: "0.8.12"
 
 "on":
   schedule:
@@ -18,23 +18,28 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    strategy:
-      matrix:
-        python:
-          - "3.12"
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v5
-
-      - name: Run tests in tox
-        uses: lsst-sqre/run-tox@v1
         with:
-          python-version: ${{ matrix.python }}
-          tox-envs: "lint,typing,py"
-          tox-plugins: tox-uv
-          use-cache: false
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Update dependencies
+        run: make update-deps
+
+      - name: Run nox
+        run: uv run --only-group=nox nox -s lint typing test
 
       - name: Report status
         if: failure()
@@ -53,18 +58,25 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          fetch-depth: 0 # full history for setuptools_scm
+          fetch-depth: 0 # full history for Sphinx
 
-      - name: Install Graphviz
-        run: sudo apt-get install graphviz
-
-      - name: Build docs in tox
-        uses: lsst-sqre/run-tox@v1
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          tox-envs: "docs,docs-linkcheck"
-          tox-plugins: tox-uv
-          use-cache: false
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+
+      - name: Install extra packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+
+      - name: Run nox
+        run: uv run --only-group=nox nox -s docs docs-linkcheck
 
       - name: Report status
         if: failure()
@@ -73,30 +85,5 @@ jobs:
           status: ${{ job.status }}
           notify_when: "failure"
           notification_title: "Periodic documentation test for {repo} failed"
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK }}
-
-  test-packaging:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [test, docs]
-
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0 # full history for setuptools_scm
-
-      - name: Build and publish
-        uses: lsst-sqre/build-and-publish-to-pypi@v3
-        with:
-          upload: false
-
-      - name: Report status
-        if: failure()
-        uses: ravsamhq/notify-slack-action@v2
-        with:
-          status: ${{ job.status }}
-          notify_when: "failure"
-          notification_title: "Periodic packaging test for {repo} failed"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK }}
