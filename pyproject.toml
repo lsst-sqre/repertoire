@@ -22,6 +22,7 @@ dependencies = [
     "fastapi>=0.100",
     "pydantic>2",
     "pydantic-settings>=2",
+    "rubin-repertoire",
     "safir>=5",
     "uvicorn[standard]>=0.34",
 ]
@@ -63,14 +64,8 @@ nox = [
 ]
 typing = [
     "mypy>=1.15",
+    "types-pyyaml>=6",
 ]
-
-[tool.setuptools_scm]
-
-[tool.setuptools.packages.find]
-# https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
-where = ["src"]
-include = ["repertoire*"]
 
 [tool.black]
 line-length = 79
@@ -137,7 +132,7 @@ python_files = ["tests/*.py", "tests/*/*.py"]
 extend = "ruff-shared.toml"
 
 [tool.ruff.lint.isort]
-known-first-party = ["repertoire", "tests"]
+known-first-party = ["repertoire", "rubin.repertoire", "tests"]
 split-on-trailing-comma = false
 
 [tool.scriv]
@@ -152,3 +147,11 @@ format = "md"
 md_header_level = "2"
 new_fragment_template = "file:changelog.d/_template.md.jinja"
 skip_fragments = "_template.md.jinja"
+
+[tool.setuptools_scm]
+
+[tool.uv.sources]
+rubin-repertoire = { workspace = true }
+
+[tool.uv.workspace]
+members = ["client"]

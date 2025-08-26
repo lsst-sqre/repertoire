@@ -1,0 +1,72 @@
+{
+  "datasets": [
+    {
+      "name": "dp02",
+      "butler_config": "https://data.lsst.cloud/api/butler/repo/dp02/butler.yaml"
+    },
+    {
+      "name": "dp03"
+    },
+    {
+      "name": "dp1",
+      "butler_config": "https://data.lsst.cloud/api/butler/repo/dp1/butler.yaml"
+    }
+  ],
+  "services": [
+    "argocd",
+    "butler",
+    "cert-manager",
+    "datalinker",
+    "gafaelfawr",
+    "ghostwriter",
+    "google-cloud-observability",
+    "hips",
+    "ingress-nginx",
+    "mobu",
+    "noteburst",
+    "nublado",
+    "portal",
+    "qserv-kafka",
+    "sasquatch",
+    "semaphore",
+    "sia",
+    "squareone",
+    "ssotap",
+    "strimzi",
+    "strimzi-access-operator",
+    "tap",
+    "times-square",
+    "vault-secrets-operator",
+    "vo-cutouts",
+    "wobbly"
+  ],
+  "urls": {
+    "data": {
+      "cutout": {
+        "dp02": "https://data.lsst.cloud/api/cutout",
+        "dp03": "https://data.lsst.cloud/api/cutout",
+        "dp1": "https://data.lsst.cloud/api/cutout"
+      },
+      "sia": {
+        "dp02": "https://data.lsst.cloud/api/sia/dp02",
+        "dp1": "https://data.lsst.cloud/api/sia/dp1"
+      },
+      "tap": {
+        "dp02": "https://data.lsst.cloud/api/tap",
+        "dp03": "https://data.lsst.cloud/api/ssotap",
+        "dp1": "https://data.lsst.cloud/api/tap"
+      }
+    },
+    "internal": {
+      "gafaelfawr": "https://data.lsst.cloud/auth/api/v1",
+      "mobu": "https://data.lsst.cloud/mobu",
+      "noteburst": "https://data.lsst.cloud/noteburst/v1",
+      "semaphore": "https://data.lsst.cloud/semaphore",
+      "wobbly": "https://data.lsst.cloud/wobbly"
+    },
+    "ui": {
+      "nublado": "https://nb.data.lsst.cloud/nb",
+      "portal": "https://data.lsst.cloud/portal/app/"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+# A typical merged Phalanx configuration for, say, data.lsst.cloud.
+
+availableServices:
+  - "argocd"
+  - "butler"
+  - "cert-manager"
+  - "datalinker"
+  - "gafaelfawr"
+  - "ghostwriter"
+  - "google-cloud-observability"
+  - "hips"
+  - "ingress-nginx"
+  - "mobu"
+  - "noteburst"
+  - "nublado"
+  - "portal"
+  - "qserv-kafka"
+  - "sasquatch"
+  - "semaphore"
+  - "sia"
+  - "squareone"
+  - "ssotap"
+  - "strimzi"
+  - "strimzi-access-operator"
+  - "tap"
+  - "times-square"
+  - "vault-secrets-operator"
+  - "vo-cutouts"
+  - "wobbly"
+baseUrl: "https://data.lsst.cloud/"
+butlerConfigs:
+  dp02: "https://data.lsst.cloud/api/butler/repo/dp02/butler.yaml"
+  dp1: "https://data.lsst.cloud/api/butler/repo/dp1/butler.yaml"
+datasets:
+  - name: "dp02"
+  - name: "dp03"
+  - name: "dp1"
+rules:
+  gafaelfawr:
+    - type: "internal"
+      name: "gafaelfawr"
+      template: "{{base_url}}/auth/api/v1"
+  mobu:
+    - type: "internal"
+      name: "mobu"
+      template: "{{base_url}}/mobu"
+  noteburst:
+    - type: "internal"
+      name: "noteburst"
+      template: "{{base_url}}/noteburst/v1"
+  nublado:
+    - type: "ui"
+      name: "nublado"
+      template: "{{base_url}}/nb"
+  portal:
+    - type: "ui"
+      name: "portal"
+      template: "{{base_url}}/portal/app/"
+  semaphore:
+    - type: "internal"
+      name: "semaphore"
+      template: "{{base_url}}/semaphore"
+  sia:
+    - type: "data"
+      name: "sia"
+      datasets:
+        - "dp02"
+        - "dp1"
+      template: "{{base_url}}/api/sia/{{dataset}}"
+  ssotap:
+    - type: "data"
+      name: "tap"
+      datasets:
+        - "dp03"
+      template: "{{base_url}}/api/ssotap"
+  tap:
+    - type: "data"
+      name: "tap"
+      datasets:
+        - "dp02"
+        - "dp1"
+      template: "{{base_url}}/api/tap"
+  vo-cutouts:
+    - type: "data"
+      name: "cutout"
+      template: "{{base_url}}/api/cutout"
+  wobbly:
+    - type: "internal"
+      name: "wobbly"
+      template: "{{base_url}}/wobbly"
+subdomainRules:
+  nublado:
+    - type: "ui"
+      name: "nublado"
+      template: "https://nb.{{base_hostname}}/nb"
+useSubdomains:
+  - "nublado"
