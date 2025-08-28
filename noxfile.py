@@ -33,3 +33,11 @@ def typing(session: nox.Session) -> None:
         "src",
         "tests",
     )
+    session.run(
+        "mypy",
+        *session.posargs,
+        "--namespace-packages",
+        "--explicit-package-bases",
+        "client/src",
+        env={"MYPYPATH": "client/src:client"},
+    )
