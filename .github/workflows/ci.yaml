@@ -117,3 +117,29 @@ jobs:
           || (github.event_name == 'pull_request'
               && startsWith(github.head_ref, 'tickets/')
               && needs.changes.outputs.docs-specific == 'true')
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test]
+    timeout-minutes: 10
+
+    # Only do Docker builds of tagged releases and pull requests from ticket
+    # branches. This will still trigger on pull requests from untrusted
+    # repositories whose branch names match our tickets/* branch convention,
+    # but in this case the build will fail with an error since the secret
+    # won't be set.
+    if: >
+      github.event_name != 'merge_group'
+      && ((github.even_name == 'release' && github.event.action == 'published')
+          || startsWith(github.head_ref, 'tickets/'))
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: lsst-sqre/build-and-push-to-ghcr@v1
+        id: build
+        with:
+          image: ${{ github.repository }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
