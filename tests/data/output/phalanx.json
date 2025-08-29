@@ -1,18 +1,5 @@
 {
-  "datasets": [
-    {
-      "name": "dp02",
-      "butler_config": "https://data.example.com/api/butler/repo/dp02/butler.yaml"
-    },
-    {
-      "name": "dp03"
-    },
-    {
-      "name": "dp1",
-      "butler_config": "https://data.example.com/api/butler/repo/dp1/butler.yaml"
-    }
-  ],
-  "services": [
+  "applications": [
     "argocd",
     "butler",
     "cert-manager",
@@ -40,6 +27,19 @@
     "vo-cutouts",
     "wobbly"
   ],
+  "datasets": [
+    {
+      "name": "dp02",
+      "butler_config": "https://data.example.com/api/butler/repo/dp02/butler.yaml"
+    },
+    {
+      "name": "dp03"
+    },
+    {
+      "name": "dp1",
+      "butler_config": "https://data.example.com/api/butler/repo/dp1/butler.yaml"
+    }
+  ],
   "urls": {
     "data": {
       "cutout": {
@@ -65,6 +65,7 @@
       "wobbly": "https://data.example.com/wobbly"
     },
     "ui": {
+      "argocd": "https://data.example.com/argo-cd",
       "nublado": "https://nb.data.example.com/nb",
       "portal": "https://data.example.com/portal/app/"
     }

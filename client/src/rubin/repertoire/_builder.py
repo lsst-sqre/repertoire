@@ -34,10 +34,7 @@ class RepertoireBuilder:
     def __init__(self, config: RepertoireSettings) -> None:
         self._config = config
 
-        self._base_context = {
-            "base_url": str(config.base_url).rstrip("/"),
-            "base_hostname": config.base_url.host,
-        }
+        self._base_context = {"base_hostname": config.base_hostname}
         self._datasets = {d.name for d in config.datasets}
 
     def build(self) -> Discovery:
@@ -49,8 +46,8 @@ class RepertoireBuilder:
             Service discovery information.
         """
         return Discovery(
+            applications=sorted(self._config.applications),
             datasets=self._build_datasets(),
-            services=sorted(self._config.available_services),
             urls=self._build_urls(),
         )
 
@@ -66,13 +63,13 @@ class RepertoireBuilder:
     def _build_urls(self) -> ServiceUrls:
         """Construct the service URLs for an environment."""
         urls = ServiceUrls()
-        for service in sorted(self._config.available_services):
-            if service in self._config.use_subdomains:
-                rules = self._config.subdomain_rules.get(service, [])
+        for application in sorted(self._config.applications):
+            if application in self._config.use_subdomains:
+                rules = self._config.subdomain_rules.get(application, [])
             else:
-                rules = self._config.rules.get(service, [])
+                rules = self._config.rules.get(application, [])
             for rule in rules:
-                self._build_url_from_rule(service, rule, urls)
+                self._build_url_from_rule(application, rule, urls)
         return urls
 
     def _build_url_from_rule(
@@ -83,7 +80,7 @@ class RepertoireBuilder:
         Parameters
         ----------
         name
-            Name of the service.
+            Name of the application.
         rule
             Generation rule for the URL.
         urls
