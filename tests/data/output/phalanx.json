@@ -2,14 +2,14 @@
   "datasets": [
     {
       "name": "dp02",
-      "butler_config": "https://data.lsst.cloud/api/butler/repo/dp02/butler.yaml"
+      "butler_config": "https://data.example.com/api/butler/repo/dp02/butler.yaml"
     },
     {
       "name": "dp03"
     },
     {
       "name": "dp1",
-      "butler_config": "https://data.lsst.cloud/api/butler/repo/dp1/butler.yaml"
+      "butler_config": "https://data.example.com/api/butler/repo/dp1/butler.yaml"
     }
   ],
   "services": [
@@ -43,30 +43,30 @@
   "urls": {
     "data": {
       "cutout": {
-        "dp02": "https://data.lsst.cloud/api/cutout",
-        "dp03": "https://data.lsst.cloud/api/cutout",
-        "dp1": "https://data.lsst.cloud/api/cutout"
+        "dp02": "https://data.example.com/api/cutout",
+        "dp03": "https://data.example.com/api/cutout",
+        "dp1": "https://data.example.com/api/cutout"
       },
       "sia": {
-        "dp02": "https://data.lsst.cloud/api/sia/dp02",
-        "dp1": "https://data.lsst.cloud/api/sia/dp1"
+        "dp02": "https://data.example.com/api/sia/dp02",
+        "dp1": "https://data.example.com/api/sia/dp1"
       },
       "tap": {
-        "dp02": "https://data.lsst.cloud/api/tap",
-        "dp03": "https://data.lsst.cloud/api/ssotap",
-        "dp1": "https://data.lsst.cloud/api/tap"
+        "dp02": "https://data.example.com/api/tap",
+        "dp03": "https://data.example.com/api/ssotap",
+        "dp1": "https://data.example.com/api/tap"
       }
     },
     "internal": {
-      "gafaelfawr": "https://data.lsst.cloud/auth/api/v1",
-      "mobu": "https://data.lsst.cloud/mobu",
-      "noteburst": "https://data.lsst.cloud/noteburst/v1",
-      "semaphore": "https://data.lsst.cloud/semaphore",
-      "wobbly": "https://data.lsst.cloud/wobbly"
+      "gafaelfawr": "https://data.example.com/auth/api/v1",
+      "mobu": "https://data.example.com/mobu",
+      "noteburst": "https://data.example.com/noteburst/v1",
+      "semaphore": "https://data.example.com/semaphore",
+      "wobbly": "https://data.example.com/wobbly"
     },
     "ui": {
-      "nublado": "https://nb.data.lsst.cloud/nb",
-      "portal": "https://data.lsst.cloud/portal/app/"
+      "nublado": "https://nb.data.example.com/nb",
+      "portal": "https://data.example.com/portal/app/"
     }
   }
 }
