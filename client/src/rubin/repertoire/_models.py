@@ -80,22 +80,22 @@ class ServiceUrls(BaseModel):
 class Discovery(BaseModel):
     """Service discovery information."""
 
+    applications: Annotated[
+        list[str],
+        Field(
+            title="Phalanx applications",
+            description=(
+                "Names of all Phalanx applications enabled in the local"
+                " environment"
+            ),
+        ),
+    ] = []
+
     datasets: Annotated[
         list[Dataset],
         Field(
             title="Datasets",
             description="All datasets available in the local environment",
-        ),
-    ] = []
-
-    services: Annotated[
-        list[str],
-        Field(
-            title="Phalanx services",
-            description=(
-                "Names of all Phalanx services deployed in the local"
-                " environment"
-            ),
         ),
     ] = []
 

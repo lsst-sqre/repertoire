@@ -1,6 +1,6 @@
 # A typical merged Phalanx configuration for, say, data.example.com.
 
-availableServices:
+applications:
   - "argocd"
   - "butler"
   - "cert-manager"
@@ -27,7 +27,7 @@ availableServices:
   - "vault-secrets-operator"
   - "vo-cutouts"
   - "wobbly"
-baseUrl: "https://data.example.com/"
+baseHostname: "data.example.com"
 butlerConfigs:
   dp02: "https://data.example.com/api/butler/repo/dp02/butler.yaml"
   dp1: "https://data.example.com/api/butler/repo/dp1/butler.yaml"
@@ -36,58 +36,62 @@ datasets:
   - name: "dp03"
   - name: "dp1"
 rules:
+  argocd:
+    - type: "ui"
+      name: "argocd"
+      template: "https://{{base_hostname}}/argo-cd"
   gafaelfawr:
     - type: "internal"
       name: "gafaelfawr"
-      template: "{{base_url}}/auth/api/v1"
+      template: "https://{{base_hostname}}/auth/api/v1"
   mobu:
     - type: "internal"
       name: "mobu"
-      template: "{{base_url}}/mobu"
+      template: "https://{{base_hostname}}/mobu"
   noteburst:
     - type: "internal"
       name: "noteburst"
-      template: "{{base_url}}/noteburst/v1"
+      template: "https://{{base_hostname}}/noteburst/v1"
   nublado:
     - type: "ui"
       name: "nublado"
-      template: "{{base_url}}/nb"
+      template: "https://{{base_hostname}}/nb"
   portal:
     - type: "ui"
       name: "portal"
-      template: "{{base_url}}/portal/app/"
+      template: "https://{{base_hostname}}/portal/app/"
   semaphore:
     - type: "internal"
       name: "semaphore"
-      template: "{{base_url}}/semaphore"
+      template: "https://{{base_hostname}}/semaphore"
   sia:
     - type: "data"
       name: "sia"
       datasets:
         - "dp02"
         - "dp1"
-      template: "{{base_url}}/api/sia/{{dataset}}"
+      template: "https://{{base_hostname}}/api/sia/{{dataset}}"
   ssotap:
     - type: "data"
       name: "tap"
       datasets:
         - "dp03"
-      template: "{{base_url}}/api/ssotap"
+      template: "https://{{base_hostname}}/api/ssotap"
   tap:
     - type: "data"
       name: "tap"
       datasets:
         - "dp02"
         - "dp1"
-      template: "{{base_url}}/api/tap"
+      template: "https://{{base_hostname}}/api/tap"
   vo-cutouts:
     - type: "data"
       name: "cutout"
-      template: "{{base_url}}/api/cutout"
+      template: "https://{{base_hostname}}/api/cutout"
   wobbly:
     - type: "internal"
       name: "wobbly"
-      template: "{{base_url}}/wobbly"
+      template: "https://{{base_hostname}}/wobbly"
 subdomainRules:
   nublado:
     - type: "ui"

@@ -108,19 +108,19 @@ class RepertoireSettings(BaseSettings):
         alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
 
-    available_services: Annotated[
+    applications: Annotated[
         set[str],
         Field(
-            title="Phalanx services",
-            description="Names of deployed Phalanx services",
+            title="Phalanx applications",
+            description="Names of deployed Phalanx applications",
         ),
     ] = set()
 
-    base_url: Annotated[
-        HttpUrl,
+    base_hostname: Annotated[
+        str,
         Field(
-            title="Base URL",
-            description="Base URL for the Phalanx environment",
+            title="Base hostname",
+            description="Base hostname for the Phalanx environment",
         ),
     ]
 
