@@ -8,7 +8,7 @@ from pydantic import HttpUrl
 from ._config import (
     DataServiceRule,
     InternalServiceRule,
-    RepertoireConfig,
+    RepertoireSettings,
     Rule,
     UiServiceRule,
 )
@@ -31,7 +31,7 @@ class RepertoireBuilder:
         Repertoire configuration.
     """
 
-    def __init__(self, config: RepertoireConfig) -> None:
+    def __init__(self, config: RepertoireSettings) -> None:
         self._config = config
 
         self._base_context = {

@@ -1,7 +1,7 @@
 """Client, models, and URL construction for Repertoire."""
 
 from ._builder import RepertoireBuilder
-from ._config import DatasetConfig, RepertoireConfig
+from ._config import DatasetConfig, RepertoireSettings
 from ._models import Dataset, Discovery, ServiceUrls
 
 __all__ = [
@@ -9,7 +9,7 @@ __all__ = [
     "DatasetConfig",
     "Discovery",
     "RepertoireBuilder",
-    "RepertoireConfig",
+    "RepertoireSettings",
     "Rule",
     "ServiceUrls",
 ]

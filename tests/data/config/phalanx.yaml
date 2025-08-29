@@ -1,4 +1,4 @@
-# A typical merged Phalanx configuration for, say, data.lsst.cloud.
+# A typical merged Phalanx configuration for, say, data.example.com.
 
 availableServices:
   - "argocd"
@@ -27,10 +27,10 @@ availableServices:
   - "vault-secrets-operator"
   - "vo-cutouts"
   - "wobbly"
-baseUrl: "https://data.lsst.cloud/"
+baseUrl: "https://data.example.com/"
 butlerConfigs:
-  dp02: "https://data.lsst.cloud/api/butler/repo/dp02/butler.yaml"
-  dp1: "https://data.lsst.cloud/api/butler/repo/dp1/butler.yaml"
+  dp02: "https://data.example.com/api/butler/repo/dp02/butler.yaml"
+  dp1: "https://data.example.com/api/butler/repo/dp1/butler.yaml"
 datasets:
   - name: "dp02"
   - name: "dp03"

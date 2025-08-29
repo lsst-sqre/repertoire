@@ -3,18 +3,20 @@
 from __future__ import annotations
 
 from pydantic import Field, SecretStr
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from safir.logging import LogLevel, Profile
+from safir.logging import (
+    LogLevel,
+    Profile,
+    configure_logging,
+    configure_uvicorn_logging,
+)
 
-__all__ = ["Config", "config"]
+from rubin.repertoire import RepertoireSettings
+
+__all__ = ["Config"]
 
 
-class Config(BaseSettings):
+class Config(RepertoireSettings):
     """Configuration for Repertoire."""
-
-    model_config = SettingsConfigDict(
-        env_prefix="REPERTOIRE_", case_sensitive=False
-    )
 
     log_level: LogLevel = Field(
         LogLevel.INFO, title="Log level of the application's logger"
@@ -34,6 +36,10 @@ class Config(BaseSettings):
         description="If set, alerts will be posted to this Slack webhook",
     )
 
-
-config = Config()
-"""Configuration for Repertoire."""
+    def configure_logging(self) -> None:
+        """Configure logging based on the Repertoire configuration."""
+        configure_logging(
+            profile=self.profile, log_level=self.log_level, name="repertoire"
+        )
+        if self.profile == Profile.production:
+            configure_uvicorn_logging(self.log_level)

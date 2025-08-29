@@ -8,10 +8,11 @@ from typing import Annotated, Literal, Self
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 from pydantic.alias_generators import to_camel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 __all__ = [
     "DatasetConfig",
-    "RepertoireConfig",
+    "RepertoireSettings",
     "Rule",
 ]
 
@@ -92,15 +93,18 @@ type Rule = Annotated[
 ]
 
 
-class RepertoireConfig(BaseModel):
+class RepertoireSettings(BaseSettings):
     """Base configuration from which Repertoire constructs URLs.
 
     This roughly represents the merged Phalanx configuration of the Repertoire
     service for a given environment, and is also used during the Phalanx build
-    process to build static service discovery information.
+    process to build static service discovery information. It is defined with
+    ``pydantic_settings.BaseSettings`` as the base class instead of
+    ``pydantic.BaseModel`` so that the main settings class of the Repertoire
+    server can inherit from it.
     """
 
-    model_config = ConfigDict(
+    model_config = SettingsConfigDict(
         alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
 
@@ -110,7 +114,7 @@ class RepertoireConfig(BaseModel):
             title="Phalanx services",
             description="Names of deployed Phalanx services",
         ),
-    ]
+    ] = set()
 
     base_url: Annotated[
         HttpUrl,

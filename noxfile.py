@@ -1,5 +1,7 @@
 """nox configuration for Repertoire."""
 
+from __future__ import annotations
+
 import nox
 from nox_uv import session
 
