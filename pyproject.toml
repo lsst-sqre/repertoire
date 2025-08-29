@@ -32,6 +32,7 @@ dynamic = ["version"]
 Homepage = "https://repertoire.lsst.io"
 Source = "https://github.com/lsst-sqre/repertoire"
 
+
 [build-system]
 requires = [
     "setuptools>=61",

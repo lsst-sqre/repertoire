@@ -15,7 +15,7 @@
 FROM python:3.13.5-slim-bookworm AS base-image
 
 # Update system packages.
-COPY server/scripts/install-base-packages.sh .
+COPY scripts/install-base-packages.sh .
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     ./install-base-packages.sh && rm ./install-base-packages.sh
@@ -26,7 +26,7 @@ FROM base-image AS install-image
 COPY --from=ghcr.io/astral-sh/uv:0.8.13 /uv /bin/uv
 
 # Install some additional packages required for building dependencies.
-COPY server/scripts/install-dependency-packages.sh .
+COPY scripts/install-dependency-packages.sh .
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     ./install-dependency-packages.sh
@@ -37,15 +37,15 @@ ENV UV_LINK_MODE=copy
 
 # Install the dependencies.
 WORKDIR /app
+ADD . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=server/uv.lock,target=uv.lock \
-    --mount=type=bind,source=server/pyproject.toml,target=pyproject.toml \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --frozen --no-default-groups --compile-bytecode --no-install-project
 
 # Install the application itself.
-ADD . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install --no-deps --compile-bytecode server
+    uv pip install --no-deps --compile-bytecode .
 
 FROM base-image AS runtime-image
 
