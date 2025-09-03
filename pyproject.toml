@@ -50,6 +50,7 @@ dev = [
     "pytest-asyncio",
     "pytest-cov",
     "pytest-sugar",
+    "respx",
 ]
 docs = [
     "documenteer[guide]>=2",
