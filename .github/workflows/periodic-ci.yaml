@@ -87,3 +87,29 @@ jobs:
           notification_title: "Periodic documentation test for {repo} failed"
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK }}
+
+  pypi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [test, docs]
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Test package build of rubin-repertoire
+        uses: lsst-sqre/build-and-publish-to-pypi@v3
+        with:
+          upload: false
+          working-directory: "client"
+
+      - name: Report status
+        if: failure()
+        uses: ravsamhq/notify-slack-action@v2
+        with:
+          status: ${{ job.status }}
+          notify_when: "failure"
+          notification_title: "Periodic packaging test for {repo} failed"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_ALERT_WEBHOOK }}

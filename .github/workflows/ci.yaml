@@ -143,3 +143,40 @@ jobs:
         with:
           image: ${{ github.repository }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  test-packaging:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Test building and publishing rubin-repertoire
+        uses: lsst-sqre/build-and-publish-to-pypi@v3
+        with:
+          upload: false
+          working-directory: "client"
+
+  pypi:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [test, docs, test-packaging]
+    environment:
+      name: pypi
+      url: https://pypi.org/p/safir
+    permissions:
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history for setuptools_scm
+
+      - name: Test building and publishing rubin-repertoire
+        uses: lsst-sqre/build-and-publish-to-pypi@v3
+        with:
+          working-directory: "client"
