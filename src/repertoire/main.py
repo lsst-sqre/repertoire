@@ -40,7 +40,7 @@ def create_app() -> FastAPI:
     app.add_middleware(XForwardedMiddleware)
 
     # Configure Slack alerts.
-    if config.slack_webhook:
+    if config.slack_alerts and config.slack_webhook:
         logger = structlog.get_logger("repertoire")
         SlackRouteErrorHandler.initialize(
             config.slack_webhook, "Repertoire", logger
