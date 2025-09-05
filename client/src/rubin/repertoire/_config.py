@@ -187,7 +187,7 @@ class RepertoireSettings(BaseSettings):
 
         Returns
         -------
-        RepertoireConfig
+        RepertoireSettings
             The corresponding configuration.
         """
         with path.open("r") as f:
