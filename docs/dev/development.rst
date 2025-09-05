@@ -2,17 +2,17 @@
 Development guide
 #################
 
-This page provides procedures and guidelines for developing and contributing to repertoire.
+This page provides procedures and guidelines for developing and contributing to Repertoire.
 
 Scope of contributions
 ======================
 
-repertoire is an open source package, meaning that you can contribute to repertoire itself, or fork repertoire for your own purposes.
+Repertoire is an open source package, meaning that you can contribute to Repertoire itself, or fork Repertoire for your own purposes.
 
-Since repertoire is intended for internal use by Rubin Observatory, community contributions can only be accepted if they align with Rubin Observatory's aims.
+Since Repertoire is intended for internal use by Rubin Observatory, community contributions can only be accepted if they align with Rubin Observatory's aims.
 For that reason, it's a good idea to propose changes with a new `GitHub issue`_ before investing time in making a pull request.
 
-repertoire is developed by the Rubin Observatory SQuaRE team.
+Repertoire is developed by the Rubin Observatory SQuaRE team.
 
 .. _GitHub issue: https://github.com/lsst-sqre/repertoire/issues/new
 
@@ -21,7 +21,13 @@ repertoire is developed by the Rubin Observatory SQuaRE team.
 Setting up a local development environment
 ==========================================
 
-To develop repertoire, create a virtual environment with your method of choice (like virtualenvwrapper) and then clone or fork, and install:
+Repertoire is developed using `uv workspaces`_ so that the server and client can share code and be maintained and tested together.
+You will therefore need uv_ installed to set up a development environment.
+See the `uv installation instructions <https://docs.astral.sh/uv/getting-started/installation/>`__ for details.
+
+.. _uv workspaces: https://docs.astral.sh/uv/concepts/projects/workspaces/
+
+Then, to develop Repertoire, clone the repository and set up a virtual environment:
 
 .. code-block:: sh
 
@@ -31,11 +37,19 @@ To develop repertoire, create a virtual environment with your method of choice (
 
 This init step does three things:
 
-1. Installs repertoire in an editable mode with its "dev" extra that includes test and documentation dependencies.
-2. Installs pre-commit and tox.
+1. Creates a Python virtual environment in the :file:`.venv` subdirectory with the packages needed to do Repertoire development installed.
+2. Installs Repertoire (both server and client) in an editable mode in that virtual environment.
 3. Installs the pre-commit hooks.
 
-You must have Docker installed and configured so that your user can start Docker containers in order to run the test suite.
+You can activate the Repertoire virtual environment if you wish with:
+
+.. prompt:: bash
+
+   source .venv/bin/activate
+
+This is optional; you do not have to activate the virtual environment to do development.
+However, if you do, you can omit :command:`uv run` from the start of all commands described below.
+Also, editors with Python integration, such as VSCode, may work more smoothly if you activate the virtualenv before starting them.
 
 .. _pre-commit-hooks:
 
@@ -54,67 +68,98 @@ Some pre-commit hooks automatically reformat code:
 When these hooks fail, your Git commit will be aborted.
 To proceed, stage the new modifications and proceed with your Git commit.
 
+If the ``uv-lock`` pre-commit hook fails, that indicates that the :file:`uv.lock` file is out of sync with the declared dependencies.
+To fix this, run :command:`make update-deps` as described in :ref:`dev-updating-dependencies`.
+
 .. _dev-run-tests:
 
 Running tests
 =============
 
-To test the library, run tox_, which tests the library the same way that the CI workflow does:
+Repertoire uses nox_ as its automation tool for testing.
 
-.. code-block:: sh
+To test both the Repertoire client and server:
 
-   tox run
+.. prompt:: bash
 
-To see a listing of test environments, run:
+   uv run nox
 
-.. code-block:: sh
+This will run several nox sessions to lint and type-check the code, run the test suite, and build the documentation.
 
-   tox list
+To list the available sessions, run:
 
-To run a specific test or list of tests, you can add test file names (and any other pytest_ options) after ``--`` when executing the ``py`` tox environment.
+.. prompt:: bash
+
+   uv run nox --list
+
+To run a specific test or list of tests, you can add test file names (and any other pytest_ options) after ``--`` when executing the ``test`` nox session.
 For example:
 
-.. code-block:: sh
+.. prompt:: bash
 
-   tox run -e py -- tests/database_test.py
+   uv run nox -s test -- tests/client/service_test.py
+
+If you are interating on a specific test failure, you may want to pass the ``-R`` flag as well to skip the dependency installation step.
+This will make nox run somewhat faster, at the cost of not fixing out-of-date dependencies.
+For example:
+
+.. prompt:: bash
+
+   uv run nox -Rs test -- tests/client/service_test.py
 
 .. _dev-build-docs:
 
 Building documentation
 ======================
 
-Documentation is built with Sphinx_:
+Documentation is built with Sphinx_.
+It is built as part of a normal test run to check that the documentation can still build without warnings, or can be built explicitly with:
 
-.. _Sphinx: https://www.sphinx-doc.org/en/master/
+.. prompt:: bash
 
-.. code-block:: sh
-
-   tox run -e docs
+   uv run nox -s docs
 
 The built documentation is located in the :file:`docs/_build/html` directory.
 
-Updating pre-commit
-===================
+Additional dependencies required only for the documentation build should be added to the ``docs`` dependency group in :file:`pyproject.toml`.
 
-To update the versions of the pre-commit hooks, run:
+Normally, Sphinx notices when input files have changed and rebuilds the documentation appropriately, but its caching logic is sometimes too aggressive and does not rebuild files that it should.
+This is often the case when files objects previously documented in the API documentation are removed.
+To force a rebuild of all of the documentation, ignoring the cache, use the ``docs-clean`` session:
 
-.. code-block:: sh
+.. prompt:: bash
 
-   pre-commit autoupdate
+   uv run nox -s docs-clean
+
+Sometimes during development it's necessary to rebuild the documentation without the Sphinx
+
+.. _dev-updating-dependencies:
+
+Updating dependencies
+=====================
+
+To update dependencies, run:
+
+.. prompt:: bash
+
+   make update
+
+This will update all pinned Python dependencies, update the versions of the pre-commit hooks, and, if needed, update the version of uv pinned in the GitHub Actions configuration and :file:`Dockerfile`.
 
 You may wish to do this at the start of a development cycle so that you're using the latest versions of the linters.
+You may also want to update dependencies immediately before release so that each release includes the latest dependencies.
 
 .. _dev-change-log:
 
 Updating the change log
 =======================
 
-repertoire uses scriv_ to maintain its change log.
+Repertoire uses scriv_ to maintain its change log.
 
-When preparing a pull request, run :command:`scriv create`.
+When preparing a pull request with user-visible changes, run :command:`uv run scriv create`.
 This will create a change log fragment in :file:`changelog.d`.
 Edit that fragment, removing the sections that do not apply and adding entries fo this pull request.
-You can pass the ``--edit`` flag to :command:`scriv create` to open the created fragment automatically in an editor.
+You can pass the ``--edit`` flag to :command:`uv run scriv create` to open the created fragment automatically in an editor.
 
 Change log entries use the following sections:
 
@@ -123,7 +168,9 @@ Change log entries use the following sections:
 - **Backward-incompatible changes**
 - **New features**
 - **Bug fixes**
-- **Other changes** (for minor, patch-level changes that are not bug fixes, such as logging formatting changes or updates to the documentation)
+- **Other changes** (for minor, patch-level changes that are not bug fixes, such as logging changes or updates to the documentation, but that are nonetheless user-visible)
+
+Changes that are not visible to the user, including minor documentation changes, should not have a change log fragment to avoid clutttering the change log with changes the user doesn't need to care about.
 
 These entries will eventually be cut and pasted into the release description for the next release, so the Markdown for the change descriptions should be compatible with GitHub's Markdown conventions for the release description.
 Specifically:
@@ -131,7 +178,7 @@ Specifically:
 - Each bullet point should be entirely on one line, even if it contains multiple sentences.
   This is an exception to the normal documentation convention of a newline after each sentence.
   Unfortunately, GitHub interprets those newlines as hard line breaks, so they would result in an ugly release description.
-- Avoid using too much complex markup, such as nested bullet lists, since the formatting in the GitHub release description may not be what you expect and manually editing it is tedious.
+- Be cautious with complex markup, such as nested bullet lists, since the formatting in the GitHub release description may not be what you expect and manually repairing it is tedious.
 
 .. _style-guide:
 
@@ -144,7 +191,7 @@ Code
 - The code style follows :pep:`8`, though in practice lean on Black and isort to format the code for you.
 
 - Use :pep:`484` type annotations.
-  The ``tox run -e typing`` test environment, which runs mypy_, ensures that the project's types are consistent.
+  The :command:`uv run nox -s typing` test session, which runs mypy_, ensures that the project's types are consistent.
 
 - Write tests for Pytest_.
 

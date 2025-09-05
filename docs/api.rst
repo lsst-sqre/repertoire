@@ -1,8 +1,8 @@
-:og:description: Comprehensive API documentation for repertoire.
+:og:description: Comprehensive API documentation for rubin.repertoire.
 
-####################
-Python API reference
-####################
+###########################
+Python client API reference
+###########################
 
-.. automodapi:: repertoire
+.. automodapi:: rubin.repertoire
    :include-all-objects:

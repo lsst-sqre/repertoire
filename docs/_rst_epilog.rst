@@ -1,7 +1,12 @@
+.. _Butler: https://pipelines.lsst.io/modules/lsst.daf.butler/index.html
 .. _Click: https://click.palletsprojects.com/
+.. _HTTPX: https://www.python-httpx.org/
 .. _mypy: http://www.mypy-lang.org
+.. _nox: https://nox.thea.codes/en/stable/index.html
+.. _Phalanx: https://phalanx.lsst.io/
 .. _pre-commit: https://pre-commit.com
 .. _pytest: https://docs.pytest.org/en/latest/
 .. _scriv: https://scriv.readthedocs.io/en/stable/
 .. _semver: https://semver.org/
-.. _tox: https://tox.wiki/en/latest/
+.. _Sphinx: https://www.sphinx-doc.org/en/master/
+.. _uv: https://docs.astral.sh/uv/

@@ -53,7 +53,7 @@ dev = [
     "respx",
 ]
 docs = [
-    "documenteer[guide]>=2",
+    "documenteer[guide]>=2.3",
     "scriv[toml]>=1.5",
 ]
 lint = [

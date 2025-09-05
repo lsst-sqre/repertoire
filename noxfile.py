@@ -13,6 +13,26 @@ nox.options.default_venv_backend = "uv"
 nox.options.reuse_existing_virtualenvs = True
 
 
+@session(uv_groups=["dev", "docs"])
+def docs(session: nox.Session) -> None:
+    """Build the documentation."""
+    doctree_dir = (session.cache_dir / "doctrees").absolute()
+    with session.chdir("docs"):
+        session.run(
+            "sphinx-build",
+            "-W",
+            "--keep-going",
+            "-n",
+            "-T",
+            "-b",
+            "html",
+            "-d",
+            str(doctree_dir),
+            ".",
+            "./_build/html",
+        )
+
+
 @session(uv_only_groups=["lint"], uv_no_install_project=True)
 def lint(session: nox.Session) -> None:
     """Run pre-commit hooks."""

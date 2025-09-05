@@ -1,16 +1,21 @@
 [project]
-title = "repertoire"
+title = "Repertoire"
 copyright = "2025 Association of Universities for Research in Astronomy, Inc. (AURA)"
+
+[project.openapi]
+openapi_path = "_static/openapi.json"
+doc_path = "user-guide/server-api"
+
+[project.openapi.generator]
+function = "repertoire.main:create_openapi"
+keyword_args = { add_back_link = true }
 
 [project.python]
 package = "repertoire"
 
 [sphinx]
 rst_epilog_file = "_rst_epilog.rst"
-disable_primary_sidebars = [
-    "index",
-    "changelog",
-]
+disable_primary_sidebars = ["index", "changelog"]
 
 [sphinx.intersphinx.projects]
 python = "https://docs.python.org/3/"
