@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import shutil
+from pathlib import Path
+
 import nox
 from nox_uv import session
 
@@ -31,6 +34,16 @@ def docs(session: nox.Session) -> None:
             ".",
             "./_build/html",
         )
+
+
+@session(name="docs-clean", uv_groups=["dev", "docs"])
+def docs_clean(session: nox.Session) -> None:
+    """Build the documentation without any cache."""
+    if Path("docs/_build").exists():
+        shutil.rmtree("docs/_build")
+    if Path("docs/api").exists():
+        shutil.rmtree("docs/api")
+    docs(session)
 
 
 @session(uv_only_groups=["lint"], uv_no_install_project=True)
