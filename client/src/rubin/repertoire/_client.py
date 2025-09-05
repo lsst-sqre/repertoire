@@ -220,6 +220,28 @@ class DiscoveryClient:
                 return str(candidate.butler_config)
         return None
 
+    async def butler_repositories(self) -> dict[str, str]:
+        """Return the Butler repository mapping for the local environment.
+
+        Returns
+        -------
+        dict of str
+            Mapping of dataset labels to Butler configuration URLs. This
+            result is suitable for use as the constructor argument to
+            ``lsst.daf.butler.LabeledButlerFactory``.
+
+        Raises
+        ------
+        RepertoireError
+            Raised on error fetching discovery information from Repertoire.
+        """
+        discovery = await self._get_data()
+        return {
+            d.name: str(d.butler_config)
+            for d in discovery.datasets
+            if d.butler_config is not None
+        }
+
     async def datasets(self) -> list[str]:
         """List datasets available in the local Phalanx environment.
 
