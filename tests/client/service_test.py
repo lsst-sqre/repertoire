@@ -46,6 +46,17 @@ async def test_butler_config_for(discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_butler_repositories(discovery: DiscoveryClient) -> None:
+    output = read_test_json("output/phalanx")
+    expected = {
+        d["name"]: d["butler_config"]
+        for d in output["datasets"]
+        if d.get("butler_config") is not None
+    }
+    assert await discovery.butler_repositories() == expected
+
+
+@pytest.mark.asyncio
 async def test_url_for(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     urls = output["urls"]
