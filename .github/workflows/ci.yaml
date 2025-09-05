@@ -64,6 +64,8 @@ jobs:
             docs:
               - "CHANGELOG.md"
               - "docs/**"
+              - "src/repertoire/main.py"
+              - "client/src/rubin/repertoire/**"
             docs-specific:
               - "CHANGELOG.md"
               - "docs/**"
