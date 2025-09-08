@@ -21,6 +21,7 @@ class Dataset(BaseModel):
         Field(
             title="Name",
             description="Human-readable name of the dataset",
+            examples=["dp02", "dp1"],
         ),
     ]
 
@@ -32,6 +33,9 @@ class Dataset(BaseModel):
                 "URL of Butler configuration to access this dataset, if it is"
                 " available via a Butler server"
             ),
+            examples=[
+                "https://example.cloud/api/butler/repo/dp02/butler.yaml"
+            ],
         ),
     ] = None
 
@@ -50,6 +54,14 @@ class ServiceUrls(BaseModel):
                 " These are the API services used directly by users for data"
                 " access."
             ),
+            examples=[
+                {
+                    "hips": {
+                        "dp02": "https://data-dev.lsst.cloud/api/hips/v2/dp02",
+                        "dp1": "https://data-dev.lsst.cloud/api/hips/v2/dp1",
+                    },
+                }
+            ],
         ),
     ] = {}
 
@@ -62,6 +74,12 @@ class ServiceUrls(BaseModel):
                 " These are used by other services and generally won't be"
                 " used directly by services."
             ),
+            examples=[
+                {
+                    "gafaelfawr": "https://data-dev.lsst.cloud/auth/api/v1",
+                    "wobbly": "https://data-dev.lsst.cloud/wobbly",
+                }
+            ],
         ),
     ] = {}
 
@@ -73,6 +91,12 @@ class ServiceUrls(BaseModel):
                 "Mapping of service name to base URL for user interfaces"
                 " intended for access by a user using a web browser."
             ),
+            examples=[
+                {
+                    "argocd": "https://data-dev.lsst.cloud/argo-cd",
+                    "nublado": "https://nb.data-dev.lsst.cloud/nb",
+                }
+            ],
         ),
     ] = {}
 
@@ -88,6 +112,9 @@ class Discovery(BaseModel):
                 "Names of all Phalanx applications enabled in the local"
                 " environment"
             ),
+            examples=[
+                ["argocd", "gafaelfawr", "hips", "mobu", "nublado", "wobbly"]
+            ],
         ),
     ] = []
 
@@ -96,6 +123,7 @@ class Discovery(BaseModel):
         Field(
             title="Datasets",
             description="All datasets available in the local environment",
+            examples=[["dp02", "dp1"]],
         ),
     ] = []
 
