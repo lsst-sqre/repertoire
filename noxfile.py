@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import shutil
+import sys
 from pathlib import Path
 
 import nox
+from nox.command import CommandFailed
 from nox_uv import session
 
 # Default sessions.
@@ -44,6 +46,32 @@ def docs_clean(session: nox.Session) -> None:
     if Path("docs/api").exists():
         shutil.rmtree("docs/api")
     docs(session)
+
+
+@session(name="docs-linkcheck", uv_groups=["dev", "docs"])
+def docs_linkcheck(session: nox.Session) -> None:
+    """Check links in the documentation."""
+    doctree_dir = (session.cache_dir / "doctrees").absolute()
+    with session.chdir("docs"):
+        try:
+            session.run(
+                "sphinx-build",
+                "-W",
+                "--keep-going",
+                "-n",
+                "-T",
+                "-b",
+                "linkcheck",
+                "-d",
+                str(doctree_dir),
+                ".",
+                "./_build/linkcheck",
+            )
+        except CommandFailed:
+            output_path = Path("_build") / "linkcheck" / "output.txt"
+            if output_path.exists():
+                sys.stdout.write(output_path.read_text())
+            session.error("Link check reported errors")
 
 
 @session(uv_only_groups=["lint"], uv_no_install_project=True)
