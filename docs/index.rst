@@ -19,7 +19,7 @@ The client is available from PyPI and intended for any service that needs to kno
 
 For more detailed information about the design of Repertoire, see :dmtn:`250`.
 
-repertoire is developed on GitHub at https://github.com/lsst-sqre/repertoire.
+Repertoire is developed on GitHub at https://github.com/lsst-sqre/repertoire.
 
 .. grid:: 3
 

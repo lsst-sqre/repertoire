@@ -1,40 +1,8 @@
-# repertoire
+# Repertoire
 
-Service discovery for the Rubin Science Platform
-Learn more at https://repertoire.lsst.io
+Repertoire is a [FastAPI](https://fastapi.tiangolo.com/) service and Python client library for data and service discovery for [Phalanx](https://phalanx.lsst.io/).
+It provides discovery services for the Rubin Science Platform.
 
-Install from PyPI:
+For full documentation, see [repertoire.lsst.io](https://repertoire.lsst.io/).
 
-```sh
-pip install repertoire
-```
-
-repertoire is developed by Rubin Observatory at https://github.com/lsst-sqre/repertoire.
-
-## Features
-
-<!-- A bullet list with things that this package does -->
-
-## Developing repertoire
-
-The best way to start contributing to repertoire is by cloning this repository, creating a virtual environment, and running the `make init` command:
-
-```sh
-git clone https://github.com/lsst-sqre/repertoire.git
-cd repertoire
-make init
-```
-
-You can run tests and build documentation with [tox](https://tox.wiki/en/latest/):
-
-```sh
-tox
-```
-
-To learn more about the individual environments:
-
-```sh
-tox -av
-```
-
-[See the docs for more information.](https://repertoire.lsst.io/dev/development.html)
+The overall discovery design for the Rubin Science Platform, of which Repertoire is a partial implementation, is documented in [DMTN-250](https://dmtn-250.lsst.io/).
