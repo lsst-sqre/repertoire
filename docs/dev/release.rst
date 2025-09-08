@@ -7,7 +7,7 @@ This information is only useful for maintainers.
 
 Repertoire's releases are largely automated through GitHub Actions (see the `ci.yaml`_ workflow file for details).
 When a semantic version tag is pushed to GitHub, the Repertoire client is `released to PyPI`_ with that version.
-Similarly, documentation is built and pushed for each version (see https://repertoire.lsst.io/v).
+Similarly, documentation is built and pushed for each version (see https://repertoire.lsst.io/v/index.html).
 
 .. _`released to PyPI`: https://pypi.org/project/rubin-repertoire/
 .. _`ci.yaml`: https://github.com/lsst-sqre/repertoire/blob/main/.github/workflows/ci.yaml
@@ -59,7 +59,7 @@ Use `GitHub's Release feature <https://docs.github.com/en/repositories/releasing
    The tag must follow the :pep:`440` specification since Repertoire uses setuptools_scm_ to set version metadata based on Git tags.
    In particular, don't prefix the tag with ``v``.
 
-   .. _setuptools_scm: https://github.com/pypa/setuptools_scm
+   .. _setuptools_scm: https://github.com/pypa/setuptools-scm
 
 2. Ensure the branch target is set appropriately (normally ``main``).
 

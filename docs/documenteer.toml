@@ -19,3 +19,10 @@ disable_primary_sidebars = ["index", "changelog"]
 
 [sphinx.intersphinx.projects]
 python = "https://docs.python.org/3/"
+
+[sphinx.linkcheck]
+ignore = [
+    # Generate redirects for authentication
+    '^https://github\.com/settings/developers$',
+    '^https://github\.com/.*/issues/new$',
+]
