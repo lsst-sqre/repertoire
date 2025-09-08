@@ -99,14 +99,6 @@ For example:
 
    uv run nox -s test -- tests/client/service_test.py
 
-If you are interating on a specific test failure, you may want to pass the ``-R`` flag as well to skip the dependency installation step.
-This will make nox run somewhat faster, at the cost of not fixing out-of-date dependencies.
-For example:
-
-.. prompt:: bash
-
-   uv run nox -Rs test -- tests/client/service_test.py
-
 .. _dev-build-docs:
 
 Building documentation
@@ -123,15 +115,20 @@ The built documentation is located in the :file:`docs/_build/html` directory.
 
 Additional dependencies required only for the documentation build should be added to the ``docs`` dependency group in :file:`pyproject.toml`.
 
-Normally, Sphinx notices when input files have changed and rebuilds the documentation appropriately, but its caching logic is sometimes too aggressive and does not rebuild files that it should.
-This is often the case when files objects previously documented in the API documentation are removed.
-To force a rebuild of all of the documentation, ignoring the cache, use the ``docs-clean`` session:
+Documentation builds are incremental, and generate and use cached descriptions of the internal Python APIs.
+If you see errors in building the Python API documentation or have problems with changes to the documentation (particularly diagrams) not showing up, try a clean documentation build with:
 
 .. prompt:: bash
 
    uv run nox -s docs-clean
 
-Sometimes during development it's necessary to rebuild the documentation without the Sphinx
+This will be slower, but it will ensure that the documentation build doesn't rely on any cached data.
+
+To check the documentation for broken links, run:
+
+.. code-block:: sh
+
+   uv run nox -s docs-linkcheck
 
 .. _dev-updating-dependencies:
 

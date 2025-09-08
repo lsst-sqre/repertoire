@@ -41,7 +41,7 @@ jobs:
         with:
           version: ${{ env.UV_VERSION }}
 
-      - name: Run tox
+      - name: Run nox
         run: uv run --only-group=nox nox -s lint typing test
 
   changes:
@@ -168,7 +168,7 @@ jobs:
     needs: [test, docs, test-packaging]
     environment:
       name: pypi
-      url: https://pypi.org/p/safir
+      url: https://pypi.org/p/rubin-repertoire
     permissions:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'

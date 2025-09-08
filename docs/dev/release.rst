@@ -53,7 +53,7 @@ Finally, create a PR from those changes and merge it before continuing with the 
 2. GitHub release and tag
 -------------------------
 
-Use `GitHub's Release feature <https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository>`__ to create releases and their corresponding Git tags.
+Create a release using `GitHub's Release feature <https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository>`__:
 
 1. For the tag, enter the version number of the release in the :guilabel:`Find or create a new tag` box in the dropdown under :guilabel:`Select tag`.
    The tag must follow the :pep:`440` specification since Repertoire uses setuptools_scm_ to set version metadata based on Git tags.
@@ -98,7 +98,7 @@ Developing on a release branch
 Once a release branch exists, it becomes the "main" branch for patches of that major-minor version.
 Pull requests should be based on, and merged into, the release branch.
 
-If the development on the release branch is a backport of commits on the ``main`` branch, use ``git cherry-pick`` to copy those commits into a new pull request against the release branch.
+If the development on the release branch is a backport of commits on the ``main`` branch, use :command:`git cherry-pick` to copy those commits into a new pull request against the release branch.
 
 Releasing from a release branch
 -------------------------------
