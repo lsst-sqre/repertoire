@@ -4,11 +4,13 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, PlainSerializer, SecretStr
 
 __all__ = [
     "Dataset",
     "Discovery",
+    "InfluxDatabase",
+    "InfluxDatabaseWithCredentials",
     "ServiceUrls",
 ]
 
@@ -38,6 +40,60 @@ class Dataset(BaseModel):
             ],
         ),
     ] = None
+
+
+class InfluxDatabase(BaseModel):
+    """Connection information for an InfluxDB database."""
+
+    url: Annotated[
+        HttpUrl,
+        Field(
+            title="InfluxDB URL",
+            description="URL to InfluxDB service",
+            examples=["https://example.cloud/influxdb/"],
+        ),
+    ]
+
+    database: Annotated[
+        str,
+        Field(
+            title="Name of InfluxDB database",
+            description="Name of database to include in queries",
+            examples=["efd", "lsst.square.metrics"],
+        ),
+    ]
+
+    schema_registry: Annotated[
+        HttpUrl,
+        Field(
+            title="Schema registry URL",
+            description="URL of corresponding Confluent schema registry",
+            examples=["https://example.cloud/schema-registry"],
+        ),
+    ]
+
+
+class InfluxDatabaseWithCredentials(InfluxDatabase):
+    """InfluxDB database connection information with credentials."""
+
+    username: Annotated[
+        str | None,
+        Field(
+            title="Client username",
+            description="Username to send for authentication",
+            examples=["efdreader"],
+        ),
+    ]
+
+    password: Annotated[
+        SecretStr | None,
+        Field(
+            title="Client password",
+            description="Password to send for authentication",
+            examples=["password"],
+        ),
+        PlainSerializer(lambda p: p.get_secret_value(), when_used="json"),
+    ]
 
 
 class ServiceUrls(BaseModel):
@@ -126,6 +182,19 @@ class Discovery(BaseModel):
             examples=[["dp02", "dp1"]],
         ),
     ] = []
+
+    influxdb_databases: Annotated[
+        dict[str, HttpUrl],
+        Field(
+            title="Available InfluxDB databases",
+            description=(
+                "Mapping of short names of InfluxDB databases accessible from"
+                " this Phalanx environment to the URL from which a client can"
+                " retrieve connection information. Requests to that URL will"
+                " require authentication."
+            ),
+        ),
+    ] = {}
 
     urls: Annotated[
         ServiceUrls,

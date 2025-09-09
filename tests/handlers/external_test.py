@@ -7,6 +7,7 @@ from httpx import AsyncClient
 
 from repertoire.dependencies.config import config_dependency
 
+from ..support.constants import TEST_BASE_URL
 from ..support.data import data_path, read_test_json
 
 
@@ -24,8 +25,31 @@ async def test_get_index(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_minimal(client: AsyncClient) -> None:
+    r = await client.get("/repertoire/discovery")
+    assert r.status_code == 200, f"error body: {r.text}"
+    assert r.json() == read_test_json("output/minimal")
+
+
+@pytest.mark.asyncio
 async def test_get_discovery(client: AsyncClient) -> None:
     config_dependency.set_config_path(data_path("config/phalanx.yaml"))
     r = await client.get("/repertoire/discovery")
     assert r.status_code == 200, f"error body: {r.text}"
     assert r.json() == read_test_json("output/phalanx")
+
+
+@pytest.mark.asyncio
+async def test_get_influxdb(client: AsyncClient) -> None:
+    config_dependency.set_config_path(data_path("config/phalanx.yaml"))
+    r = await client.get("/repertoire/discovery")
+    assert r.status_code == 200, f"error body: {r.text}"
+
+    url = r.json()["influxdb_databases"]["idfdev_efd"]
+    assert url == f"{TEST_BASE_URL}repertoire/discovery/influxdb/idfdev_efd"
+    r = await client.get(url)
+    assert r.status_code == 200, f"error body: {r.text}"
+    assert r.json() == read_test_json("output/idfdev_efd")
+
+    r = await client.get(f"{TEST_BASE_URL}repertoire/discovery/influxdb/bogus")
+    assert r.status_code == 404

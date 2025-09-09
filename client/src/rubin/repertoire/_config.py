@@ -12,6 +12,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 __all__ = [
     "DatasetConfig",
+    "InfluxDatabaseConfig",
     "RepertoireSettings",
     "Rule",
 ]
@@ -29,6 +30,66 @@ class DatasetConfig(BaseModel):
         Field(
             title="Name",
             description="Human-readable name of the dataset",
+        ),
+    ]
+
+
+class InfluxDatabaseConfig(BaseModel):
+    """Configuration for an InfluxDB database.
+
+    Since these vary by environment and may be accessible across environments,
+    they need to be specified separately in each environment.
+    """
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    url: Annotated[
+        HttpUrl,
+        Field(
+            title="InfluxDB URL",
+            description="URL of InfluxDB service",
+            examples=["https://example.cloud/influxdb/"],
+        ),
+    ]
+
+    database: Annotated[
+        str,
+        Field(
+            title="Name of InfluxDB database",
+            description="Name of database to include in queries",
+            examples=["efd", "lsst.square.metrics"],
+        ),
+    ]
+
+    username: Annotated[
+        str,
+        Field(
+            title="Client username",
+            description="Username to send for authentication",
+            examples=["efdreader"],
+        ),
+    ]
+
+    password_key: Annotated[
+        str,
+        Field(
+            title="Secret key containing password",
+            description=(
+                "Set this to the key of the secret containing the password"
+                " for this InfluxDB database"
+            ),
+            examples=["influxdb_efd-password"],
+        ),
+    ]
+
+    schema_registry: Annotated[
+        HttpUrl,
+        Field(
+            title="Schema registry URL",
+            description="URL of corresponding Confluent schema registry",
+            examples=["https://example.cloud/schema-registry"],
         ),
     ]
 
@@ -139,6 +200,18 @@ class RepertoireSettings(BaseSettings):
             description="Metadata about available datasets",
         ),
     ] = []
+
+    influxdb_databases: Annotated[
+        dict[str, InfluxDatabaseConfig],
+        Field(
+            title="InfluxDB databases",
+            description=(
+                "Mapping of short database names to InfluxDB database"
+                " connection information for databases accessible from this"
+                " Phalanx environment"
+            ),
+        ),
+    ] = {}
 
     rules: Annotated[
         dict[str, list[Rule]],

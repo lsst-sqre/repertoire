@@ -1,11 +1,12 @@
 """Client, models, and URL construction for Repertoire."""
 
-from ._builder import RepertoireBuilder
+from ._builder import RepertoireBuilder, RepertoireBuilderWithSecrets
 from ._client import DiscoveryClient
 from ._config import (
     BaseRule,
     DataServiceRule,
     DatasetConfig,
+    InfluxDatabaseConfig,
     InternalServiceRule,
     RepertoireSettings,
     UiServiceRule,
@@ -16,7 +17,13 @@ from ._exceptions import (
     RepertoireValidationError,
     RepertoireWebError,
 )
-from ._models import Dataset, Discovery, ServiceUrls
+from ._models import (
+    Dataset,
+    Discovery,
+    InfluxDatabase,
+    InfluxDatabaseWithCredentials,
+    ServiceUrls,
+)
 
 __all__ = [
     "BaseRule",
@@ -25,8 +32,12 @@ __all__ = [
     "DatasetConfig",
     "Discovery",
     "DiscoveryClient",
+    "InfluxDatabase",
+    "InfluxDatabaseConfig",
+    "InfluxDatabaseWithCredentials",
     "InternalServiceRule",
     "RepertoireBuilder",
+    "RepertoireBuilderWithSecrets",
     "RepertoireError",
     "RepertoireSettings",
     "RepertoireUrlError",

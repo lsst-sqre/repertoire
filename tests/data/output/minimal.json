@@ -1,0 +1,10 @@
+{
+  "applications": [],
+  "datasets": [],
+  "influxdb_databases": {},
+  "urls": {
+    "data": {},
+    "internal": {},
+    "ui": {}
+  }
+}

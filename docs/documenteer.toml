@@ -18,6 +18,7 @@ rst_epilog_file = "_rst_epilog.rst"
 disable_primary_sidebars = ["index", "changelog"]
 
 [sphinx.intersphinx.projects]
+aioinflux = "https://aioinflux.readthedocs.io/en/stable/"
 python = "https://docs.python.org/3/"
 
 [sphinx.linkcheck]
