@@ -78,6 +78,7 @@ jobs:
     if: >
       (needs.changes.outputs.docs == 'true')
       || (github.event_name == 'workflow_dispatch')
+      || (github.event_name == 'release' && github.event.action == 'published')
 
     steps:
       - uses: actions/checkout@v5
@@ -131,9 +132,9 @@ jobs:
     # but in this case the build will fail with an error since the secret
     # won't be set.
     if: >
-      github.event_name != 'merge_group'
-      && ((github.even_name == 'release' && github.event.action == 'published')
-          || startsWith(github.head_ref, 'tickets/'))
+      (github.event_name == 'release' && github.event.action == 'published')
+      || (github.event_name != 'merge_group'
+          && startsWith(github.head_ref, 'tickets/'))
 
     steps:
       - uses: actions/checkout@v5
