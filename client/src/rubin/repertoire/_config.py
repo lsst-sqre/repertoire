@@ -176,6 +176,14 @@ class RepertoireSettings(BaseSettings):
         ),
     ] = set()
 
+    available_datasets: Annotated[
+        set[str],
+        Field(
+            title="Available datasets",
+            description="Datasets available in this Phalanx environment",
+        ),
+    ] = set()
+
     base_hostname: Annotated[
         str,
         Field(
