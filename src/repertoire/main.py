@@ -1,14 +1,20 @@
 """The main application factory for the Repertoire service."""
 
 import json
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from importlib.metadata import metadata, version
+from pathlib import Path
 
 import structlog
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
+from safir.fastapi import ClientRequestError, client_request_error_handler
 from safir.middleware.x_forwarded import XForwardedMiddleware
 from safir.slack.webhook import SlackRouteErrorHandler
 
+from .constants import SECRETS_PATH
+from .dependencies.builder import builder_dependency
 from .dependencies.config import config_dependency
 from .handlers.external import external_router
 from .handlers.internal import internal_router
@@ -16,7 +22,9 @@ from .handlers.internal import internal_router
 __all__ = ["create_app"]
 
 
-def create_app(*, load_config: bool = True) -> FastAPI:
+def create_app(
+    *, load_config: bool = True, secrets_root: str | Path = SECRETS_PATH
+) -> FastAPI:
     """Create the FastAPI application.
 
     This is in a function rather than using a global variable (as is more
@@ -30,6 +38,9 @@ def create_app(*, load_config: bool = True) -> FastAPI:
         If set to `False`, do not try to load the configuration. This is used
         primarily for OpenAPI schema generation, where constructing the app is
         required but the configuration won't matter.
+    secrets_root
+        Overrides the default secrets root of :file:`/etc/repertoire/secrets`
+        used by the Helm chart and Docker container.
     """
     path_prefix = "/repertoire"
     if load_config:
@@ -44,6 +55,11 @@ def create_app(*, load_config: bool = True) -> FastAPI:
             )
             logger.debug("Initialized Slack webhook")
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
+        builder_dependency.initialize(secrets_root)
+        yield
+
     # Create the application.
     app = FastAPI(
         title="Repertoire",
@@ -52,6 +68,7 @@ def create_app(*, load_config: bool = True) -> FastAPI:
         openapi_url=f"{path_prefix}/openapi.json",
         docs_url=f"{path_prefix}/docs",
         redoc_url=f"{path_prefix}/redoc",
+        lifespan=lifespan,
     )
 
     # Attach the routers.
@@ -60,6 +77,9 @@ def create_app(*, load_config: bool = True) -> FastAPI:
 
     # Add middleware.
     app.add_middleware(XForwardedMiddleware)
+
+    # Add error handlers.
+    app.exception_handler(ClientRequestError)(client_request_error_handler)
 
     # Return the constructed app.
     return app

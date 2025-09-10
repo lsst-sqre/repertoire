@@ -35,6 +35,19 @@ datasets:
   - name: "dp02"
   - name: "dp03"
   - name: "dp1"
+influxdbDatabases:
+  idfdev_efd:
+    url: "https://data.example.com/influxdb/"
+    database: "efd"
+    username: "efdreader"
+    passwordKey: "idfdev_efd-password"
+    schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
+  idfdev_metrics:
+    url: "https://data.example.com/influxdb/"
+    database: "lsst.square.metrics"
+    username: "efdreader"
+    passwordKey: "idfdev_metrics-password"
+    schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
 rules:
   argocd:
     - type: "ui"

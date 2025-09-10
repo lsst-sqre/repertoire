@@ -1,7 +1,9 @@
 .. _Butler: https://pipelines.lsst.io/modules/lsst.daf.butler/index.html
 .. _Click: https://click.palletsprojects.com/
+.. _Gafaelfawr: https://gafaelfawr.lsst.io/
 .. _HTTPX: https://www.python-httpx.org/
 .. _mypy: https://www.mypy-lang.org
+.. _Nublado: https://nublado.lsst.io/
 .. _nox: https://nox.thea.codes/en/stable/index.html
 .. _Phalanx: https://phalanx.lsst.io/
 .. _pre-commit: https://pre-commit.com

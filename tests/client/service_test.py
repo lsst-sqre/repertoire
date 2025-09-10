@@ -4,77 +4,66 @@ from __future__ import annotations
 
 import pytest
 import respx
-from httpx import AsyncClient, Response
+from httpx import Response
 
-from repertoire.dependencies.config import config_dependency
 from rubin.repertoire import DiscoveryClient
 
-from ..support.constants import TEST_BASE_URL
-from ..support.data import data_path, read_test_json
-
-
-@pytest.fixture
-def discovery(
-    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
-) -> DiscoveryClient:
-    config_dependency.set_config_path(data_path("config/phalanx.yaml"))
-    repertoire_url = TEST_BASE_URL.rstrip("/") + "/repertoire"
-    monkeypatch.setenv("REPERTOIRE_BASE_URL", repertoire_url)
-    return DiscoveryClient(client)
+from ..support.data import read_test_json
 
 
 @pytest.mark.asyncio
-async def test_applications(discovery: DiscoveryClient) -> None:
+async def test_applications(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
-    assert await discovery.applications() == output["applications"]
+    assert await discovery_client.applications() == output["applications"]
 
 
 @pytest.mark.asyncio
-async def test_datasets(discovery: DiscoveryClient) -> None:
+async def test_datasets(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     expected = sorted(d["name"] for d in output["datasets"])
-    assert await discovery.datasets() == expected
+    assert await discovery_client.datasets() == expected
 
 
 @pytest.mark.asyncio
-async def test_butler_config_for(discovery: DiscoveryClient) -> None:
+async def test_butler_config_for(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     for dataset in output["datasets"]:
-        result = await discovery.butler_config_for(dataset["name"])
+        result = await discovery_client.butler_config_for(dataset["name"])
         assert result == dataset.get("butler_config")
-    assert await discovery.butler_config_for("unknown") is None
+    assert await discovery_client.butler_config_for("unknown") is None
 
 
 @pytest.mark.asyncio
-async def test_butler_repositories(discovery: DiscoveryClient) -> None:
+async def test_butler_repositories(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     expected = {
         d["name"]: d["butler_config"]
         for d in output["datasets"]
         if d.get("butler_config") is not None
     }
-    assert await discovery.butler_repositories() == expected
+    assert await discovery_client.butler_repositories() == expected
 
 
 @pytest.mark.asyncio
-async def test_url_for(discovery: DiscoveryClient) -> None:
+async def test_url_for(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     urls = output["urls"]
 
     for service, url in urls["internal"].items():
-        assert await discovery.url_for_internal_service(service) == url
-    assert await discovery.url_for_internal_service("unknown") is None
+        assert await discovery_client.url_for_internal_service(service) == url
+    assert await discovery_client.url_for_internal_service("unknown") is None
 
     for service, url in urls["ui"].items():
-        assert await discovery.url_for_ui_service(service) == url
-    assert await discovery.url_for_ui_service("unknown") is None
+        assert await discovery_client.url_for_ui_service(service) == url
+    assert await discovery_client.url_for_ui_service("unknown") is None
 
+    client = discovery_client
     for service, mapping in urls["data"].items():
         for dataset, url in mapping.items():
-            result = await discovery.url_for_data_service(service, dataset)
+            result = await client.url_for_data_service(service, dataset)
             assert result == url
-        assert await discovery.url_for_data_service(service, "unknown") is None
-    assert await discovery.url_for_data_service("unknown", dataset) is None
+        assert await client.url_for_data_service(service, "unknown") is None
+    assert await client.url_for_data_service("unknown", dataset) is None
 
 
 @pytest.mark.asyncio

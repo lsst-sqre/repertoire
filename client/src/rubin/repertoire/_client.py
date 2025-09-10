@@ -5,14 +5,14 @@ from __future__ import annotations
 import os
 
 from httpx import AsyncClient, HTTPError
-from pydantic import ValidationError
+from pydantic import BaseModel, HttpUrl, ValidationError
 
 from ._exceptions import (
     RepertoireUrlError,
     RepertoireValidationError,
     RepertoireWebError,
 )
-from ._models import Discovery
+from ._models import Discovery, InfluxDatabaseWithCredentials
 
 __all__ = ["DiscoveryClient"]
 
@@ -82,7 +82,7 @@ class DiscoveryClient:
         RepertoireError
             Raised on error fetching discovery information from Repertoire.
         """
-        discovery = await self._get_data()
+        discovery = await self._get_discovery()
         return discovery.applications
 
     async def butler_config_for(self, dataset: str) -> str | None:
@@ -104,7 +104,7 @@ class DiscoveryClient:
         RepertoireError
             Raised on error fetching discovery information from Repertoire.
         """
-        discovery = await self._get_data()
+        discovery = await self._get_discovery()
         for candidate in discovery.datasets:
             if candidate.name == dataset and candidate.butler_config:
                 return str(candidate.butler_config)
@@ -125,7 +125,7 @@ class DiscoveryClient:
         RepertoireError
             Raised on error fetching discovery information from Repertoire.
         """
-        discovery = await self._get_data()
+        discovery = await self._get_discovery()
         return {
             d.name: str(d.butler_config)
             for d in discovery.datasets
@@ -148,8 +148,61 @@ class DiscoveryClient:
         RepertoireError
             Raised on error fetching discovery information from Repertoire.
         """
-        discovery = await self._get_data()
+        discovery = await self._get_discovery()
         return sorted(d.name for d in discovery.datasets)
+
+    async def get_influxdb_connection_info(
+        self, database: str, token: str
+    ) -> InfluxDatabaseWithCredentials | None:
+        """Get connection information for an InfluxDB database.
+
+        Parameters
+        ----------
+        database
+            Short name of the InfluxDB database. Call `influxdb_databases` to
+            get the valid values.
+        token
+            Gafaelfawr token to use for authentication. Database information
+            may only be available to users with specific scopes.
+
+        Returns
+        -------
+        InfluxDatabaseWithCredentials or None
+            Connection information for an InfluxDB database, including
+            credentials, or `None` if this database was not found in this
+            environment.
+
+        Raises
+        ------
+        RepertoireError
+            Raised on error fetching discovery information from Repertoire.
+        """
+        discovery = await self._get_discovery()
+        if url := discovery.influxdb_databases.get(database):
+            return await self._get(url, InfluxDatabaseWithCredentials, token)
+        else:
+            return None
+
+    async def influxdb_databases(self) -> list[str]:
+        """List InfluxDB databases available in the local Phalanx environment.
+
+        These may or may not be locally hosted, but the credentials and
+        connection information is available to authenticated users.
+
+        Returns
+        -------
+        list of str
+            Short identifiers (``summit_efd``, for example) of the available
+            InfluxDB databases. This string should be passed as the
+            ``database`` argument to `get_influxdb_connection_info`.
+
+        Raises
+        ------
+        RepertoireError
+            Raised on error fetching discovery information from Repertoire.
+        """
+        discovery = await self._get_discovery()
+        return sorted(discovery.influxdb_databases.keys())
 
     async def url_for_data_service(
         self, service: str, dataset: str
@@ -175,7 +228,7 @@ class DiscoveryClient:
         RepertoireError
             Raised on error fetching discovery information from Repertoire.
         """
-        discovery = await self._get_data()
+        discovery = await self._get_discovery()
         urls = discovery.urls.data.get(service)
         if not urls:
             return None
@@ -201,7 +254,7 @@ class DiscoveryClient:
         RepertoireError
             Raised on error fetching discovery information from Repertoire.
         """
-        discovery = await self._get_data()
+        discovery = await self._get_discovery()
         url = discovery.urls.internal.get(service)
         return str(url) if url is not None else None
 
@@ -224,22 +277,51 @@ class DiscoveryClient:
         RepertoireError
             Raised on error fetching discovery information from Repertoire.
         """
-        discovery = await self._get_data()
+        discovery = await self._get_discovery()
         url = discovery.urls.ui.get(service)
         return str(url) if url is not None else None
 
-    async def _get_data(self) -> Discovery:
-        """Fetch and cache discovery information."""
-        if self._discovery_cache:
-            return self._discovery_cache
+    async def _get[T: BaseModel](
+        self, url: str | HttpUrl, model: type[T], token: str | None = None
+    ) -> T:
+        """Make an HTTP GET request and validate the results.
+
+        Parameters
+        ----------
+        url
+            URL at which to make the request.
+        model
+            Expected type of the response.
+        token
+            If given, authenticate with the provided Gafaelfawr token.
+
+        Returns
+        -------
+        pydantic.BaseModel
+            Validated model of the requested type.
+
+        Raises
+        ------
+        RepertoireError
+            Raised on error fetching discovery information from Repertoire.
+        """
+        headers = {}
+        if token is not None:
+            headers["Authorization"] = f"Bearer {token}"
         try:
-            r = await self._client.get(self._build_url("/discovery"))
+            r = await self._client.get(str(url), headers=headers)
             r.raise_for_status()
-            self._discovery_cache = Discovery.model_validate(r.json())
+            return model.model_validate(r.json())
         except HTTPError as e:
             raise RepertoireWebError.from_exception(e) from e
         except ValidationError as e:
             raise RepertoireValidationError(str(e)) from e
+
+    async def _get_discovery(self) -> Discovery:
+        """Fetch and cache discovery information."""
+        if self._discovery_cache is None:
+            route = self._build_url("/discovery")
+            self._discovery_cache = await self._get(route, Discovery)
         return self._discovery_cache
 
     def _build_url(self, route: str) -> str:
