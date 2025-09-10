@@ -27,6 +27,10 @@ applications:
   - "vault-secrets-operator"
   - "vo-cutouts"
   - "wobbly"
+availableDatasets:
+  - "dp02"
+  - "dp03"
+  - "dp1"
 baseHostname: "data.example.com"
 butlerConfigs:
   dp02: "https://data.example.com/api/butler/repo/dp02/butler.yaml"
@@ -49,6 +53,9 @@ datasets:
       Science Pipelines v29 processing of observations obtained with the LSST
       Commissioning Camera of seven ~1 square degree fields, over seven weeks
       in late 2024.
+  other:
+    description: >-
+      Test dataset not listed in availableDatasets.
 influxdbDatabases:
   idfdev_efd:
     url: "https://data.example.com/influxdb/"

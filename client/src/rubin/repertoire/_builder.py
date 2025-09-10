@@ -97,6 +97,8 @@ class RepertoireBuilder:
         """Construct the datasets available in an environment."""
         results = {}
         for key, value in self._config.datasets.items():
+            if key not in self._config.available_datasets:
+                continue
             results[key] = Dataset(
                 butler_config=self._config.butler_configs.get(key),
                 description=value.description,
@@ -142,8 +144,9 @@ class RepertoireBuilder:
         context = self._base_context
         match rule:
             case DataServiceRule():
-                for dataset in rule.datasets or self._config.datasets.keys():
-                    if dataset not in self._config.datasets:
+                allowed = rule.datasets or self._config.available_datasets
+                for dataset in allowed:
+                    if dataset not in self._config.available_datasets:
                         continue
                     context = {**context, "dataset": dataset}
                     url = template.render(**context)
