@@ -25,11 +25,10 @@ class DatasetConfig(BaseModel):
         alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
 
-    name: Annotated[
+    description: Annotated[
         str,
         Field(
-            title="Name",
-            description="Human-readable name of the dataset",
+            title="Description", description="Long description of the dataset"
         ),
     ]
 
@@ -194,12 +193,14 @@ class RepertoireSettings(BaseSettings):
     ] = {}
 
     datasets: Annotated[
-        list[DatasetConfig],
+        dict[str, DatasetConfig],
         Field(
             title="Datasets",
-            description="Metadata about available datasets",
+            description=(
+                "Mapping of dataset names to metadata about that dataset"
+            ),
         ),
-    ] = []
+    ] = {}
 
     influxdb_databases: Annotated[
         dict[str, InfluxDatabaseConfig],

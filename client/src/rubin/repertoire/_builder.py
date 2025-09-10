@@ -44,9 +44,7 @@ class RepertoireBuilder:
 
     def __init__(self, config: RepertoireSettings) -> None:
         self._config = config
-
         self._base_context = {"base_hostname": config.base_hostname}
-        self._datasets = {d.name for d in config.datasets}
 
     def build_discovery(self, base_url: str) -> Discovery:
         """Construct service discovery information from the configuration.
@@ -95,14 +93,15 @@ class RepertoireBuilder:
             schema_registry=influxdb.schema_registry,
         )
 
-    def _build_datasets(self) -> list[Dataset]:
+    def _build_datasets(self) -> dict[str, Dataset]:
         """Construct the datasets available in an environment."""
-        datasets = [Dataset(name=d) for d in sorted(self._datasets)]
-        for dataset in datasets:
-            name = dataset.name
-            if name in self._config.butler_configs:
-                dataset.butler_config = self._config.butler_configs[name]
-        return datasets
+        results = {}
+        for key, value in self._config.datasets.items():
+            results[key] = Dataset(
+                butler_config=self._config.butler_configs.get(key),
+                description=value.description,
+            )
+        return results
 
     def _build_influxdb_databases(self, base_url: str) -> dict[str, HttpUrl]:
         """Construct the URLs to credentials for InfluxDB databases."""
@@ -143,8 +142,8 @@ class RepertoireBuilder:
         context = self._base_context
         match rule:
             case DataServiceRule():
-                for dataset in rule.datasets or self._datasets:
-                    if dataset not in self._datasets:
+                for dataset in rule.datasets or self._config.datasets.keys():
+                    if dataset not in self._config.datasets:
                         continue
                     context = {**context, "dataset": dataset}
                     url = template.render(**context)

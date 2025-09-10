@@ -18,15 +18,6 @@ __all__ = [
 class Dataset(BaseModel):
     """Discovery information about a single dataset."""
 
-    name: Annotated[
-        str,
-        Field(
-            title="Name",
-            description="Human-readable name of the dataset",
-            examples=["dp02", "dp1"],
-        ),
-    ]
-
     butler_config: Annotated[
         HttpUrl | None,
         Field(
@@ -40,6 +31,18 @@ class Dataset(BaseModel):
             ],
         ),
     ] = None
+
+    description: Annotated[
+        str,
+        Field(
+            title="Description",
+            description="Long description of the dataset",
+            examples=[
+                "Data Preview 1 contains the first image data from the"
+                " telescope during commissioning"
+            ],
+        ),
+    ]
 
 
 class InfluxDatabase(BaseModel):
@@ -175,13 +178,12 @@ class Discovery(BaseModel):
     ] = []
 
     datasets: Annotated[
-        list[Dataset],
+        dict[str, Dataset],
         Field(
             title="Datasets",
             description="All datasets available in the local environment",
-            examples=[["dp02", "dp1"]],
         ),
-    ] = []
+    ] = {}
 
     influxdb_databases: Annotated[
         dict[str, HttpUrl],
@@ -193,6 +195,7 @@ class Discovery(BaseModel):
                 " retrieve connection information. Requests to that URL will"
                 " require authentication."
             ),
+            examples=[{"efd": "https://example.com/discovery/influxdb/efd"}],
         ),
     ] = {}
 
