@@ -228,11 +228,11 @@ class DiscoveryClient:
             Raised on error fetching discovery information from Repertoire.
         """
         discovery = await self._get_discovery()
-        urls = discovery.urls.data.get(service)
-        if not urls:
+        datasets = discovery.services.data.get(service)
+        if not datasets:
             return None
-        url = urls.get(dataset)
-        return str(url) if url is not None else None
+        info = datasets.get(dataset)
+        return str(info.url) if info else None
 
     async def url_for_internal_service(self, service: str) -> str | None:
         """Return the base API URL for a given internal service.
@@ -254,8 +254,8 @@ class DiscoveryClient:
             Raised on error fetching discovery information from Repertoire.
         """
         discovery = await self._get_discovery()
-        url = discovery.urls.internal.get(service)
-        return str(url) if url is not None else None
+        info = discovery.services.internal.get(service)
+        return str(info.url) if info else None
 
     async def url_for_ui_service(self, service: str) -> str | None:
         """Return the base URL for a given UI service.
@@ -277,8 +277,8 @@ class DiscoveryClient:
             Raised on error fetching discovery information from Repertoire.
         """
         discovery = await self._get_discovery()
-        url = discovery.urls.ui.get(service)
-        return str(url) if url is not None else None
+        info = discovery.services.ui.get(service)
+        return str(info.url) if info else None
 
     async def _get[T: BaseModel](
         self, url: str | HttpUrl, model: type[T], token: str | None = None

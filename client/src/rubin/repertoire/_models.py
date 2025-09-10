@@ -7,11 +7,16 @@ from typing import Annotated
 from pydantic import BaseModel, Field, HttpUrl, PlainSerializer, SecretStr
 
 __all__ = [
+    "ApiService",
+    "BaseService",
+    "DataService",
     "Dataset",
     "Discovery",
     "InfluxDatabase",
     "InfluxDatabaseWithCredentials",
-    "ServiceUrls",
+    "InternalService",
+    "Services",
+    "UiService",
 ]
 
 
@@ -26,9 +31,7 @@ class Dataset(BaseModel):
                 "URL of Butler configuration to access this dataset, if it is"
                 " available via a Butler server"
             ),
-            examples=[
-                "https://example.cloud/api/butler/repo/dp02/butler.yaml"
-            ],
+            examples=["https://example.org/api/butler/repo/dp02/butler.yaml"],
         ),
     ] = None
 
@@ -53,7 +56,7 @@ class InfluxDatabase(BaseModel):
         Field(
             title="InfluxDB URL",
             description="URL to InfluxDB service",
-            examples=["https://example.cloud/influxdb/"],
+            examples=["https://example.org/influxdb/"],
         ),
     ]
 
@@ -71,7 +74,7 @@ class InfluxDatabase(BaseModel):
         Field(
             title="Schema registry URL",
             description="URL of corresponding Confluent schema registry",
-            examples=["https://example.cloud/schema-registry"],
+            examples=["https://example.org/schema-registry"],
         ),
     ]
 
@@ -99,25 +102,71 @@ class InfluxDatabaseWithCredentials(InfluxDatabase):
     ]
 
 
-class ServiceUrls(BaseModel):
-    """Mappings of service names to base URLs."""
+class BaseService(BaseModel):
+    """Base model for services."""
+
+    url: Annotated[
+        HttpUrl,
+        Field(
+            title="Service URL",
+            description="Default access URL for the service",
+            examples=["https://example.org/api/cutout"],
+        ),
+    ]
+
+
+class ApiService(BaseService):
+    """Base model for services with an API."""
+
+    openapi: Annotated[
+        HttpUrl | None,
+        Field(
+            title="OpenAPI schema",
+            description=(
+                "URL to the OpenAPI schema for the service if available"
+            ),
+            examples=["https://example.org/api/cutout/openapi.json"],
+        ),
+    ] = None
+
+
+class DataService(ApiService):
+    """A user-facing API service tied to a particular dataset."""
+
+
+class InternalService(ApiService):
+    """An internal API service not tied to a particular dataset."""
+
+
+class UiService(BaseService):
+    """A user interface service."""
+
+
+class Services(BaseModel):
+    """Mappings of service names to service information."""
 
     data: Annotated[
-        dict[str, dict[str, HttpUrl]],
+        dict[str, dict[str, DataService]],
         Field(
-            title="Service to dataset to URL",
+            title="Data services",
             description=(
                 "Mapping of service names to dataset names served by that"
-                " service to base URLs. The dataset name will match the name"
-                " of one of the datasets in the associated discovery reply."
-                " These are the API services used directly by users for data"
-                " access."
+                " service to service information. The dataset name will match"
+                " the name of one of the datasets in the associated discovery"
+                " reply. These are the API services used directly by users"
+                " for data access."
             ),
             examples=[
                 {
-                    "hips": {
-                        "dp02": "https://data-dev.lsst.cloud/api/hips/v2/dp02",
-                        "dp1": "https://data-dev.lsst.cloud/api/hips/v2/dp1",
+                    "cutout": {
+                        "dp02": {
+                            "url": "https://example.org/api/cutout/dp02",
+                            "openapi": "https://example.org/api/cutout/openapi",
+                        },
+                        "dp1": {
+                            "url": "https://example.org/api/cutout/dp1",
+                            "openapi": "https://example.org/api/cutout/openapi",
+                        },
                     },
                 }
             ],
@@ -125,35 +174,42 @@ class ServiceUrls(BaseModel):
     ] = {}
 
     internal: Annotated[
-        dict[str, HttpUrl],
+        dict[str, InternalService],
         Field(
-            title="Internal service URLs",
+            title="Internal service",
             description=(
-                "Mapping of service name to base URL for internal services."
-                " These are used by other services and generally won't be"
-                " used directly by services."
+                "Mapping of service name to service information for internal"
+                " services. These are used by other services and generally"
+                " won't be used directly by users."
             ),
             examples=[
                 {
-                    "gafaelfawr": "https://data-dev.lsst.cloud/auth/api/v1",
-                    "wobbly": "https://data-dev.lsst.cloud/wobbly",
+                    "gafaelfawr": {
+                        "url": "https://example.org/auth/api/v1",
+                        "openapi": "https://example.org/auth/openapi.json",
+                    },
+                    "wobbly": {
+                        "url": "https://example.org/wobbly",
+                        "openapi": "https://example.org/wobbly/openapi.json",
+                    },
                 }
             ],
         ),
     ] = {}
 
     ui: Annotated[
-        dict[str, HttpUrl],
+        dict[str, UiService],
         Field(
-            title="User interface URLs",
+            title="User interfaces",
             description=(
-                "Mapping of service name to base URL for user interfaces"
-                " intended for access by a user using a web browser."
+                "Mapping of service name to service information for user"
+                " interfaces intended for access by a user using a web"
+                " browser."
             ),
             examples=[
                 {
-                    "argocd": "https://data-dev.lsst.cloud/argo-cd",
-                    "nublado": "https://nb.data-dev.lsst.cloud/nb",
+                    "argocd": {"url": "https://example.org/argo-cd"},
+                    "nublado": {"url": "https://nb.example.org/nb"},
                 }
             ],
         ),
@@ -199,8 +255,8 @@ class Discovery(BaseModel):
         ),
     ] = {}
 
-    urls: Annotated[
-        ServiceUrls,
+    services: Annotated[
+        Services,
         Field(
             title="Service URLs",
             description="URLs to services available in the local environment",

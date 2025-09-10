@@ -44,34 +44,76 @@
     "idfdev_efd": "https://example.com/repertoire/discovery/influxdb/idfdev_efd",
     "idfdev_metrics": "https://example.com/repertoire/discovery/influxdb/idfdev_metrics"
   },
-  "urls": {
+  "services": {
     "data": {
       "cutout": {
-        "dp02": "https://data.example.com/api/cutout",
-        "dp03": "https://data.example.com/api/cutout",
-        "dp1": "https://data.example.com/api/cutout"
+        "dp02": {
+          "url": "https://data.example.com/api/cutout",
+          "openapi": "https://data.example.com/api/cutout/openapi.json"
+        },
+        "dp03": {
+          "url": "https://data.example.com/api/cutout",
+          "openapi": "https://data.example.com/api/cutout/openapi.json"
+        },
+        "dp1": {
+          "url": "https://data.example.com/api/cutout",
+          "openapi": "https://data.example.com/api/cutout/openapi.json"
+        }
       },
       "sia": {
-        "dp02": "https://data.example.com/api/sia/dp02",
-        "dp1": "https://data.example.com/api/sia/dp1"
+        "dp02": {
+          "url": "https://data.example.com/api/sia/dp02",
+          "openapi": "https://data.example.com/api/sia/openapi.json"
+        },
+        "dp1": {
+          "url": "https://data.example.com/api/sia/dp1",
+          "openapi": "https://data.example.com/api/sia/openapi.json"
+        }
       },
       "tap": {
-        "dp02": "https://data.example.com/api/tap",
-        "dp03": "https://data.example.com/api/ssotap",
-        "dp1": "https://data.example.com/api/tap"
+        "dp02": {
+          "url": "https://data.example.com/api/tap"
+        },
+        "dp03": {
+          "url": "https://data.example.com/api/ssotap"
+        },
+        "dp1": {
+          "url": "https://data.example.com/api/tap"
+        }
       }
     },
     "internal": {
-      "gafaelfawr": "https://data.example.com/auth/api/v1",
-      "mobu": "https://data.example.com/mobu",
-      "noteburst": "https://data.example.com/noteburst/v1",
-      "semaphore": "https://data.example.com/semaphore",
-      "wobbly": "https://data.example.com/wobbly"
+      "gafaelfawr": {
+        "url": "https://data.example.com/auth/api/v1",
+        "openapi": "https://data.example.com/auth/openapi.json"
+      },
+      "mobu": {
+        "url": "https://data.example.com/mobu",
+        "openapi": "https://data.example.com/mobu/openapi.json"
+      },
+      "noteburst": {
+        "url": "https://data.example.com/noteburst/v1",
+        "openapi": "https://data.example.com/noteburst/openapi.json"
+      },
+      "semaphore": {
+        "url": "https://data.example.com/semaphore",
+        "openapi": "https://data.example.com/semaphore/openapi.json"
+      },
+      "wobbly": {
+        "url": "https://data.example.com/wobbly",
+        "openapi": "https://data.example.com/wobbly/openapi.json"
+      }
     },
     "ui": {
-      "argocd": "https://data.example.com/argo-cd",
-      "nublado": "https://nb.data.example.com/nb",
-      "portal": "https://data.example.com/portal/app/"
+      "argocd": {
+        "url": "https://data.example.com/argo-cd"
+      },
+      "nublado": {
+        "url": "https://nb.data.example.com/nb"
+      },
+      "portal": {
+        "url": "https://data.example.com/portal/app/"
+      }
     }
   }
 }

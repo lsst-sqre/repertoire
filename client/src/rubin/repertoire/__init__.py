@@ -18,15 +18,23 @@ from ._exceptions import (
     RepertoireWebError,
 )
 from ._models import (
+    ApiService,
+    BaseService,
+    DataService,
     Dataset,
     Discovery,
     InfluxDatabase,
     InfluxDatabaseWithCredentials,
-    ServiceUrls,
+    InternalService,
+    Services,
+    UiService,
 )
 
 __all__ = [
+    "ApiService",
     "BaseRule",
+    "BaseService",
+    "DataService",
     "DataServiceRule",
     "Dataset",
     "DatasetConfig",
@@ -35,6 +43,7 @@ __all__ = [
     "InfluxDatabase",
     "InfluxDatabaseConfig",
     "InfluxDatabaseWithCredentials",
+    "InternalService",
     "InternalServiceRule",
     "RepertoireBuilder",
     "RepertoireBuilderWithSecrets",
@@ -43,6 +52,7 @@ __all__ = [
     "RepertoireUrlError",
     "RepertoireValidationError",
     "RepertoireWebError",
-    "ServiceUrls",
+    "Services",
+    "UiService",
     "UiServiceRule",
 ]

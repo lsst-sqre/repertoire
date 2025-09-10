@@ -15,11 +15,14 @@ from ._config import (
     UiServiceRule,
 )
 from ._models import (
+    DataService,
     Dataset,
     Discovery,
     InfluxDatabase,
     InfluxDatabaseWithCredentials,
-    ServiceUrls,
+    InternalService,
+    Services,
+    UiService,
 )
 
 __all__ = [
@@ -63,7 +66,7 @@ class RepertoireBuilder:
             applications=sorted(self._config.applications),
             datasets=self._build_datasets(),
             influxdb_databases=self._build_influxdb_databases(base_url),
-            urls=self._build_urls(),
+            services=self._build_services(),
         )
 
     def build_influxdb(self, database: str) -> InfluxDatabase | None:
@@ -112,51 +115,116 @@ class RepertoireBuilder:
             for k, v in sorted(self._config.influxdb_databases.items())
         }
 
-    def _build_urls(self) -> ServiceUrls:
+    def _build_services(self) -> Services:
         """Construct the service URLs for an environment."""
-        urls = ServiceUrls()
+        services = Services()
         for application in sorted(self._config.applications):
             if application in self._config.use_subdomains:
                 rules = self._config.subdomain_rules.get(application, [])
             else:
                 rules = self._config.rules.get(application, [])
             for rule in rules:
-                self._build_url_from_rule(application, rule, urls)
-        return urls
+                self._build_service_from_rule(application, rule, services)
+        return services
 
-    def _build_url_from_rule(
-        self, name: str, rule: Rule, urls: ServiceUrls
+    def _build_service_from_rule(
+        self, name: str, rule: Rule, services: Services
     ) -> None:
-        """Generate and store URLs based on a rule.
+        """Generate and store service information based on a rule.
 
         Parameters
         ----------
         name
             Name of the application.
         rule
-            Generation rule for the URL.
-        urls
-            Collected URLs into which to insert the result.
+            Generation rule for the service information.
+        services
+            Collected service information into which to insert the result.
         """
         if rule.name:
             name = rule.name
-        template = Template(rule.template)
-        context = self._base_context
         match rule:
             case DataServiceRule():
                 allowed = rule.datasets or self._config.available_datasets
                 for dataset in allowed:
                     if dataset not in self._config.available_datasets:
                         continue
-                    context = {**context, "dataset": dataset}
-                    url = template.render(**context)
-                    if name not in urls.data:
-                        urls.data[name] = {}
-                    urls.data[name][dataset] = HttpUrl(url)
+                    service = self._build_data_service_from_rule(dataset, rule)
+                    if name not in services.data:
+                        services.data[name] = {}
+                    services.data[name][dataset] = service
             case InternalServiceRule():
-                urls.internal[name] = HttpUrl(template.render(**context))
+                internal_service = self._build_internal_service_from_rule(rule)
+                services.internal[name] = internal_service
             case UiServiceRule():
-                urls.ui[name] = HttpUrl(template.render(**context))
+                services.ui[name] = self._build_ui_service_from_rule(rule)
+
+    def _build_data_service_from_rule(
+        self, dataset: str, rule: DataServiceRule
+    ) -> DataService:
+        """Generate data service information based on a rule.
+
+        Parameters
+        ----------
+        dataset
+            Name of the dataset.
+        rule
+            Generation rule for the service information.
+
+        Returns
+        -------
+        DataService
+            Constructed service information.
+        """
+        context = {**self._base_context, "dataset": dataset}
+        openapi = None
+        if rule.openapi:
+            openapi = HttpUrl(Template(rule.openapi).render(**context))
+        return DataService(
+            url=HttpUrl(Template(rule.template).render(**context)),
+            openapi=openapi,
+        )
+
+    def _build_internal_service_from_rule(
+        self, rule: InternalServiceRule
+    ) -> InternalService:
+        """Generate internal service information based on a rule.
+
+        Parameters
+        ----------
+        rule
+            Generation rule for the service information.
+
+        Returns
+        -------
+        InternalService
+            Constructed service information.
+        """
+        openapi = None
+        if rule.openapi:
+            openapi_str = Template(rule.openapi).render(**self._base_context)
+            openapi = HttpUrl(openapi_str)
+        return InternalService(
+            url=HttpUrl(Template(rule.template).render(**self._base_context)),
+            openapi=openapi,
+        )
+
+    def _build_ui_service_from_rule(self, rule: UiServiceRule) -> UiService:
+        """Generate UI service information based on a rule.
+
+        Parameters
+        ----------
+        rule
+            Generation rule for the service information.
+
+        Returns
+        -------
+        UiService
+            Constructed service information.
+        """
+        return UiService(
+            url=HttpUrl(Template(rule.template).render(**self._base_context))
+        )
 
 
 class RepertoireBuilderWithSecrets(RepertoireBuilder):

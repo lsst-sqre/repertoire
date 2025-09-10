@@ -134,11 +134,27 @@ class DataServiceRule(BaseRule):
         ),
     ] = None
 
+    openapi: Annotated[
+        str | None,
+        Field(
+            title="OpenAPI schema template",
+            description="Template to generate the OpenAPI schema URL",
+        ),
+    ] = None
+
 
 class InternalServiceRule(BaseRule):
     """Rule for an internal Phalanx service not associated with a dataset."""
 
     type: Annotated[Literal["internal"], Field(title="Type of service")]
+
+    openapi: Annotated[
+        str | None,
+        Field(
+            title="OpenAPI schema template",
+            description="Template to generate the OpenAPI schema URL",
+        ),
+    ] = None
 
 
 class UiServiceRule(BaseRule):
