@@ -1,6 +1,6 @@
 {
   "applications": [],
-  "datasets": [],
+  "datasets": {},
   "influxdb_databases": {},
   "urls": {
     "data": {},

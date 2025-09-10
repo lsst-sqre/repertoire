@@ -20,7 +20,7 @@ async def test_applications(discovery_client: DiscoveryClient) -> None:
 @pytest.mark.asyncio
 async def test_datasets(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
-    expected = sorted(d["name"] for d in output["datasets"])
+    expected = sorted(output["datasets"].keys())
     assert await discovery_client.datasets() == expected
 
 
@@ -28,8 +28,8 @@ async def test_datasets(discovery_client: DiscoveryClient) -> None:
 async def test_butler_config_for(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     for dataset in output["datasets"]:
-        result = await discovery_client.butler_config_for(dataset["name"])
-        assert result == dataset.get("butler_config")
+        result = await discovery_client.butler_config_for(dataset)
+        assert result == output["datasets"][dataset].get("butler_config")
     assert await discovery_client.butler_config_for("unknown") is None
 
 
@@ -37,9 +37,9 @@ async def test_butler_config_for(discovery_client: DiscoveryClient) -> None:
 async def test_butler_repositories(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     expected = {
-        d["name"]: d["butler_config"]
-        for d in output["datasets"]
-        if d.get("butler_config") is not None
+        k: v["butler_config"]
+        for k, v in output["datasets"].items()
+        if v.get("butler_config") is not None
     }
     assert await discovery_client.butler_repositories() == expected
 

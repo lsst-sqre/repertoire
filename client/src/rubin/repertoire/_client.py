@@ -105,9 +105,8 @@ class DiscoveryClient:
             Raised on error fetching discovery information from Repertoire.
         """
         discovery = await self._get_discovery()
-        for candidate in discovery.datasets:
-            if candidate.name == dataset and candidate.butler_config:
-                return str(candidate.butler_config)
+        if info := discovery.datasets.get(dataset):
+            return str(info.butler_config) if info.butler_config else None
         return None
 
     async def butler_repositories(self) -> dict[str, str]:
@@ -127,9 +126,9 @@ class DiscoveryClient:
         """
         discovery = await self._get_discovery()
         return {
-            d.name: str(d.butler_config)
-            for d in discovery.datasets
-            if d.butler_config is not None
+            k: str(v.butler_config)
+            for k, v in discovery.datasets.items()
+            if v.butler_config is not None
         }
 
     async def datasets(self) -> list[str]:
@@ -149,7 +148,7 @@ class DiscoveryClient:
             Raised on error fetching discovery information from Repertoire.
         """
         discovery = await self._get_discovery()
-        return sorted(d.name for d in discovery.datasets)
+        return sorted(discovery.datasets.keys())
 
     async def get_influxdb_connection_info(
         self, database: str, token: str
