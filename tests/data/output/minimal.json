@@ -2,7 +2,7 @@
   "applications": [],
   "datasets": {},
   "influxdb_databases": {},
-  "urls": {
+  "services": {
     "data": {},
     "internal": {},
     "ui": {}

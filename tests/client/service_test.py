@@ -47,21 +47,23 @@ async def test_butler_repositories(discovery_client: DiscoveryClient) -> None:
 @pytest.mark.asyncio
 async def test_url_for(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
-    urls = output["urls"]
+    services = output["services"]
 
-    for service, url in urls["internal"].items():
+    for service, info in services["internal"].items():
+        url = info["url"]
         assert await discovery_client.url_for_internal_service(service) == url
     assert await discovery_client.url_for_internal_service("unknown") is None
 
-    for service, url in urls["ui"].items():
+    for service, info in services["ui"].items():
+        url = info["url"]
         assert await discovery_client.url_for_ui_service(service) == url
     assert await discovery_client.url_for_ui_service("unknown") is None
 
     client = discovery_client
-    for service, mapping in urls["data"].items():
-        for dataset, url in mapping.items():
+    for service, mapping in services["data"].items():
+        for dataset, info in mapping.items():
             result = await client.url_for_data_service(service, dataset)
-            assert result == url
+            assert result == info["url"]
         assert await client.url_for_data_service(service, "unknown") is None
     assert await client.url_for_data_service("unknown", dataset) is None
 
