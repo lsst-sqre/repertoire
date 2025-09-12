@@ -12,6 +12,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 __all__ = [
     "DatasetConfig",
+    "HipsConfig",
+    "HipsDatasetConfig",
     "InfluxDatabaseConfig",
     "RepertoireSettings",
     "Rule",
@@ -29,6 +31,119 @@ class DatasetConfig(BaseModel):
         str,
         Field(
             title="Description", description="Long description of the dataset"
+        ),
+    ]
+
+
+class HipsDatasetConfig(BaseModel):
+    """Configuration for a single HiPS dataset."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    paths: Annotated[
+        list[str],
+        Field(
+            title="Routes for surveys",
+            description=(
+                "Routes relative to the source URL for each of the HiPS"
+                " surveys whose properties files should be retrieved and"
+                " assembled into the HiPS list"
+            ),
+        ),
+    ]
+
+
+class HipsLegacyConfig(BaseModel):
+    """Configuration for the HiPS legacy path.
+
+    This is deprecated and support will be dropped entirely once the Rubin
+    dataset available under the legacy paths is retired.
+    """
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    dataset: Annotated[
+        str,
+        Field(
+            title="Dataset to show under legacy path",
+            description=(
+                "Label of the HiPS dataset that's also exported under the"
+                " legacy path. Set to None if legacy paths are not supported."
+            ),
+        ),
+    ]
+
+    path_prefix: Annotated[
+        str,
+        Field(
+            title="Path prefix for legacy HiPS path",
+            description=(
+                "Path prefix for the legacy HiPS path, which only supports a"
+                " single databaset"
+            ),
+        ),
+    ]
+
+
+class HipsConfig(BaseModel):
+    """Configuration for HiPS datasets.
+
+    This is used to generate service discovery information for HiPS datasets
+    and to configure the Repertoire server, which provides combined HiPS list
+    files built from the properties files of the datasets for the individual
+    bands.
+    """
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    datasets: Annotated[
+        dict[str, HipsDatasetConfig],
+        Field(
+            title="Label to HiPS config mapping",
+            description=(
+                "Mapping of dataset labels to the corresponding HiPS list"
+                " configuration"
+            ),
+        ),
+    ]
+
+    legacy: Annotated[
+        HipsLegacyConfig | None,
+        Field(
+            title="Legacy HiPS configuration",
+            description=(
+                "Configuration for the HiPS legacy path. This is provided only"
+                " for backward compatibility and will be dropped in a future"
+                " release."
+            ),
+        ),
+    ] = None
+
+    path_prefix: Annotated[
+        str,
+        Field(
+            title="HiPS list path prefix",
+            description=(
+                "Path prefix for the the list files for per-dataset HiPS"
+                " collections. /<dataset>/list will be appended."
+            ),
+        ),
+    ]
+
+    source_template: Annotated[
+        str,
+        Field(
+            title="Source URL template",
+            description=(
+                "Template for the URL for the HiPS survey, used to retrieve"
+                " the properties files to construct the HiPS list"
+            ),
         ),
     ]
 
@@ -225,6 +340,14 @@ class RepertoireSettings(BaseSettings):
             ),
         ),
     ] = {}
+
+    hips: Annotated[
+        HipsConfig | None,
+        Field(
+            title="HiPS list configuration",
+            description="URL and band information for HiPS datasets",
+        ),
+    ] = None
 
     influxdb_databases: Annotated[
         dict[str, InfluxDatabaseConfig],
