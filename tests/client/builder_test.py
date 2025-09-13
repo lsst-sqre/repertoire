@@ -14,11 +14,17 @@ from ..support.data import data_path, read_test_json
 
 def test_build_discovery() -> None:
     config_path = data_path("config/phalanx.yaml")
-    base_url = TEST_BASE_URL.rstrip("/") + "/repertoire"
+    hips_base_url = TEST_BASE_URL.rstrip("/")
+    base_url = hips_base_url + "/repertoire"
     config = RepertoireSettings.from_file(config_path)
-    output = RepertoireBuilder(config).build_discovery(base_url)
+
+    output = RepertoireBuilder(config).build_discovery(base_url, hips_base_url)
     output_json = output.model_dump(mode="json", exclude_none=True)
     assert output_json == read_test_json("output/phalanx")
+
+    output = RepertoireBuilder(config).build_discovery(base_url)
+    for dataset in output.datasets:
+        assert output.datasets[dataset].hips_list is None
 
 
 def test_build_influxdb() -> None:

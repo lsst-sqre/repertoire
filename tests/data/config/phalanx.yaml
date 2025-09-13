@@ -56,6 +56,20 @@ datasets:
   other:
     description: >-
       Test dataset not listed in availableDatasets.
+hips:
+  datasets:
+    dp1:
+      paths:
+        - "deep_coadd/color_ugri"
+        - "deep_coadd/color_gri"
+    unknown:
+      paths:
+        - "deep_coadd/color_gri"
+  legacy:
+    dataset: "dp1"
+    pathPrefix: "/api/hips"
+  pathPrefix: "/api/hips/v2"
+  sourceTemplate: "https://{{base_hostname}}/api/hips/v2/{{dataset}}"
 influxdbDatabases:
   idfdev_efd:
     url: "https://data.example.com/influxdb/"

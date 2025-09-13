@@ -1,0 +1,22 @@
+# A Phalanx configuration without legacy HiPS.
+
+applications: []
+availableDatasets:
+  - "dp02"
+  - "dp1"
+baseHostname: "data.example.com"
+datasets:
+  dp1:
+    description: >-
+      Data Preview 1 contains image and catalog products from the Rubin
+      Science Pipelines v29 processing of observations obtained with the LSST
+      Commissioning Camera of seven ~1 square degree fields, over seven weeks
+      in late 2024.
+hips:
+  datasets:
+    dp1:
+      paths:
+        - "deep_coadd/color_ugri"
+        - "deep_coadd/color_gri"
+  pathPrefix: "/api/hips/v2"
+  sourceTemplate: "https://{{base_hostname}}/api/hips/v2/{{dataset}}"

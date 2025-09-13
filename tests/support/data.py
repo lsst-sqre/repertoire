@@ -6,7 +6,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-__all__ = ["data_path", "read_test_json"]
+__all__ = [
+    "data_path",
+    "read_test_file",
+    "read_test_json",
+]
 
 
 def data_path(fragment: str) -> Path:
@@ -23,6 +27,22 @@ def data_path(fragment: str) -> Path:
         Full path to file.
     """
     return Path(__file__).parent.parent / "data" / fragment
+
+
+def read_test_file(fragment: str) -> str:
+    """Read test data as text.
+
+    Parameters
+    ----------
+    fragment
+        Path relative to :file:`tests/data`.
+
+    Returns
+    -------
+    str
+        Contents of file.
+    """
+    return data_path(fragment).read_text()
 
 
 def read_test_json(fragment: str) -> Any:

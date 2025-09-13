@@ -13,7 +13,7 @@ from ..support.data import read_test_json
 
 
 @pytest.mark.asyncio
-async def test_influxdb_databases(discovery_client: DiscoveryClient) -> None:
+async def test_databases(discovery_client: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     expected = list(output["influxdb_databases"].keys())
     assert await discovery_client.influxdb_databases() == expected

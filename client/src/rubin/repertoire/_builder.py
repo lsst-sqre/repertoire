@@ -49,13 +49,18 @@ class RepertoireBuilder:
         self._config = config
         self._base_context = {"base_hostname": config.base_hostname}
 
-    def build_discovery(self, base_url: str) -> Discovery:
+    def build_discovery(
+        self, base_url: str, hips_base_url: str | None = None
+    ) -> Discovery:
         """Construct service discovery information from the configuration.
 
         Parameters
         ----------
         base_url
             Base URL for Repertoire internal links.
+        hips_base_url
+            Base URL for HiPS list files, without any part of the HiPS path
+            prefixes, or `None` to not consider HiPS information.
 
         Returns
         -------
@@ -64,7 +69,7 @@ class RepertoireBuilder:
         """
         return Discovery(
             applications=sorted(self._config.applications),
-            datasets=self._build_datasets(),
+            datasets=self._build_datasets(hips_base_url),
             influxdb_databases=self._build_influxdb_databases(base_url),
             services=self._build_services(),
         )
@@ -96,15 +101,22 @@ class RepertoireBuilder:
             schema_registry=influxdb.schema_registry,
         )
 
-    def _build_datasets(self) -> dict[str, Dataset]:
+    def _build_datasets(self, base_url: str | None) -> dict[str, Dataset]:
         """Construct the datasets available in an environment."""
         results = {}
         for key, value in self._config.datasets.items():
             if key not in self._config.available_datasets:
                 continue
+            hips = None
+            if base_url and self._config.hips:
+                if key in self._config.hips.datasets:
+                    path_prefix = self._config.hips.path_prefix
+                    base_url = base_url.rstrip("/") + path_prefix
+                    hips = HttpUrl(base_url + f"/{key}/list")
             results[key] = Dataset(
                 butler_config=self._config.butler_configs.get(key),
                 description=value.description,
+                hips_list=hips,
             )
         return results
 
@@ -159,6 +171,10 @@ class RepertoireBuilder:
             case UiServiceRule():
                 services.ui[name] = self._build_ui_service_from_rule(rule)
 
+    def _build_dataset_context(self, dataset: str) -> dict[str, str]:
+        """Construct a Jinja template context for a given dataset."""
+        return {**self._base_context, "dataset": dataset}
+
     def _build_data_service_from_rule(
         self, dataset: str, rule: DataServiceRule
     ) -> DataService:
@@ -176,7 +192,7 @@ class RepertoireBuilder:
         DataService
             Constructed service information.
         """
-        context = {**self._base_context, "dataset": dataset}
+        context = self._build_dataset_context(dataset)
         openapi = None
         if rule.openapi:
             openapi = HttpUrl(Template(rule.openapi).render(**context))
