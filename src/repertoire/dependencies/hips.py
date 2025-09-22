@@ -129,6 +129,8 @@ class HipsListDependency:
             Raised if an error was encountered retrieving the underlying
             properties file.
         """
+        if not config.token:
+            raise HipsDatasetNotFoundError("HiPS lists not configured")
         if not config.hips or dataset not in config.hips.datasets:
             raise HipsDatasetNotFoundError(f"No HiPS dataset for {dataset}")
         if dataset not in config.available_datasets:

@@ -83,9 +83,7 @@ def lint(session: nox.Session) -> None:
 @session(uv_groups=["dev"])
 def test(session: nox.Session) -> None:
     """Test both the server and the client."""
-    token_path = Path(__file__).parent / "tests" / "data" / "secrets" / "token"
-    token = token_path.read_text().rstrip("\n")
-    session.run("pytest", *session.posargs, env={"REPERTOIRE_TOKEN": token})
+    session.run("pytest", *session.posargs)
 
 
 @session(uv_groups=["dev", "typing"])
