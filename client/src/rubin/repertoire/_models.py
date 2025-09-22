@@ -47,6 +47,17 @@ class Dataset(BaseModel):
         ),
     ]
 
+    hips_list: Annotated[
+        HttpUrl | None,
+        Field(
+            title="HiPS list URL",
+            description=(
+                "URL to the HiPS list collecting HiPS surveys for this dataset"
+            ),
+            examples=["https://example.org/api/hips/dp02/list"],
+        ),
+    ] = None
+
 
 class InfluxDatabase(BaseModel):
     """Connection information for an InfluxDB database."""

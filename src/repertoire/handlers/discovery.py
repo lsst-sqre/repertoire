@@ -1,4 +1,4 @@
-"""Handlers for the app's external root, ``/repertoire/``."""
+"""Handlers for the Repertoire discovery API."""
 
 from typing import Annotated
 
@@ -20,13 +20,13 @@ from ..dependencies.discovery import discovery_dependency
 from ..exceptions import DatabaseNotFoundError
 from ..models import Index
 
-__all__ = ["external_router"]
+__all__ = ["discovery_router"]
 
-external_router = APIRouter(route_class=SlackRouteErrorHandler)
+discovery_router = APIRouter(route_class=SlackRouteErrorHandler)
 """FastAPI router for all external handlers."""
 
 
-@external_router.get(
+@discovery_router.get(
     "/",
     response_model_exclude_none=True,
     summary="Application metadata",
@@ -40,7 +40,7 @@ async def get_root(
     return Index(metadata=metadata)
 
 
-@external_router.get(
+@discovery_router.get(
     "/discovery",
     response_model_exclude_none=True,
     summary="Discovery information",
@@ -51,7 +51,7 @@ async def get_discovery(
     return discovery
 
 
-@external_router.get(
+@discovery_router.get(
     "/discovery/influxdb/{database}",
     response_model_exclude_none=True,
     summary="InfluxDB connection information",

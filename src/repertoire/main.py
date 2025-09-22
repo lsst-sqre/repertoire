@@ -16,7 +16,8 @@ from safir.slack.webhook import SlackRouteErrorHandler
 from .constants import SECRETS_PATH
 from .dependencies.builder import builder_dependency
 from .dependencies.config import config_dependency
-from .handlers.external import external_router
+from .handlers.discovery import discovery_router
+from .handlers.hips import hips_legacy_router, hips_router
 from .handlers.internal import internal_router
 
 __all__ = ["create_app"]
@@ -73,7 +74,12 @@ def create_app(
 
     # Attach the routers.
     app.include_router(internal_router)
-    app.include_router(external_router, prefix=path_prefix)
+    app.include_router(discovery_router, prefix=path_prefix)
+    if load_config and config.hips:
+        app.include_router(hips_router, prefix=config.hips.path_prefix)
+        if config.hips.legacy:
+            legacy_path_prefix = config.hips.legacy.path_prefix
+            app.include_router(hips_legacy_router, prefix=legacy_path_prefix)
 
     # Add middleware.
     app.add_middleware(XForwardedMiddleware)

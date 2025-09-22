@@ -45,6 +45,13 @@ class Config(RepertoireSettings):
         ),
     )
 
+    token: SecretStr = Field(
+        ...,
+        title="Gafaelfawr token",
+        description="Gafaelfawr token for HiPS property file retrieval",
+        validation_alias=AliasChoices("REPERTOIRE_TOKEN", "token"),
+    )
+
     def configure_logging(self) -> None:
         """Configure logging based on the Repertoire configuration."""
         configure_logging(
