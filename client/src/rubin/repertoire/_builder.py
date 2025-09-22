@@ -111,8 +111,8 @@ class RepertoireBuilder:
             if base_url and self._config.hips:
                 if key in self._config.hips.datasets:
                     path_prefix = self._config.hips.path_prefix
-                    base_url = base_url.rstrip("/") + path_prefix
-                    hips = HttpUrl(base_url + f"/{key}/list")
+                    hips_base_url = base_url.rstrip("/") + path_prefix
+                    hips = HttpUrl(hips_base_url + f"/{key}/list")
             results[key] = Dataset(
                 butler_config=self._config.butler_configs.get(key),
                 description=value.description,

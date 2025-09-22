@@ -58,6 +58,9 @@ datasets:
       Test dataset not listed in availableDatasets.
 hips:
   datasets:
+    dp02:
+      paths:
+        - "deep_coadd/color_ugri"
     dp1:
       paths:
         - "deep_coadd/color_ugri"

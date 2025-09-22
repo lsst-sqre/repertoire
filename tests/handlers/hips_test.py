@@ -13,8 +13,11 @@ async def test_list(client: AsyncClient) -> None:
     r = await client.get("/api/hips/v2/dp1/list")
     assert r.status_code == 200, f"error body: {r.text}"
     assert r.text == read_test_file("output/hips-dp1-list")
-
     r = await client.get("/api/hips/v2/dp02/list")
+    assert r.status_code == 200, f"error body: {r.text}"
+    r = await client.get("/api/hips/v2/dp03/list")
+    assert r.status_code == 404
+    r = await client.get("/api/hips/v2/unknown/list")
     assert r.status_code == 404
 
 
