@@ -18,5 +18,7 @@ hips:
       paths:
         - "deep_coadd/color_ugri"
         - "deep_coadd/color_gri"
+  legacy:
+    pathPrefix: "/api/hips"
   pathPrefix: "/api/hips/v2"
   sourceTemplate: "https://{{base_hostname}}/api/hips/v2/{{dataset}}"

@@ -38,6 +38,7 @@ class MockHips:
             Returns 200 with the templated properties file.
         """
         config = config_dependency.config()
+        assert config.token
         token = config.token.get_secret_value()
         assert request.headers["Authorization"] == f"Bearer {token}"
         result = self._template.render(path=path)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncGenerator
+from pathlib import Path
 
 import pytest
 import pytest_asyncio
@@ -11,9 +12,11 @@ from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from jinja2 import Template
+from pydantic import SecretStr
 
 from repertoire.config import Config
 from repertoire.dependencies.config import config_dependency
+from repertoire.dependencies.hips import hips_list_dependency
 from repertoire.main import create_app
 from rubin.repertoire import DiscoveryClient
 
@@ -23,7 +26,9 @@ from .support.hips import register_mock_hips
 
 
 @pytest_asyncio.fixture(params=["phalanx"])
-async def app(request: pytest.FixtureRequest) -> AsyncGenerator[FastAPI]:
+async def app(
+    request: pytest.FixtureRequest, token: str
+) -> AsyncGenerator[FastAPI]:
     """Return a configured test application.
 
     Wraps the application in a lifespan manager so that startup and shutdown
@@ -42,6 +47,10 @@ async def app(request: pytest.FixtureRequest) -> AsyncGenerator[FastAPI]:
     """
     config_path = f"config/{request.param}.yaml"
     config_dependency.set_config_path(data_path(config_path))
+    config = config_dependency.config()
+    if config.hips and config.hips.datasets:
+        config.token = SecretStr(token)
+    hips_list_dependency.clear_cache()
     app = create_app(secrets_root=data_path("secrets"))
     async with LifespanManager(app):
         yield app
@@ -67,10 +76,21 @@ def discovery_client(
 
 
 @pytest.fixture(autouse=True)
-def mock_hips(respx_mock: respx.Router) -> None:
+def mock_hips(
+    respx_mock: respx.Router, monkeypatch: pytest.MonkeyPatch, token: str
+) -> None:
+    monkeypatch.setenv("REPERTOIRE_TOKEN", token)
     config = Config.from_file(data_path("config/phalanx.yaml"))
     assert config.hips
+    assert config.token
+    monkeypatch.delenv("REPERTOIRE_TOKEN")
     template = Template(config.hips.source_template)
     for dataset in config.hips.datasets:
         context = {"base_hostname": config.base_hostname, "dataset": dataset}
         register_mock_hips(respx_mock, template.render(**context))
+
+
+@pytest.fixture(scope="session")
+def token() -> str:
+    token_path = Path(__file__).parent / "data" / "secrets" / "token"
+    return token_path.read_text().rstrip("\n")

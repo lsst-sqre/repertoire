@@ -95,6 +95,11 @@ class HipsListDependency:
         """
         if not config.hips or not config.hips.legacy:
             raise HipsDatasetNotFoundError("Legacy HiPS list not configured")
+        if not config.hips.legacy.dataset:
+            raise HipsDatasetNotFoundError("Legacy HiPS list not configured")
+        dataset = config.hips.legacy.dataset
+        if dataset not in config.available_datasets:
+            raise HipsDatasetNotFoundError(f"Dataset {dataset} not available")
         return await self.get_list(config.hips.legacy.dataset, config, logger)
 
     async def _build_hips_list(
@@ -124,8 +129,12 @@ class HipsListDependency:
             Raised if an error was encountered retrieving the underlying
             properties file.
         """
+        if not config.token:
+            raise HipsDatasetNotFoundError("HiPS lists not configured")
         if not config.hips or dataset not in config.hips.datasets:
             raise HipsDatasetNotFoundError(f"No HiPS dataset for {dataset}")
+        if dataset not in config.available_datasets:
+            raise HipsDatasetNotFoundError(f"Dataset {dataset} not available")
         template = Template(config.hips.source_template)
         context = {"base_hostname": config.base_hostname, "dataset": dataset}
         base_url = template.render(**context)

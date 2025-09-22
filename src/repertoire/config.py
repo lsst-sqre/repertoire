@@ -45,8 +45,8 @@ class Config(RepertoireSettings):
         ),
     )
 
-    token: SecretStr = Field(
-        ...,
+    token: SecretStr | None = Field(
+        None,
         title="Gafaelfawr token",
         description="Gafaelfawr token for HiPS property file retrieval",
         validation_alias=AliasChoices("REPERTOIRE_TOKEN", "token"),

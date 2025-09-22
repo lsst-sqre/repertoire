@@ -67,7 +67,7 @@ class HipsLegacyConfig(BaseModel):
     )
 
     dataset: Annotated[
-        str,
+        str | None,
         Field(
             title="Dataset to show under legacy path",
             description=(
@@ -75,7 +75,7 @@ class HipsLegacyConfig(BaseModel):
                 " legacy path. Set to None if legacy paths are not supported."
             ),
         ),
-    ]
+    ] = None
 
     path_prefix: Annotated[
         str,
