@@ -14,6 +14,7 @@ from jinja2 import Template
 
 from repertoire.config import Config
 from repertoire.dependencies.config import config_dependency
+from repertoire.dependencies.hips import hips_list_dependency
 from repertoire.main import create_app
 from rubin.repertoire import DiscoveryClient
 
@@ -42,6 +43,7 @@ async def app(request: pytest.FixtureRequest) -> AsyncGenerator[FastAPI]:
     """
     config_path = f"config/{request.param}.yaml"
     config_dependency.set_config_path(data_path(config_path))
+    hips_list_dependency.clear_cache()
     app = create_app(secrets_root=data_path("secrets"))
     async with LifespanManager(app):
         yield app
