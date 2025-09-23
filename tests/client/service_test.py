@@ -71,12 +71,14 @@ async def test_url_for(discovery_client: DiscoveryClient) -> None:
 @pytest.mark.asyncio
 async def test_default_client(respx_mock: respx.Router) -> None:
     output = read_test_json("output/phalanx")
-    discovery_url = "https://api.example.com/repertoire/discovery"
+    base_url = "https://api.example.com/repertoire"
     response = Response(200, json=output)
-    respx_mock.get(discovery_url).mock(return_value=response)
+    respx_mock.get(base_url + "/discovery").mock(return_value=response)
 
-    discovery = DiscoveryClient(base_url="https://api.example.com/repertoire")
+    discovery = DiscoveryClient(base_url=base_url)
     assert await discovery.applications() == output["applications"]
 
-    discovery = DiscoveryClient(base_url="https://api.example.com/repertoire/")
+    # Slashes tend to get accidentally added to the ends of paths, so test
+    # that the client is robust.
+    discovery = DiscoveryClient(base_url=base_url + "/")
     assert await discovery.applications() == output["applications"]
