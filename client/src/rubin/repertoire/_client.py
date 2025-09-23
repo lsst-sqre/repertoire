@@ -61,8 +61,7 @@ class DiscoveryClient:
         else:
             base_url = os.getenv("REPERTOIRE_BASE_URL")
             if not base_url:
-                msg = "REPERTOIRE_BASE_URL not set in environment"
-                raise RepertoireUrlError(msg)
+                raise RepertoireUrlError
             self._base_url = base_url.rstrip("/")
 
     async def applications(self) -> list[str]:

@@ -8,6 +8,7 @@
 .. _Phalanx: https://phalanx.lsst.io/
 .. _pre-commit: https://pre-commit.com
 .. _pytest: https://docs.pytest.org/en/latest/
+.. _respx: https://lundberg.github.io/respx/guide/
 .. _scriv: https://scriv.readthedocs.io/en/stable/
 .. _semver: https://semver.org/
 .. _Sphinx: https://www.sphinx-doc.org/en/master/

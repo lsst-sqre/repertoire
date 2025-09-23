@@ -14,8 +14,12 @@ keyword_args = { add_back_link = true }
 package = "repertoire"
 
 [sphinx]
-rst_epilog_file = "_rst_epilog.rst"
 disable_primary_sidebars = ["index", "changelog"]
+nitpick_ignore = [
+    # Modules that do not provide intersphinx documentation.
+    ["py:class", "respx.router.Router"],
+]
+rst_epilog_file = "_rst_epilog.rst"
 
 [sphinx.intersphinx.projects]
 aioinflux = "https://aioinflux.readthedocs.io/en/stable/"

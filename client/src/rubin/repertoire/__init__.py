@@ -17,6 +17,7 @@ from ._exceptions import (
     RepertoireValidationError,
     RepertoireWebError,
 )
+from ._mock import register_mock_discovery
 from ._models import (
     ApiService,
     BaseService,
@@ -55,4 +56,5 @@ __all__ = [
     "Services",
     "UiService",
     "UiServiceRule",
+    "register_mock_discovery",
 ]
