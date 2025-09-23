@@ -21,6 +21,7 @@ Consumers in other languages, such as JavaScript, can use the Repertoire server 
    datasets
    influxdb
    applications
+   testing
 
 .. toctree::
    :caption: Server

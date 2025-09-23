@@ -21,6 +21,9 @@ class RepertoireError(Exception):
 class RepertoireUrlError(RepertoireError):
     """Base URL for Repertoire was not set."""
 
+    def __init__(self) -> None:
+        super().__init__("REPERTOIRE_BASE_URL not set in environment")
+
 
 class RepertoireValidationError(RepertoireError):
     """Discovery information does not pass schema validation."""
