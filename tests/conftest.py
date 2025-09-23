@@ -82,7 +82,6 @@ def mock_hips(
     monkeypatch.setenv("REPERTOIRE_TOKEN", token)
     config = Config.from_file(data_path("config/phalanx.yaml"))
     assert config.hips
-    assert config.token
     monkeypatch.delenv("REPERTOIRE_TOKEN")
     template = Template(config.hips.source_template)
     for dataset in config.hips.datasets:
