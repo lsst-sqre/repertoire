@@ -66,6 +66,8 @@ Most users of Repertoire can create a client with a simple call to the construct
 
 This requires the ``REPERTOIRE_BASE_URL`` environment variable be set to the base URL of the Repertoire service, which is normally arranged via :ref:`Phalanx configuration <client-phalanx>`.
 
+When you are done using the client, call `DiscoveryClient.aclose` to clean up the internal HTTP pool.
+
 Override the base URL
 ---------------------
 
@@ -99,6 +101,9 @@ To use an existing HTTPX ``AsyncClient`` for making requests to Repertoire, pass
 
 This is also the pattern to use if the Repertoire client needs custom HTTPX configuration for whatever reason, such as custom timeouts or special headers.
 That configuration can be added to the HTTPX client before passing it into the `DiscoveryClient` constructor.
+
+If you provide an HTTPX client, you do not need to call `DiscoveryClient.aclose`.
+You are responsible for closing the provided client when appropriate.
 
 Next steps
 ==========

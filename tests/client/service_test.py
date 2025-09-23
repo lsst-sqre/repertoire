@@ -77,8 +77,10 @@ async def test_default_client(respx_mock: respx.Router) -> None:
 
     discovery = DiscoveryClient(base_url=base_url)
     assert await discovery.applications() == output["applications"]
+    await discovery.aclose()
 
     # Slashes tend to get accidentally added to the ends of paths, so test
     # that the client is robust.
     discovery = DiscoveryClient(base_url=base_url + "/")
     assert await discovery.applications() == output["applications"]
+    await discovery.aclose()
