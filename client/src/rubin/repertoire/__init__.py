@@ -11,6 +11,7 @@ from ._config import (
     RepertoireSettings,
     UiServiceRule,
 )
+from ._dependencies import DiscoveryDependency, discovery_dependency
 from ._exceptions import (
     RepertoireError,
     RepertoireUrlError,
@@ -41,6 +42,7 @@ __all__ = [
     "DatasetConfig",
     "Discovery",
     "DiscoveryClient",
+    "DiscoveryDependency",
     "InfluxDatabase",
     "InfluxDatabaseConfig",
     "InfluxDatabaseWithCredentials",
@@ -56,5 +58,6 @@ __all__ = [
     "Services",
     "UiService",
     "UiServiceRule",
+    "discovery_dependency",
     "register_mock_discovery",
 ]
