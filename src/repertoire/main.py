@@ -11,8 +11,10 @@ from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from safir.fastapi import ClientRequestError, client_request_error_handler
 from safir.middleware.x_forwarded import XForwardedMiddleware
+from safir.sentry import initialize_sentry
 from safir.slack.webhook import SlackRouteErrorHandler
 
+from . import __version__
 from .constants import SECRETS_PATH
 from .dependencies.builder import builder_dependency
 from .dependencies.config import config_dependency
@@ -55,6 +57,9 @@ def create_app(
                 config.slack_webhook, "Repertoire", logger
             )
             logger.debug("Initialized Slack webhook")
+
+    # Initialize Sentry (does nothing if it is not configured).
+    initialize_sentry(release=__version__)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:

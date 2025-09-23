@@ -1568,7 +1568,7 @@ requires-dist = [
     { name = "pydantic", specifier = ">2" },
     { name = "pydantic-settings", specifier = ">=2" },
     { name = "rubin-repertoire", editable = "client" },
-    { name = "safir", specifier = ">=5" },
+    { name = "safir", specifier = ">=13" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.34" },
 ]
 
