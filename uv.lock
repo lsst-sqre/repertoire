@@ -1706,13 +1706,13 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", specifier = ">=0.100" },
-    { name = "httpx", specifier = ">=0.28" },
-    { name = "jinja2", specifier = ">=3" },
-    { name = "pydantic", specifier = ">=2.10" },
-    { name = "pydantic-settings", specifier = ">=2.6" },
-    { name = "pyyaml", specifier = ">=6" },
-    { name = "safir", specifier = ">=4" },
+    { name = "fastapi", specifier = ">=0.100,<1" },
+    { name = "httpx", specifier = ">=0.28,<1" },
+    { name = "jinja2", specifier = ">=3,<4" },
+    { name = "pydantic", specifier = ">=2.10,<3" },
+    { name = "pydantic-settings", specifier = ">=2.6,<3" },
+    { name = "pyyaml", specifier = ">=6,<7" },
+    { name = "safir", specifier = ">=4,<14" },
 ]
 
 [[package]]
