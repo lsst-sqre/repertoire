@@ -54,6 +54,7 @@ class DiscoveryClient:
         base_url: str | None = None,
     ) -> None:
         self._client = http_client or AsyncClient()
+        self._close_client = http_client is None
         self._discovery_cache: Discovery | None = None
 
         if base_url is not None:
@@ -63,6 +64,14 @@ class DiscoveryClient:
             if not base_url:
                 raise RepertoireUrlError
             self._base_url = base_url.rstrip("/")
+
+    async def aclose(self) -> None:
+        """Close the HTTP client pool, if one wasn't provided.
+
+        This object must not be used after calling this method.
+        """
+        if self._close_client:
+            await self._client.aclose()
 
     async def applications(self) -> list[str]:
         """List applications installed in the local Phalanx environment.
