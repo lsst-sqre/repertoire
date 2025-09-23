@@ -25,6 +25,7 @@ dependencies = [
     "pydantic-settings>=2",
     "rubin-repertoire",
     "safir>=13",
+    "structlog>=25",
     "uvicorn[standard]>=0.34",
 ]
 dynamic = ["version"]

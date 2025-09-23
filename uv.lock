@@ -1530,6 +1530,7 @@ dependencies = [
     { name = "pydantic-settings" },
     { name = "rubin-repertoire" },
     { name = "safir" },
+    { name = "structlog" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -1569,6 +1570,7 @@ requires-dist = [
     { name = "pydantic-settings", specifier = ">=2" },
     { name = "rubin-repertoire", editable = "client" },
     { name = "safir", specifier = ">=13" },
+    { name = "structlog", specifier = ">=25" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.34" },
 ]
 
