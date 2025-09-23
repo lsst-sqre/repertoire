@@ -69,10 +69,8 @@ async def client(app: FastAPI) -> AsyncGenerator[AsyncClient]:
 def discovery_client(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ) -> DiscoveryClient:
-    config_dependency.set_config_path(data_path("config/phalanx.yaml"))
     repertoire_url = TEST_BASE_URL.rstrip("/") + "/repertoire"
-    monkeypatch.setenv("REPERTOIRE_BASE_URL", repertoire_url)
-    return DiscoveryClient(client)
+    return DiscoveryClient(client, base_url=repertoire_url)
 
 
 @pytest.fixture(autouse=True)
