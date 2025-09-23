@@ -11,6 +11,27 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.3.0'></a>
+## 0.3.0 (2025-09-23)
+
+### Backwards-incompatible changes
+
+- Add a `DiscoveryClient.aclose` method to cleanly shut down the internal HTTPX async client if one was not passed into the constructor. Users of the Repertoire client who do not use the FastAPI dependency and do not provide an HTTPX client to the `DiscoveryClient` constructor should call this method when they are done using the client.
+
+### New features
+
+- Add HiPS to the Repertoire configuration and use it to generate HiPS list URLs for every dataset with associated HiPS discovery information.
+- Add support for generating a per-dataset HiPS list file on a separately-configurable route from the main Repertoire path prefix. The list file is assembled from HiPS properties files retrieved via HTTP, authenticated by a Gafaelfawr token.
+- Add support for generating a separate HiPS list file for a single dataset on a legacy route.
+- Add `rubin.repertoire.register_mock_discovery`. This function mocks service discovery results and is intended for use in test suites of applications that use the Repertoire client.
+- Add a FastAPI dependency, `rubin.repertoire.discovery_dependency`, as the recommended way for FastAPI applications to manage a service discovery client.
+- Support Slack and Sentry serialization with additional context in all of the exceptions raised by the Repertoire client.
+- Add optional support for reporting exceptions to Sentry.
+
+### Bug fixes
+
+- Add upper major version bounds on the rubin-repertoire dependencies to ensure a human checks compatibility before allowing updates.
+
 <a id='changelog-0.2.0'></a>
 ## 0.2.0 (2025-09-10)
 
