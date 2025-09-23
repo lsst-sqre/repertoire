@@ -24,6 +24,7 @@ dependencies = [
     "pydantic>=2.10",
     "pydantic-settings>=2.6",
     "pyyaml>=6",
+    "safir>=4",
 ]
 dynamic = ["version"]
 
