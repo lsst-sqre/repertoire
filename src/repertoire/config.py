@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pydantic import AliasChoices, Field, SecretStr
+from pydantic import AliasChoices, BaseModel, Field, SecretStr
 from safir.logging import (
     LogLevel,
     Profile,
@@ -13,6 +13,18 @@ from safir.logging import (
 from rubin.repertoire import RepertoireSettings
 
 __all__ = ["Config"]
+
+
+class SentryConfig(BaseModel):
+    """Sentry configuration for Repertoire.
+
+    This configuration is not used internally, but has to be present in the
+    model so that we can forbid unknown configuration settings. Otherwise,
+    Phalanx wouldn't be able to use the full ``config`` key of the Helm values
+    as the configuration file.
+    """
+
+    enabled: bool = Field(False, title="Whether to send exceptions to Sentry")
 
 
 class Config(RepertoireSettings):
@@ -29,6 +41,8 @@ class Config(RepertoireSettings):
     name: str = Field("Repertoire", title="Name of application")
 
     path_prefix: str = Field("/repertoire", title="URL prefix for application")
+
+    sentry: SentryConfig | None = Field(None, title="Sentry configuration")
 
     slack_alerts: bool = Field(
         False,
