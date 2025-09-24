@@ -1,0 +1,3 @@
+baseHostname: "data.example.com"
+sentry:
+  enabled: true
