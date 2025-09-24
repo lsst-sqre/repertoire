@@ -23,19 +23,12 @@ To get a list of InfluxDB databases for which connection information is availabl
    discovery = DiscoveryClient()
    databases = await discovery.influxdb_databases()
 
-The resulting names are short, human-readable names that can be passed as the ``database`` parameter to `DiscoveryClient.get_influxdb_connection_info` as described below.
+The resulting names are short, human-readable names that can be passed as the ``database`` parameter to `DiscoveryClient.get_influxdb_connection_info` or `DiscoveryClient.get_influxdb_credentials` as described below.
 
 Getting connection information
 ==============================
 
-Getting the connection information for a specific database requires authentication, since the returned information includes the username and password.
-
-First, obtain a Gafaelfawr_ token.
-Inside a service, normally this should be a delegated token received as part of a request and used to act on behalf of the user.
-See the `Gafaelfawr documentation on delegated tokens <https://gafaelfawr.lsst.io/user-guide/gafaelfawringress.html#requesting-delegated-tokens>`__ for more information.
-In other environments, this may be a user token created through the token UI, or a notebook token created by Nublado_.
-
-Then, call `DiscoveryClient.get_influxdb_connection_info` with the name of the database (possibly obtained via `DiscoveryClient.influxdb_databases`) and that token:
+To get the connection information for a specific database, use `DiscoveryClient.get_influxdb_connection_info`:
 
 .. code-block:: python
 
@@ -43,8 +36,7 @@ Then, call `DiscoveryClient.get_influxdb_connection_info` with the name of the d
 
 
    discovery = DiscoveryClient()
-   token = "..."  # obtained from somewhere else
-   info = await discovery.get_influxdb_connection_info("some_database", token)
+   info = await discovery.get_influxdb_connection_info("some_database")
 
 The resulting object has the following fields:
 
@@ -56,11 +48,34 @@ The resulting object has the following fields:
 ``database``
     The name of the InfluxDB database to use for queries.
 
+``schema_registry``
+    The URL (as a string) of the associated `Confluent Kafka Schema Registry <https://docs.confluent.io/platform/current/schema-registry/index.html>`__ that contains schema information for this database.
+
+Getting credentials
+===================
+
+Getting the connection information with credentials for a specific database requires authentication, since the returned information includes the username and password.
+
+First, obtain a Gafaelfawr_ token.
+Inside a service, normally this should be a delegated token received as part of a request and used to act on behalf of the user.
+See the `Gafaelfawr documentation on delegated tokens <https://gafaelfawr.lsst.io/user-guide/gafaelfawringress.html#requesting-delegated-tokens>`__ for more information.
+In other environments, this may be a user token created through the token UI, or a notebook token created by Nublado_.
+
+Then, call `DiscoveryClient.get_influxdb_credentials` with the name of the database (possibly obtained via `DiscoveryClient.influxdb_databases`) and that token:
+
+.. code-block:: python
+
+   from rubin.repertoire import DiscoveryClient
+
+
+   discovery = DiscoveryClient()
+   token = "..."  # obtained from somewhere else
+   info = await discovery.get_influxdb_credentials("some_database", token)
+
+The resulting object has the same fields as that retured by `DiscoveryClient.get_influxdb_connection_info`, plus two more:
+
 ``username``
     Username with which to authenticate.
 
 ``password``
     Password with which to authenticate.
-
-``schema_registry``
-    The URL (as a string) of the associated `Confluent Kafka Schema Registry <https://docs.confluent.io/platform/current/schema-registry/index.html>`__ that contains schema information for this database.

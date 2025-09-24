@@ -32,11 +32,6 @@ def test_build_influxdb() -> None:
     config = RepertoireSettings.from_file(config_path)
     expected = read_test_json("output/idfdev_efd")
 
-    # This is the version without credentials, so username and password should
-    # not be included.
-    del expected["username"]
-    del expected["password"]
-
     # Check the output.
     output = RepertoireBuilder(config).build_influxdb("idfdev_efd")
     assert output
@@ -54,14 +49,14 @@ def test_build_influxdb_creds() -> None:
     output = builder.build_influxdb_with_credentials("idfdev_efd")
     assert output
     output_json = output.model_dump(mode="json", exclude_none=True)
-    assert output_json == read_test_json("output/idfdev_efd")
+    assert output_json == read_test_json("output/idfdev_efd-creds")
 
     # Now test with a str parameter and a secret file not ending in a newline.
     builder = RepertoireBuilderWithSecrets(config, str(secrets_path))
     output = builder.build_influxdb_with_credentials("idfdev_metrics")
     assert output
     output_json = output.model_dump(mode="json", exclude_none=True)
-    assert output_json == read_test_json("output/idfdev_metrics")
+    assert output_json == read_test_json("output/idfdev_metrics-creds")
 
     # Unknown InfluxDB databases should return None.
     assert builder.build_influxdb("invalid") is None

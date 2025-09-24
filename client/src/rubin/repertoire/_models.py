@@ -113,6 +113,26 @@ class InfluxDatabaseWithCredentials(InfluxDatabase):
     ]
 
 
+class InfluxDatabaseWithPointer(InfluxDatabase):
+    """InfluxDB database connection information with credential pointer.
+
+    This is returned by the unauthenticated discovery route and contains a
+    pointer to the authenticated endpoint to get credential information.
+    """
+
+    credentials_url: Annotated[
+        HttpUrl,
+        Field(
+            title="URL for credentials",
+            description=(
+                "Authenticated endpoint that will return full connection"
+                " information including authentication credentials"
+            ),
+            examples=["https://example.com/discovery/influxdb/efd"],
+        ),
+    ]
+
+
 class BaseService(BaseModel):
     """Base model for services."""
 
@@ -253,16 +273,13 @@ class Discovery(BaseModel):
     ] = {}
 
     influxdb_databases: Annotated[
-        dict[str, HttpUrl],
+        dict[str, InfluxDatabaseWithPointer],
         Field(
             title="Available InfluxDB databases",
             description=(
                 "Mapping of short names of InfluxDB databases accessible from"
-                " this Phalanx environment to the URL from which a client can"
-                " retrieve connection information. Requests to that URL will"
-                " require authentication."
+                " this Phalanx environment to connection information"
             ),
-            examples=[{"efd": "https://example.com/discovery/influxdb/efd"}],
         ),
     ] = {}
 

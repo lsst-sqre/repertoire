@@ -44,11 +44,14 @@ async def test_get_influxdb(client: AsyncClient) -> None:
     r = await client.get("/repertoire/discovery")
     assert r.status_code == 200, f"error body: {r.text}"
 
-    url = r.json()["influxdb_databases"]["idfdev_efd"]
+    seen = r.json()["influxdb_databases"]["idfdev_efd"]
+    url = seen["credentials_url"]
+    del seen["credentials_url"]
+    assert seen == read_test_json("output/idfdev_efd")
     assert url == f"{TEST_BASE_URL}repertoire/discovery/influxdb/idfdev_efd"
     r = await client.get(url)
     assert r.status_code == 200, f"error body: {r.text}"
-    assert r.json() == read_test_json("output/idfdev_efd")
+    assert r.json() == read_test_json("output/idfdev_efd-creds")
 
     r = await client.get(f"{TEST_BASE_URL}repertoire/discovery/influxdb/bogus")
     assert r.status_code == 404
