@@ -46,7 +46,7 @@ Simply import it and include it in the parameters to whatever route needs to do 
        *,
        discovery: Annotated[DiscoveryClient, Depends(discovery_dependency)],
    ) -> SomeModel:
-       cutout_url = discovery.url_for_data_service("cutout-sync", dataset)
+       cutout_url = discovery.url_for_data("cutout-sync", dataset)
        # ...do something with the URL...
 
 This dependency uses `~safir.dependencies.http_client.http_client_dependency` under the hood, so you should insert a call to ``http_client_depnedency.aclose()`` in the cleanup portion of your application's FastAPI lifespan callback.
