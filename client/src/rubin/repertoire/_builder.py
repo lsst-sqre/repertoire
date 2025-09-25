@@ -8,6 +8,7 @@ from jinja2 import Template
 from pydantic import HttpUrl, SecretStr
 
 from ._config import (
+    ApiVersionRule,
     DataServiceRule,
     InternalServiceRule,
     RepertoireSettings,
@@ -15,6 +16,7 @@ from ._config import (
     UiServiceRule,
 )
 from ._models import (
+    ApiVersion,
     DataService,
     Dataset,
     Discovery,
@@ -208,6 +210,7 @@ class RepertoireBuilder:
         return DataService(
             url=HttpUrl(Template(rule.template).render(**context)),
             openapi=openapi,
+            versions=self._build_versions_from_rules(rule.versions, dataset),
         )
 
     def _build_internal_service_from_rule(
@@ -232,6 +235,7 @@ class RepertoireBuilder:
         return InternalService(
             url=HttpUrl(Template(rule.template).render(**self._base_context)),
             openapi=openapi,
+            versions=self._build_versions_from_rules(rule.versions),
         )
 
     def _build_ui_service_from_rule(self, rule: UiServiceRule) -> UiService:
@@ -250,6 +254,35 @@ class RepertoireBuilder:
         return UiService(
             url=HttpUrl(Template(rule.template).render(**self._base_context))
         )
+
+    def _build_versions_from_rules(
+        self, rules: dict[str, ApiVersionRule], dataset: str | None = None
+    ) -> dict[str, ApiVersion]:
+        """Construct information for REST API versions.
+
+        Parameters
+        ----------
+        rules
+            Mapping from version names to REST API generation rules.
+        dataset
+            If given, the dataset for URL templates.
+
+        Returns
+        -------
+        dict of ApiVersion
+            Mapping from version names to REST API version information.
+        """
+        if dataset:
+            context = self._build_dataset_context(dataset)
+        else:
+            context = self._base_context
+        result = {}
+        for version, rule in sorted(rules.items()):
+            result[version] = ApiVersion(
+                url=HttpUrl(Template(rule.template).render(**context)),
+                ivoa_standard_id=rule.ivoa_standard_id,
+            )
+        return result
 
 
 class RepertoireBuilderWithSecrets(RepertoireBuilder):

@@ -66,6 +66,44 @@ async def test_url_for(discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_versions_for(discovery: DiscoveryClient) -> None:
+    output = read_test_json("output/phalanx")
+    services = output["services"]
+
+    for service, mapping in services["data"].items():
+        for dataset, info in mapping.items():
+            result = await discovery.versions_for_data(service, dataset)
+            versions = info.get("versions")
+            if not versions:
+                assert result == []
+                continue
+            assert result == sorted(versions.keys())
+            for version, version_info in versions.items():
+                url = await discovery.url_for_data(
+                    service, dataset, version=version
+                )
+                assert url == version_info["url"]
+            url = await discovery.url_for_data(service, dataset, version="bad")
+            assert url is None
+        url = await discovery.url_for_data(service, "bad", version="bad")
+        assert url is None
+    assert await discovery.url_for_data("bad", "bad", version="bad") is None
+
+    for service, info in services["internal"].items():
+        result = await discovery.versions_for_internal(service)
+        versions = info.get("versions")
+        if not versions:
+            assert result == []
+            continue
+        assert result == sorted(versions.keys())
+        for version, version_info in versions.items():
+            url = await discovery.url_for_internal(service, version=version)
+            assert url == version_info["url"]
+        assert await discovery.url_for_internal(service, version="bad") is None
+    assert await discovery.url_for_internal("bad", version="bad") is None
+
+
+@pytest.mark.asyncio
 async def test_default_client(respx_mock: respx.Router) -> None:
     output = read_test_json("output/phalanx")
     base_url = "https://api.example.com/repertoire"

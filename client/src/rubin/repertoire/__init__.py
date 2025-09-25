@@ -3,13 +3,19 @@
 from ._builder import RepertoireBuilder, RepertoireBuilderWithSecrets
 from ._client import DiscoveryClient
 from ._config import (
+    ApiVersionRule,
     BaseRule,
     DataServiceRule,
     DatasetConfig,
+    HipsConfig,
+    HipsDatasetConfig,
+    HipsLegacyConfig,
     InfluxDatabaseConfig,
     InternalServiceRule,
     RepertoireSettings,
+    Rule,
     UiServiceRule,
+    VersionedServiceRule,
 )
 from ._dependencies import DiscoveryDependency, discovery_dependency
 from ._exceptions import (
@@ -21,6 +27,7 @@ from ._exceptions import (
 from ._mock import register_mock_discovery
 from ._models import (
     ApiService,
+    ApiVersion,
     BaseService,
     DataService,
     Dataset,
@@ -34,6 +41,8 @@ from ._models import (
 
 __all__ = [
     "ApiService",
+    "ApiVersion",
+    "ApiVersionRule",
     "BaseRule",
     "BaseService",
     "DataService",
@@ -43,6 +52,9 @@ __all__ = [
     "Discovery",
     "DiscoveryClient",
     "DiscoveryDependency",
+    "HipsConfig",
+    "HipsDatasetConfig",
+    "HipsLegacyConfig",
     "InfluxDatabase",
     "InfluxDatabaseConfig",
     "InfluxDatabaseWithCredentials",
@@ -55,9 +67,11 @@ __all__ = [
     "RepertoireUrlError",
     "RepertoireValidationError",
     "RepertoireWebError",
+    "Rule",
     "Services",
     "UiService",
     "UiServiceRule",
+    "VersionedServiceRule",
     "discovery_dependency",
     "register_mock_discovery",
 ]

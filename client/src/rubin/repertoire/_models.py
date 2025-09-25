@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, HttpUrl, PlainSerializer, SecretStr
 
 __all__ = [
     "ApiService",
+    "ApiVersion",
     "BaseService",
     "DataService",
     "Dataset",
@@ -133,6 +134,28 @@ class InfluxDatabaseWithPointer(InfluxDatabase):
     ]
 
 
+class ApiVersion(BaseModel):
+    """One version of a REST API."""
+
+    url: Annotated[
+        HttpUrl,
+        Field(
+            title="Service URL",
+            description="Access URL for that version of the service",
+            examples=["https://example.org/api/cutout/sync"],
+        ),
+    ]
+
+    ivoa_standard_id: Annotated[
+        str | None,
+        Field(
+            title="IVOA standardID",
+            description="IVOA standardID used in service registrations",
+            examples=["ivo://ivoa.net/std/SODA#async-1.0"],
+        ),
+    ] = None
+
+
 class BaseService(BaseModel):
     """Base model for services."""
 
@@ -159,6 +182,17 @@ class ApiService(BaseService):
             examples=["https://example.org/api/cutout/openapi.json"],
         ),
     ] = None
+
+    versions: Annotated[
+        dict[str, ApiVersion],
+        Field(
+            title="API versions",
+            description=(
+                "Discovery information for each API version, if the service"
+                " may have multiple versions"
+            ),
+        ),
+    ] = {}
 
 
 class DataService(ApiService):
