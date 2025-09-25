@@ -11,6 +11,26 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.4.0'></a>
+## 0.4.0 (2025-09-25)
+
+### Backwards-incompatible changes
+
+- Rename client methods `url_for_data_service`, `url_for_internal_service`, and `url_for_ui_service` to `url_for_data`, `url_for_internal`, and `url_for_ui`. These names are a bit more ambiguous, but less likely to make code lines obnoxiously long.
+- Include InfluxDB connection information other than authentication credentials in the main discovery response rather than only a URL to the authenticated route. Put the URL to the authenticated route in a new `credentials_url` key.
+- Add new client method `influxdb_connection_info` that returns only public connection information. Add new client method `influxdb_credentials` that requires a token argument and returns the full connection information including credentials.
+- Remove client method `get_influxdb_connection_info` in favor of the new `influxdb_connection_info` client method.
+
+### New features
+
+- Add optional API versions to the configuration for data and internal services and include API versions in the discovery information. Each API version, if configured, is a mapping to an object containing the URL and the optional IVOA standardID.
+- Add new client methods `versions_for_data` and `versions_for_internal` that list the available versions for data and internal services.
+- Add an optional `version` argument to client methods `url_for_data` and `url_for_internal` to get the URL of a specific API version instead of the default URL.
+
+### Bug fixes
+
+- Accept and ignore a `sentry.enabled` key in the server configuration. This allows Phalanx configuration for Sentry to be added without failing on the unexpected configuration key.
+
 <a id='changelog-0.3.0'></a>
 ## 0.3.0 (2025-09-23)
 
