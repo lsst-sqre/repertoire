@@ -22,14 +22,14 @@ Service APIs
 
 `DiscoveryClient` provides the following methods to look up services:
 
-`DiscoveryClient.url_for_data_service`
+`DiscoveryClient.url_for_data`
     Takes the name of the service and the name of the dataset and returns the corresponding base URL for that service's REST API, or `None` if that service is not running in the local Phalanx environment or if it doesn't provide that dataset.
     See :doc:`datasets` for information on how to find the dataset names available in the local environment.
 
-`DiscoveryClient.url_for_internal_service`
+`DiscoveryClient.url_for_internal`
     Takes the name of the service and returns the base URL for that service's REST API, or `None` if that service is not running in the local Phalanx environment.
 
-`DiscoveryClient.url_for_ui_service`
+`DiscoveryClient.url_for_ui`
     Takes the name of the service and returns the entry-point URL for the browser-based user interface, or `None` if that service is not running in the local Phalanx environment.
 
 URLs are returned as strings.

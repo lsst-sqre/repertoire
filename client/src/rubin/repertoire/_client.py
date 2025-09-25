@@ -147,8 +147,7 @@ class DiscoveryClient:
         list of str
             Short identifiers (``dp1``, for example) of the datasets expected
             to be available in the local Phalanx environment. These are the
-            valid dataset arguments to `butler_config_for` and
-            `url_for_data_service`.
+            valid dataset arguments to `butler_config_for` and `url_for_data`.
 
         Raises
         ------
@@ -248,9 +247,7 @@ class DiscoveryClient:
         discovery = await self._get_discovery()
         return sorted(discovery.influxdb_databases.keys())
 
-    async def url_for_data_service(
-        self, service: str, dataset: str
-    ) -> str | None:
+    async def url_for_data(self, service: str, dataset: str) -> str | None:
         """Return the base API URL for a given data service.
 
         Parameters
@@ -279,7 +276,7 @@ class DiscoveryClient:
         info = datasets.get(dataset)
         return str(info.url) if info else None
 
-    async def url_for_internal_service(self, service: str) -> str | None:
+    async def url_for_internal(self, service: str) -> str | None:
         """Return the base API URL for a given internal service.
 
         Parameters
@@ -302,7 +299,7 @@ class DiscoveryClient:
         info = discovery.services.internal.get(service)
         return str(info.url) if info else None
 
-    async def url_for_ui_service(self, service: str) -> str | None:
+    async def url_for_ui(self, service: str) -> str | None:
         """Return the base URL for a given UI service.
 
         Parameters

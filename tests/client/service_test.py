@@ -51,21 +51,21 @@ async def test_url_for(discovery_client: DiscoveryClient) -> None:
 
     for service, info in services["internal"].items():
         url = info["url"]
-        assert await discovery_client.url_for_internal_service(service) == url
-    assert await discovery_client.url_for_internal_service("unknown") is None
+        assert await discovery_client.url_for_internal(service) == url
+    assert await discovery_client.url_for_internal("unknown") is None
 
     for service, info in services["ui"].items():
         url = info["url"]
-        assert await discovery_client.url_for_ui_service(service) == url
-    assert await discovery_client.url_for_ui_service("unknown") is None
+        assert await discovery_client.url_for_ui(service) == url
+    assert await discovery_client.url_for_ui("unknown") is None
 
     client = discovery_client
     for service, mapping in services["data"].items():
         for dataset, info in mapping.items():
-            result = await client.url_for_data_service(service, dataset)
+            result = await client.url_for_data(service, dataset)
             assert result == info["url"]
-        assert await client.url_for_data_service(service, "unknown") is None
-    assert await client.url_for_data_service("unknown", dataset) is None
+        assert await client.url_for_data(service, "unknown") is None
+    assert await client.url_for_data("unknown", dataset) is None
 
 
 @pytest.mark.asyncio
