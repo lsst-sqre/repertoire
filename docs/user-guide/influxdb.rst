@@ -23,12 +23,12 @@ To get a list of InfluxDB databases for which connection information is availabl
    discovery = DiscoveryClient()
    databases = await discovery.influxdb_databases()
 
-The resulting names are short, human-readable names that can be passed as the ``database`` parameter to `DiscoveryClient.get_influxdb_connection_info` or `DiscoveryClient.get_influxdb_credentials` as described below.
+The resulting names are short, human-readable names that can be passed as the ``database`` parameter to `DiscoveryClient.influxdb_connection_info` or `DiscoveryClient.influxdb_credentials` as described below.
 
 Getting connection information
 ==============================
 
-To get the connection information for a specific database, use `DiscoveryClient.get_influxdb_connection_info`:
+To get the connection information for a specific database, use `DiscoveryClient.influxdb_connection_info`:
 
 .. code-block:: python
 
@@ -36,7 +36,7 @@ To get the connection information for a specific database, use `DiscoveryClient.
 
 
    discovery = DiscoveryClient()
-   info = await discovery.get_influxdb_connection_info("some_database")
+   info = await discovery.influxdb_connection_info("some_database")
 
 The resulting object has the following fields:
 
@@ -61,7 +61,7 @@ Inside a service, normally this should be a delegated token received as part of 
 See the `Gafaelfawr documentation on delegated tokens <https://gafaelfawr.lsst.io/user-guide/gafaelfawringress.html#requesting-delegated-tokens>`__ for more information.
 In other environments, this may be a user token created through the token UI, or a notebook token created by Nublado_.
 
-Then, call `DiscoveryClient.get_influxdb_credentials` with the name of the database (possibly obtained via `DiscoveryClient.influxdb_databases`) and that token:
+Then, call `DiscoveryClient.influxdb_credentials` with the name of the database (possibly obtained via `DiscoveryClient.influxdb_databases`) and that token:
 
 .. code-block:: python
 
@@ -70,9 +70,9 @@ Then, call `DiscoveryClient.get_influxdb_credentials` with the name of the datab
 
    discovery = DiscoveryClient()
    token = "..."  # obtained from somewhere else
-   info = await discovery.get_influxdb_credentials("some_database", token)
+   info = await discovery.influxdb_credentials("some_database", token)
 
-The resulting object has the same fields as that retured by `DiscoveryClient.get_influxdb_connection_info`, plus two more:
+The resulting object has the same fields as that retured by `DiscoveryClient.influxdb_connection_info`, plus two more:
 
 ``username``
     Username with which to authenticate.
