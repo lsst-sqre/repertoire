@@ -11,12 +11,19 @@ from pydantic.alias_generators import to_camel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 __all__ = [
+    "ApiVersionRule",
+    "BaseRule",
+    "DataServiceRule",
     "DatasetConfig",
     "HipsConfig",
     "HipsDatasetConfig",
+    "HipsLegacyConfig",
     "InfluxDatabaseConfig",
+    "InternalServiceRule",
     "RepertoireSettings",
     "Rule",
+    "UiServiceRule",
+    "VersionedServiceRule",
 ]
 
 
@@ -208,6 +215,29 @@ class InfluxDatabaseConfig(BaseModel):
     ]
 
 
+class ApiVersionRule(BaseModel):
+    """Discovery generation rule for one API version."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    template: Annotated[
+        str,
+        Field(
+            title="Template", description="Jinja template to generate the URL"
+        ),
+    ]
+
+    ivoa_standard_id: Annotated[
+        str | None,
+        Field(
+            title="IVOA standardID",
+            description="IVOA standardID used in service registrations",
+        ),
+    ] = None
+
+
 class BaseRule(BaseModel):
     """Base class for rules for deriving URLs."""
 
@@ -233,7 +263,22 @@ class BaseRule(BaseModel):
     ]
 
 
-class DataServiceRule(BaseRule):
+class VersionedServiceRule(BaseRule):
+    """Base class for services that can have multiple API versions."""
+
+    versions: Annotated[
+        dict[str, ApiVersionRule],
+        Field(
+            title="API versions",
+            description=(
+                "Mapping of API version names to discovery information for"
+                " that API version"
+            ),
+        ),
+    ] = {}
+
+
+class DataServiceRule(VersionedServiceRule):
     """Rule for a Phalanx service associated with a dataset."""
 
     type: Annotated[Literal["data"], Field(title="Type of service")]
@@ -258,7 +303,7 @@ class DataServiceRule(BaseRule):
     ] = None
 
 
-class InternalServiceRule(BaseRule):
+class InternalServiceRule(VersionedServiceRule):
     """Rule for an internal Phalanx service not associated with a dataset."""
 
     type: Annotated[Literal["internal"], Field(title="Type of service")]

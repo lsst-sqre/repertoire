@@ -20,7 +20,8 @@ Services are divided into three classes:
 Service APIs
 ============
 
-`DiscoveryClient` provides the following methods to look up services:
+`DiscoveryClient` provides the following methods to look up services.
+These APIs do not require authentication.
 
 `DiscoveryClient.url_for_data`
     Takes the name of the service and the name of the dataset and returns the corresponding base URL for that service's REST API, or `None` if that service is not running in the local Phalanx environment or if it doesn't provide that dataset.
@@ -33,7 +34,29 @@ Service APIs
     Takes the name of the service and returns the entry-point URL for the browser-based user interface, or `None` if that service is not running in the local Phalanx environment.
 
 URLs are returned as strings.
-These APIs do not require authentication.
+
+REST API versions
+-----------------
+
+Data and internal services may have multiple REST APIs.
+These can be discovered with the following methods:
+
+`DiscoveryClient.versions_for_data`
+    Takes the name of the service and dataset and returns a list of the available versions in the local Phalanx environment.
+    If the service is not versioned, the list will be empty.
+    If the service is not present in the local environment or doesn't provide that dataset, the return value will be `None`.
+
+`DiscoveryClient.versions_for_internal`
+    Takes the name of the service and returns a list of the available versions in the local Phalanx environment.
+    If the service is not versioned, the list will be empty.
+    If the service is not present in the local environment, the return value will be `None`.
+
+In addition, there is an optional keyword argument, ``version``, to the `~DiscoveryClient.url_for_data` and `~DiscoveryClient.url_for_internal` methods.
+If provided, the method will return the URL for that specific version instead of the default URL.
+The return value will be `None` if the service is not versioned or if that version is not available in the local environment.
+
+In the case of versioned services, the default URL (returned by `~DiscoveryClient.url_for_data` and `~DiscoveryClient.url_for_internal` with no ``version`` argument) will be the base URL of the top-level REST API without any version.
+When ``version`` is provided, the returned URL will be the base URL for that version of the API.
 
 Butler configuration
 ====================

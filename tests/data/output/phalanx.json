@@ -61,58 +61,106 @@
       "cutout": {
         "dp02": {
           "url": "https://data.example.com/api/cutout",
+          "versions": {
+            "soda-async-1.0": {
+              "url": "https://data.example.com/api/cutout/dp02/jobs",
+              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#async-1.0"
+            },
+            "soda-sync-1.0": {
+              "url": "https://data.example.com/api/cutout/dp02/sync",
+              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-1.0"
+            }
+          },
           "openapi": "https://data.example.com/api/cutout/openapi.json"
         },
         "dp03": {
           "url": "https://data.example.com/api/cutout",
+          "versions": {
+            "soda-async-1.0": {
+              "url": "https://data.example.com/api/cutout/dp03/jobs",
+              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#async-1.0"
+            },
+            "soda-sync-1.0": {
+              "url": "https://data.example.com/api/cutout/dp03/sync",
+              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-1.0"
+            }
+          },
           "openapi": "https://data.example.com/api/cutout/openapi.json"
         },
         "dp1": {
           "url": "https://data.example.com/api/cutout",
+          "versions": {
+            "soda-async-1.0": {
+              "url": "https://data.example.com/api/cutout/dp1/jobs",
+              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#async-1.0"
+            },
+            "soda-sync-1.0": {
+              "url": "https://data.example.com/api/cutout/dp1/sync",
+              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-1.0"
+            }
+          },
           "openapi": "https://data.example.com/api/cutout/openapi.json"
         }
       },
       "sia": {
         "dp02": {
           "url": "https://data.example.com/api/sia/dp02",
+          "versions": {},
           "openapi": "https://data.example.com/api/sia/openapi.json"
         },
         "dp1": {
           "url": "https://data.example.com/api/sia/dp1",
+          "versions": {},
           "openapi": "https://data.example.com/api/sia/openapi.json"
         }
       },
       "tap": {
         "dp02": {
-          "url": "https://data.example.com/api/tap"
+          "url": "https://data.example.com/api/tap",
+          "versions": {}
         },
         "dp03": {
-          "url": "https://data.example.com/api/ssotap"
+          "url": "https://data.example.com/api/ssotap",
+          "versions": {}
         },
         "dp1": {
-          "url": "https://data.example.com/api/tap"
+          "url": "https://data.example.com/api/tap",
+          "versions": {}
         }
       }
     },
     "internal": {
       "gafaelfawr": {
-        "url": "https://data.example.com/auth/api/v1",
+        "url": "https://data.example.com/auth/api",
+        "versions": {
+          "v1": {
+            "url": "https://data.example.com/auth/api/v1"
+          }
+        },
         "openapi": "https://data.example.com/auth/openapi.json"
       },
       "mobu": {
         "url": "https://data.example.com/mobu",
+        "versions": {},
         "openapi": "https://data.example.com/mobu/openapi.json"
       },
       "noteburst": {
-        "url": "https://data.example.com/noteburst/v1",
+        "url": "https://data.example.com/noteburst",
+        "versions": {
+          "v1": {
+            "url": "https://data.example.com/noteburst/v1"
+          }
+        },
         "openapi": "https://data.example.com/noteburst/openapi.json"
       },
       "semaphore": {
         "url": "https://data.example.com/semaphore",
+        "versions": {},
         "openapi": "https://data.example.com/semaphore/openapi.json"
       },
       "wobbly": {
         "url": "https://data.example.com/wobbly",
+        "versions": {},
         "openapi": "https://data.example.com/wobbly/openapi.json"
       }
     },

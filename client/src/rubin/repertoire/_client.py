@@ -247,7 +247,9 @@ class DiscoveryClient:
         discovery = await self._get_discovery()
         return sorted(discovery.influxdb_databases.keys())
 
-    async def url_for_data(self, service: str, dataset: str) -> str | None:
+    async def url_for_data(
+        self, service: str, dataset: str, *, version: str | None = None
+    ) -> str | None:
         """Return the base API URL for a given data service.
 
         Parameters
@@ -257,12 +259,15 @@ class DiscoveryClient:
         dataset
             Dataset that will be queried via the API, chosen from the results
             of `datasets`.
+        version
+            If given, return the URL for a specific version of the API
+            instead.
 
         Returns
         -------
         str or None
-            Base URL of the API, or `None` if the service or dataset is not
-            available in this environment.
+            Base URL of the API, or `None` if the service, dataset, or version
+            is not available in this environment.
 
         Raises
         ------
@@ -274,21 +279,30 @@ class DiscoveryClient:
         if not datasets:
             return None
         info = datasets.get(dataset)
-        return str(info.url) if info else None
+        if info and version is not None:
+            version_info = info.versions.get(version)
+            return str(version_info.url) if version_info else None
+        else:
+            return str(info.url) if info else None
 
-    async def url_for_internal(self, service: str) -> str | None:
+    async def url_for_internal(
+        self, service: str, *, version: str | None = None
+    ) -> str | None:
         """Return the base API URL for a given internal service.
 
         Parameters
         ----------
         service
             Name of the service.
+        version
+            If given, return the URL for a specific version of the API
+            instead.
 
         Returns
         -------
         str or None
-            Base URL of the API, or `None` if the service is not available in
-            this environment.
+            Base URL of the API, or `None` if the service or version is not
+            available in this environment.
 
         Raises
         ------
@@ -297,7 +311,11 @@ class DiscoveryClient:
         """
         discovery = await self._get_discovery()
         info = discovery.services.internal.get(service)
-        return str(info.url) if info else None
+        if info and version is not None:
+            version_info = info.versions.get(version)
+            return str(version_info.url) if version_info else None
+        else:
+            return str(info.url) if info else None
 
     async def url_for_ui(self, service: str) -> str | None:
         """Return the base URL for a given UI service.
@@ -321,6 +339,52 @@ class DiscoveryClient:
         discovery = await self._get_discovery()
         info = discovery.services.ui.get(service)
         return str(info.url) if info else None
+
+    async def versions_for_data(
+        self, service: str, dataset: str
+    ) -> list[str] | None:
+        """Return the available API versions for a data service.
+
+        Parameters
+        ----------
+        service
+            Name of the service.
+        dataset
+            Dataset that will be queried via the API, chosen from the results
+            of `datasets`.
+
+        Returns
+        -------
+        list of str or None
+            List of versions. If the API is not versioned, this list will be
+            empty. If the service or dataset is not available in this
+            environment, returns `None`.
+        """
+        discovery = await self._get_discovery()
+        datasets = discovery.services.data.get(service)
+        if not datasets:
+            return None
+        info = datasets.get(dataset)
+        return sorted(info.versions.keys()) if info else None
+
+    async def versions_for_internal(self, service: str) -> list[str] | None:
+        """Return the available API versions for an internal service.
+
+        Parameters
+        ----------
+        service
+            Name of the service.
+
+        Returns
+        -------
+        list of str or None
+            List of versions. If the API is not versioned, this list will be
+            empty. If the service is not available in this environment,
+            returns `None`.
+        """
+        discovery = await self._get_discovery()
+        info = discovery.services.internal.get(service)
+        return sorted(info.versions.keys()) if info else None
 
     async def _get[T: BaseModel](
         self, url: str | HttpUrl, model: type[T], token: str | None = None
