@@ -12,60 +12,57 @@ from ..support.data import read_test_json
 
 
 @pytest.mark.asyncio
-async def test_applications(discovery_client: DiscoveryClient) -> None:
+async def test_applications(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
-    assert await discovery_client.applications() == output["applications"]
+    assert await discovery.applications() == output["applications"]
 
 
 @pytest.mark.asyncio
-async def test_datasets(discovery_client: DiscoveryClient) -> None:
+async def test_datasets(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     expected = sorted(output["datasets"].keys())
-    assert await discovery_client.datasets() == expected
+    assert await discovery.datasets() == expected
 
 
 @pytest.mark.asyncio
-async def test_butler_config_for(discovery_client: DiscoveryClient) -> None:
+async def test_butler_config_for(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     for dataset in output["datasets"]:
-        result = await discovery_client.butler_config_for(dataset)
+        result = await discovery.butler_config_for(dataset)
         assert result == output["datasets"][dataset].get("butler_config")
-    assert await discovery_client.butler_config_for("unknown") is None
+    assert await discovery.butler_config_for("unknown") is None
 
 
 @pytest.mark.asyncio
-async def test_butler_repositories(discovery_client: DiscoveryClient) -> None:
+async def test_butler_repositories(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     expected = {
         k: v["butler_config"]
         for k, v in output["datasets"].items()
         if v.get("butler_config") is not None
     }
-    assert await discovery_client.butler_repositories() == expected
+    assert await discovery.butler_repositories() == expected
 
 
 @pytest.mark.asyncio
-async def test_url_for(discovery_client: DiscoveryClient) -> None:
+async def test_url_for(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     services = output["services"]
 
     for service, info in services["internal"].items():
-        url = info["url"]
-        assert await discovery_client.url_for_internal(service) == url
-    assert await discovery_client.url_for_internal("unknown") is None
+        assert await discovery.url_for_internal(service) == info["url"]
+    assert await discovery.url_for_internal("unknown") is None
 
     for service, info in services["ui"].items():
-        url = info["url"]
-        assert await discovery_client.url_for_ui(service) == url
-    assert await discovery_client.url_for_ui("unknown") is None
+        assert await discovery.url_for_ui(service) == info["url"]
+    assert await discovery.url_for_ui("unknown") is None
 
-    client = discovery_client
     for service, mapping in services["data"].items():
         for dataset, info in mapping.items():
-            result = await client.url_for_data(service, dataset)
+            result = await discovery.url_for_data(service, dataset)
             assert result == info["url"]
-        assert await client.url_for_data(service, "unknown") is None
-    assert await client.url_for_data("unknown", dataset) is None
+        assert await discovery.url_for_data(service, "unknown") is None
+    assert await discovery.url_for_data("unknown", dataset) is None
 
 
 @pytest.mark.asyncio
