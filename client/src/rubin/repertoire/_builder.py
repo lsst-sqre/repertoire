@@ -20,6 +20,7 @@ from ._models import (
     Discovery,
     InfluxDatabase,
     InfluxDatabaseWithCredentials,
+    InfluxDatabaseWithPointer,
     InternalService,
     Services,
     UiService,
@@ -120,12 +121,20 @@ class RepertoireBuilder:
             )
         return results
 
-    def _build_influxdb_databases(self, base_url: str) -> dict[str, HttpUrl]:
+    def _build_influxdb_databases(
+        self, base_url: str
+    ) -> dict[str, InfluxDatabaseWithPointer]:
         """Construct the URLs to credentials for InfluxDB databases."""
-        return {
-            k: HttpUrl(base_url.rstrip("/") + f"/discovery/influxdb/{k}")
-            for k, v in sorted(self._config.influxdb_databases.items())
-        }
+        result = {}
+        for label, config in sorted(self._config.influxdb_databases.items()):
+            creds_url = base_url.rstrip("/") + f"/discovery/influxdb/{label}"
+            result[label] = InfluxDatabaseWithPointer(
+                url=config.url,
+                database=config.database,
+                schema_registry=config.schema_registry,
+                credentials_url=HttpUrl(creds_url),
+            )
+        return result
 
     def _build_services(self) -> Services:
         """Construct the service URLs for an environment."""

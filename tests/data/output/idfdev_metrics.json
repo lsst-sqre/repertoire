@@ -1,7 +1,5 @@
 {
   "url": "https://data.example.com/influxdb/",
   "database": "lsst.square.metrics",
-  "username": "efdreader",
-  "password": "other-password",
   "schema_registry": "http://sasquatch-schema-registry.sasquatch:8081/"
 }

@@ -12,7 +12,7 @@ from ._exceptions import (
     RepertoireValidationError,
     RepertoireWebError,
 )
-from ._models import Discovery, InfluxDatabaseWithCredentials
+from ._models import Discovery, InfluxDatabase, InfluxDatabaseWithCredentials
 
 __all__ = ["DiscoveryClient"]
 
@@ -159,9 +159,46 @@ class DiscoveryClient:
         return sorted(discovery.datasets.keys())
 
     async def get_influxdb_connection_info(
+        self, database: str
+    ) -> InfluxDatabase | None:
+        """Get connection information for an InfluxDB database.
+
+        This does not include authentication credentials. Authenticated
+        clients can call `get_influxdb_credentials` instead to get full
+        connection information.
+
+        Parameters
+        ----------
+        database
+            Short name of the InfluxDB database. Call `influxdb_databases` to
+            get the valid values.
+
+        Returns
+        -------
+        InfluxDatabase or None
+            Connection information for an InfluxDB database, including
+            credentials, or `None` if this database was not found in this
+            environment.
+
+        Raises
+        ------
+        RepertoireError
+            Raised on error fetching discovery information from Repertoire.
+        """
+        discovery = await self._get_discovery()
+        if info := discovery.influxdb_databases.get(database):
+            return InfluxDatabase(
+                url=info.url,
+                database=info.database,
+                schema_registry=info.schema_registry,
+            )
+        else:
+            return None
+
+    async def get_influxdb_credentials(
         self, database: str, token: str
     ) -> InfluxDatabaseWithCredentials | None:
-        """Get connection information for an InfluxDB database.
+        """Get credentials for an InfluxDB database.
 
         Parameters
         ----------
@@ -185,7 +222,8 @@ class DiscoveryClient:
             Raised on error fetching discovery information from Repertoire.
         """
         discovery = await self._get_discovery()
-        if url := discovery.influxdb_databases.get(database):
+        if info := discovery.influxdb_databases.get(database):
+            url = info.credentials_url
             return await self._get(url, InfluxDatabaseWithCredentials, token)
         else:
             return None

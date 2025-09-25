@@ -24,17 +24,30 @@ async def test_connection_info(discovery_client: DiscoveryClient) -> None:
     client = discovery_client
 
     for database in ("idfdev_efd", "idfdev_metrics"):
-        output = await client.get_influxdb_connection_info(database, "token")
+        output = await client.get_influxdb_connection_info(database)
         assert output
         output_json = output.model_dump(mode="json", exclude_none=True)
         assert output_json == read_test_json(f"output/{database}")
 
-    assert await client.get_influxdb_connection_info("invalid", "t") is None
+    assert await client.get_influxdb_connection_info("invalid") is None
+
+
+@pytest.mark.asyncio
+async def test_credentials(discovery_client: DiscoveryClient) -> None:
+    client = discovery_client
+
+    for database in ("idfdev_efd", "idfdev_metrics"):
+        output = await client.get_influxdb_credentials(database, "token")
+        assert output
+        output_json = output.model_dump(mode="json", exclude_none=True)
+        assert output_json == read_test_json(f"output/{database}-creds")
+
+    assert await client.get_influxdb_credentials("invalid", "token") is None
 
 
 @pytest.mark.asyncio
 async def test_authentication(respx_mock: respx.Router) -> None:
-    result = read_test_json("output/idfdev_efd")
+    result = read_test_json("output/idfdev_efd-creds")
     discovery_url = f"{TEST_BASE_URL}repertoire/discovery"
     influxdb_url = f"{TEST_BASE_URL}repertoire/discovery/influxdb/idfdev_efd"
     token = "some-gafaelfawr-token"
@@ -48,7 +61,7 @@ async def test_authentication(respx_mock: respx.Router) -> None:
     respx_mock.get(influxdb_url).mock(side_effect=check_request)
 
     discovery = DiscoveryClient(base_url=f"{TEST_BASE_URL}repertoire")
-    output = await discovery.get_influxdb_connection_info("idfdev_efd", token)
+    output = await discovery.get_influxdb_credentials("idfdev_efd", token)
     assert output
     output_json = output.model_dump(mode="json", exclude_none=True)
     assert output_json == result
