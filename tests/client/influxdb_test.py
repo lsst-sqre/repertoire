@@ -13,36 +13,30 @@ from ..support.data import read_test_json
 
 
 @pytest.mark.asyncio
-async def test_databases(discovery_client: DiscoveryClient) -> None:
+async def test_databases(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     expected = list(output["influxdb_databases"].keys())
-    assert await discovery_client.influxdb_databases() == expected
+    assert await discovery.influxdb_databases() == expected
 
 
 @pytest.mark.asyncio
-async def test_connection_info(discovery_client: DiscoveryClient) -> None:
-    client = discovery_client
-
+async def test_connection_info(discovery: DiscoveryClient) -> None:
     for database in ("idfdev_efd", "idfdev_metrics"):
-        output = await client.influxdb_connection_info(database)
+        output = await discovery.influxdb_connection_info(database)
         assert output
         output_json = output.model_dump(mode="json", exclude_none=True)
         assert output_json == read_test_json(f"output/{database}")
-
-    assert await client.influxdb_connection_info("invalid") is None
+    assert await discovery.influxdb_connection_info("invalid") is None
 
 
 @pytest.mark.asyncio
-async def test_credentials(discovery_client: DiscoveryClient) -> None:
-    client = discovery_client
-
+async def test_credentials(discovery: DiscoveryClient) -> None:
     for database in ("idfdev_efd", "idfdev_metrics"):
-        output = await client.influxdb_credentials(database, "token")
+        output = await discovery.influxdb_credentials(database, "token")
         assert output
         output_json = output.model_dump(mode="json", exclude_none=True)
         assert output_json == read_test_json(f"output/{database}-creds")
-
-    assert await client.influxdb_credentials("invalid", "token") is None
+    assert await discovery.influxdb_credentials("invalid", "token") is None
 
 
 @pytest.mark.asyncio

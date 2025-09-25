@@ -66,7 +66,7 @@ async def client(app: FastAPI) -> AsyncGenerator[AsyncClient]:
 
 
 @pytest.fixture
-def discovery_client(
+def discovery(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ) -> DiscoveryClient:
     repertoire_url = TEST_BASE_URL.rstrip("/") + "/repertoire"
