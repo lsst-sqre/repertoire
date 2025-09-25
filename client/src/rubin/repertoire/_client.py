@@ -158,14 +158,14 @@ class DiscoveryClient:
         discovery = await self._get_discovery()
         return sorted(discovery.datasets.keys())
 
-    async def get_influxdb_connection_info(
+    async def influxdb_connection_info(
         self, database: str
     ) -> InfluxDatabase | None:
         """Get connection information for an InfluxDB database.
 
         This does not include authentication credentials. Authenticated
-        clients can call `get_influxdb_credentials` instead to get full
-        connection information.
+        clients can call `influxdb_credentials` instead to get full connection
+        information.
 
         Parameters
         ----------
@@ -176,9 +176,8 @@ class DiscoveryClient:
         Returns
         -------
         InfluxDatabase or None
-            Connection information for an InfluxDB database, including
-            credentials, or `None` if this database was not found in this
-            environment.
+            Connection information for an InfluxDB database, or `None` if this
+            database was not found in this environment.
 
         Raises
         ------
@@ -195,7 +194,7 @@ class DiscoveryClient:
         else:
             return None
 
-    async def get_influxdb_credentials(
+    async def influxdb_credentials(
         self, database: str, token: str
     ) -> InfluxDatabaseWithCredentials | None:
         """Get credentials for an InfluxDB database.
@@ -239,7 +238,7 @@ class DiscoveryClient:
         list of str
             Short identifiers (``summit_efd``, for example) of the available
             InfluxDB databases. This string should be passed as the
-            ``database`` argument to `get_influxdb_connection_info`.
+            ``database`` argument to `influxdb_connection_info`.
 
         Raises
         ------
