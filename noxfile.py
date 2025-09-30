@@ -102,5 +102,5 @@ def typing(session: nox.Session) -> None:
         "--namespace-packages",
         "--explicit-package-bases",
         "client/src",
-        env={"MYPYPATH": "client/src:client"},
+        env={"MYPYPATH": "client/src"},
     )
