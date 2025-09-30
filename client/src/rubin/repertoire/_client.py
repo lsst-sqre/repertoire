@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any
 
 from httpx import AsyncClient, HTTPError
 from pydantic import BaseModel, HttpUrl, ValidationError
@@ -92,6 +93,24 @@ class DiscoveryClient:
         """
         discovery = await self._get_discovery()
         return discovery.applications
+
+    async def build_nublado_dict(self) -> dict[str, Any]:
+        """Generate discovery data for Nublado containers.
+
+        User science payloads using a Nublado container consume a
+        pre-generated JSON dump of a restricted and hopefully stable subset of
+        service discovery to allow support of possibly years-old code from
+        older container versions. This method generates a dict containing that
+        stripped-down data set, suitable for subsequent JSON encoding.
+
+        Returns
+        -------
+        dict of dict
+            Restricted subset of discovery information, suitable for JSON
+            encoding.
+        """
+        discovery = await self._get_discovery()
+        return discovery.to_nublado_dict()
 
     async def butler_config_for(self, dataset: str) -> str | None:
         """Return the Butler configuration URL for a given dataset.

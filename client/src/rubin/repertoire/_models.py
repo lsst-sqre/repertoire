@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import BaseModel, Field, HttpUrl, PlainSerializer, SecretStr
 
@@ -58,6 +58,20 @@ class Dataset(BaseModel):
             examples=["https://example.org/api/hips/dp02/list"],
         ),
     ] = None
+
+    def to_nublado_dict(self) -> dict[str, str]:
+        """Convert to the reduced format used inside Nublado containers.
+
+        Returns
+        -------
+        dict of dict
+            Restricted subset of dataset discovery, suitable for JSON
+            encoding.
+        """
+        if self.butler_config:
+            return {"butler_config": str(self.butler_config)}
+        else:
+            return {}
 
 
 class InfluxDatabase(BaseModel):
@@ -155,6 +169,17 @@ class ApiVersion(BaseModel):
         ),
     ] = None
 
+    def to_nublado_dict(self) -> dict[str, str]:
+        """Convert to the reduced format used inside Nublado containers.
+
+        Returns
+        -------
+        dict of dict
+            Restricted subset of dataset discovery, suitable for JSON
+            encoding.
+        """
+        return {"url": str(self.url)}
+
 
 class BaseService(BaseModel):
     """Base model for services."""
@@ -193,6 +218,21 @@ class ApiService(BaseService):
             ),
         ),
     ] = {}
+
+    def to_nublado_dict(self) -> dict[str, Any]:
+        """Convert to the reduced format used inside Nublado containers.
+
+        Returns
+        -------
+        dict of dict
+            Restricted subset of dataset discovery, suitable for JSON
+            encoding.
+        """
+        result: dict[str, Any] = {"url": str(self.url)}
+        versions = {k: v.to_nublado_dict() for k, v in self.versions.items()}
+        if versions:
+            result["versions"] = versions
+        return result
 
 
 class DataService(ApiService):
@@ -280,6 +320,24 @@ class Services(BaseModel):
         ),
     ] = {}
 
+    def to_nublado_dict(self) -> dict[str, dict[str, Any]]:
+        """Convert to the reduced format used inside Nublado containers.
+
+        Returns
+        -------
+        dict of dict
+            Restricted subset of dataset discovery, suitable for JSON
+            encoding.
+        """
+        if not self.data:
+            return {}
+        results: dict[str, dict[str, Any]] = {}
+        for service, mapping in self.data.items():
+            results[service] = {}
+            for dataset, info in mapping.items():
+                results[service][dataset] = info.to_nublado_dict()
+        return {"data": results}
+
 
 class Discovery(BaseModel):
     """Service discovery information."""
@@ -324,3 +382,30 @@ class Discovery(BaseModel):
             description="URLs to services available in the local environment",
         ),
     ]
+
+    def to_nublado_dict(self) -> dict[str, dict[str, Any]]:
+        """Convert to the reduced format used inside Nublado containers.
+
+        User science payloads using a Nublado container consume a
+        pre-generated JSON dump of a restricted and hopefully stable subset of
+        service discovery to allow support of possibly years-old code from
+        older container versions. This method generates a dict containing that
+        stripped-down data set, suitable for JSON encoding.
+
+        Returns
+        -------
+        dict of dict
+            Restricted subset of discovery information, suitable for JSON
+            encoding.
+        """
+        results = {
+            "datasets": {
+                k: v.to_nublado_dict() for k, v in self.datasets.items()
+            },
+            "influxdb_databases": {
+                k: v.model_dump(mode="json")
+                for k, v in self.influxdb_databases.items()
+            },
+            "services": self.services.to_nublado_dict(),
+        }
+        return {k: v for k, v in results.items() if v}
