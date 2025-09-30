@@ -6,8 +6,7 @@ This page gives an overview of how Repertoire releases are made.
 This information is only useful for maintainers.
 
 Repertoire's releases are largely automated through GitHub Actions (see the `ci.yaml`_ workflow file for details).
-When a semantic version tag is pushed to GitHub, the Repertoire client is `released to PyPI`_ with that version.
-Similarly, documentation is built and pushed for each version (see https://repertoire.lsst.io/v/index.html).
+When a new release is published on GitHub, the Repertoire client is `released to PyPI`_ with that version, a new Docker image is built and uploaded to GitHub, and documentation is built and pushed for the new version (see https://repertoire.lsst.io/v/index.html).
 
 .. _`released to PyPI`: https://pypi.org/project/rubin-repertoire/
 .. _`ci.yaml`: https://github.com/lsst-sqre/repertoire/blob/main/.github/workflows/ci.yaml
