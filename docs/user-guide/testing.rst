@@ -38,7 +38,7 @@ For example:
    import pytest
    import respx
    from pathlib import Path
-   from rubin.repertoire import register_mock_discovery
+   from rubin.repertoire import Discovery, register_mock_discovery
 
 
    @pytest.fixture(autouse=True)
