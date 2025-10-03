@@ -3,9 +3,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
+from safir.dependencies.gafaelfawr import (
+    auth_dependency,
+    auth_logger_dependency,
+)
 from safir.metadata import get_metadata
 from safir.models import ErrorLocation
 from safir.slack.webhook import SlackRouteErrorHandler
+from structlog.stdlib import BoundLogger
 
 from rubin.repertoire import (
     Discovery,
@@ -17,6 +22,11 @@ from ..config import Config
 from ..dependencies.builder import builder_dependency
 from ..dependencies.config import config_dependency
 from ..dependencies.discovery import discovery_dependency
+from ..dependencies.events import (
+    Events,
+    InfluxCredentialsEvent,
+    events_dependency,
+)
 from ..exceptions import DatabaseNotFoundError
 from ..models import Index
 
@@ -61,9 +71,15 @@ async def get_influxdb(
     builder: Annotated[
         RepertoireBuilderWithSecrets, Depends(builder_dependency)
     ],
+    events: Annotated[Events, Depends(events_dependency)],
+    logger: Annotated[BoundLogger, Depends(auth_logger_dependency)],
+    username: Annotated[str, Depends(auth_dependency)],
 ) -> InfluxDatabaseWithCredentials:
     result = builder.build_influxdb_with_credentials(database)
     if result is None:
         msg = f"Database {database} not found"
         raise DatabaseNotFoundError(msg, ErrorLocation.path, ["database"])
+    logger.info("Retrieved InfluxDB credentials", label=database)
+    event = InfluxCredentialsEvent(username=username, label=database)
+    await events.influx_creds.publish(event)
     return result

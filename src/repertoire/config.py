@@ -9,6 +9,7 @@ from safir.logging import (
     configure_logging,
     configure_uvicorn_logging,
 )
+from safir.metrics import MetricsConfiguration, metrics_configuration_factory
 
 from rubin.repertoire import RepertoireSettings
 
@@ -36,6 +37,11 @@ class Config(RepertoireSettings):
 
     log_profile: Profile = Field(
         Profile.development, title="Application logging profile"
+    )
+
+    metrics: MetricsConfiguration = Field(
+        default_factory=metrics_configuration_factory,
+        title="Metrics configuration",
     )
 
     name: str = Field("Repertoire", title="Name of application")

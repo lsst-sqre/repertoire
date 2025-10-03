@@ -60,7 +60,9 @@ async def app(
 async def client(app: FastAPI) -> AsyncGenerator[AsyncClient]:
     """Return an ``httpx.AsyncClient`` configured to talk to the test app."""
     async with AsyncClient(
-        base_url="https://example.com/", transport=ASGITransport(app=app)
+        base_url="https://example.com/",
+        headers={"X-Auth-Request-User": "username"},
+        transport=ASGITransport(app=app),
     ) as client:
         yield client
 
