@@ -9,6 +9,7 @@
 .. _pre-commit: https://pre-commit.com
 .. _pytest: https://docs.pytest.org/en/latest/
 .. _respx: https://lundberg.github.io/respx/guide/
+.. _Sasquatch: https://sasquatch.lsst.io/
 .. _scriv: https://scriv.readthedocs.io/en/stable/
 .. _semver: https://semver.org/
 .. _Sphinx: https://www.sphinx-doc.org/en/master/

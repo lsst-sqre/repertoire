@@ -25,6 +25,6 @@ Consumers in other languages, such as JavaScript, can use the Repertoire server 
    testing
 
 .. toctree::
-   :caption: Server
+   :caption: Other languages
 
    server-api

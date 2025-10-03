@@ -4,7 +4,7 @@ name = "repertoire"
 description = "Service discovery for the Rubin Science Platform"
 license = "MIT"
 license-files = ["LICENSE"]
-readme= "README.md"
+readme = "README.md"
 keywords = ["rubin", "lsst"]
 # https://pypi.org/classifiers/
 classifiers = [
@@ -24,7 +24,7 @@ dependencies = [
     "pydantic>2",
     "pydantic-settings>=2",
     "rubin-repertoire",
-    "safir>=13",
+    "safir[kafka]>=13",
     "structlog>=25",
     "uvicorn[standard]>=0.34",
 ]

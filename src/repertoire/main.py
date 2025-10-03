@@ -18,6 +18,7 @@ from . import __version__
 from .constants import SECRETS_PATH
 from .dependencies.builder import builder_dependency
 from .dependencies.config import config_dependency
+from .dependencies.events import events_dependency
 from .handlers.discovery import discovery_router
 from .handlers.hips import hips_legacy_router, hips_router
 from .handlers.internal import internal_router
@@ -64,7 +65,13 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         builder_dependency.initialize(secrets_root)
+        event_manager = config.metrics.make_manager()
+        await event_manager.initialize()
+        await events_dependency.initialize(event_manager)
+
         yield
+
+        await event_manager.aclose()
 
     # Create the application.
     app = FastAPI(

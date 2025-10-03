@@ -83,7 +83,15 @@ def lint(session: nox.Session) -> None:
 @session(uv_groups=["dev"])
 def test(session: nox.Session) -> None:
     """Test both the server and the client."""
-    session.run("pytest", *session.posargs)
+    session.run(
+        "pytest",
+        *session.posargs,
+        env={
+            "METRICS_APPLICATION": "repertoire",
+            "METRICS_ENABLED": "false",
+            "METRICS_MOCK": "true",
+        },
+    )
 
 
 @session(uv_groups=["dev", "typing"])
