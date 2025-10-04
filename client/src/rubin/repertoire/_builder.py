@@ -119,6 +119,7 @@ class RepertoireBuilder:
             results[key] = Dataset(
                 butler_config=self._config.butler_configs.get(key),
                 description=value.description,
+                docs_url=value.docs_url,
                 hips_list=hips,
             )
         return results
