@@ -48,6 +48,15 @@ class Dataset(BaseModel):
         ),
     ]
 
+    docs_url: Annotated[
+        HttpUrl,
+        Field(
+            title="Documentation URL",
+            description="URL to more detailed documentation about the dataset",
+            examples=["https://dp1.example.com/"],
+        ),
+    ]
+
     hips_list: Annotated[
         HttpUrl | None,
         Field(

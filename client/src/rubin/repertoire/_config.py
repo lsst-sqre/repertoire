@@ -41,6 +41,14 @@ class DatasetConfig(BaseModel):
         ),
     ]
 
+    docs_url: Annotated[
+        HttpUrl,
+        Field(
+            title="Documentation URL",
+            description="URL to more detailed documentation about the dataset",
+        ),
+    ]
+
 
 class HipsDatasetConfig(BaseModel):
     """Configuration for a single HiPS dataset."""
