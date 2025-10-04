@@ -11,6 +11,22 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.5.0'></a>
+## 0.5.0 (2025-10-03)
+
+### Backwards-incompatible changes
+
+- Add new mandatory `docsUrl` field for datasets in the Repertoire configuration, which is copied to the `docs_url` field in the per-dataset discovery information.
+
+### New features
+
+- Add new client method `build_nublado_dict`, which returns a stripped-down version of service discovery information in dictionary form suitable for JSON encoding. This will be used for service discovery inside [Nublado](https://nublado.lsst.io/) containers. The format is designed to maximize the chance it will continue working with old software stacks.
+- Add client support for Python 3.12.
+
+### Other changes
+
+- Log a metrics event each time an authenticated user retrieves InfluxDB database credentials.
+
 <a id='changelog-0.4.0'></a>
 ## 0.4.0 (2025-09-25)
 
