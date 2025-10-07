@@ -11,11 +11,17 @@ from nox.command import CommandFailed
 from nox_uv import session
 
 # Default sessions.
-nox.options.sessions = ["lint", "typing", "test", "docs"]
+nox.options.sessions = ["lint", "typing", "test", "coverage-report", "docs"]
 
 # Other nox defaults.
 nox.options.default_venv_backend = "uv"
 nox.options.reuse_existing_virtualenvs = True
+
+
+@session(name="coverage-report", requires=["test"], uv_groups=["dev"])
+def coverage_report(session: nox.Session) -> None:
+    """Generate a code coverage report from the test suite."""
+    session.run("coverage", "report", *session.posargs)
 
 
 @session(uv_groups=["dev", "docs"])
@@ -85,6 +91,10 @@ def test(session: nox.Session) -> None:
     """Test both the server and the client."""
     session.run(
         "pytest",
+        "--cov=repertoire",
+        "--cov=rubin.repertoire",
+        "--cov-branch",
+        "--cov-report=",
         *session.posargs,
         env={
             "METRICS_APPLICATION": "repertoire",
