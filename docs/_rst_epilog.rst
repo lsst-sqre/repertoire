@@ -2,6 +2,7 @@
 .. _Click: https://click.palletsprojects.com/
 .. _Gafaelfawr: https://gafaelfawr.lsst.io/
 .. _HTTPX: https://www.python-httpx.org/
+.. _lsst-efd-client: https://efd-client.lsst.io/
 .. _mypy: https://www.mypy-lang.org
 .. _Nublado: https://nublado.lsst.io/
 .. _nox: https://nox.thea.codes/en/stable/index.html
