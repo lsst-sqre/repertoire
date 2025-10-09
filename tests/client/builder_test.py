@@ -60,3 +60,20 @@ def test_build_influxdb_creds() -> None:
 
     # Unknown InfluxDB databases should return None.
     assert builder.build_influxdb("invalid") is None
+
+
+def test_list_influxdb_creds() -> None:
+    config_path = data_path("config/phalanx.yaml")
+    secrets_path = data_path("secrets")
+    config = RepertoireSettings.from_file(config_path)
+
+    builder = RepertoireBuilderWithSecrets(config, secrets_path)
+    output = builder.list_influxdb_with_credentials()
+    output_json = {
+        k: v.model_dump(mode="json", exclude_none=True)
+        for k, v in output.items()
+    }
+    assert output_json == {
+        "idfdev_efd": read_test_json("output/idfdev_efd-creds"),
+        "idfdev_metrics": read_test_json("output/idfdev_metrics-creds"),
+    }

@@ -324,7 +324,7 @@ class RepertoireBuilderWithSecrets(RepertoireBuilder):
 
         Returns
         -------
-        InfluxDatabase or None
+        InfluxDatabaseWithCredentials or None
             InfluxDB connection information or `None` if no such InfluxDB
             database was found.
         """
@@ -340,3 +340,35 @@ class RepertoireBuilderWithSecrets(RepertoireBuilder):
             password=SecretStr(password.rstrip("\n")),
             schema_registry=influxdb.schema_registry,
         )
+
+    def list_influxdb_with_credentials(
+        self,
+    ) -> dict[str, InfluxDatabaseWithCredentials]:
+        """Construct dictionary of all InfluxDB credential information.
+
+        The primary intent of this method is to allow users to download a JSON
+        file containing a mapping of InfluxDB labels to connection
+        information, with credentials, for all databases they have access to.
+        This can, in turn, be used as data for other software that manages
+        connections, such as lsst-efd-client_.
+
+        The files referenced in the password paths must exist locally when
+        calling this method. This will be the case for the running Repertoire
+        service but not when the library is being called outside of the
+        service, such as when building static information.
+
+        Returns
+        -------
+        dict of InfluxDatabaseWithCredentials
+            Mapping of label to InfluxDB discovery information, with
+            credentials, for every known database.
+        """
+        result = {}
+        for database in self._config.influxdb_databases:
+            creds = self.build_influxdb_with_credentials(database)
+
+            # creds should never be None because it comes from the same
+            # configuration, but mypy doesn't know that.
+            if creds:
+                result[database] = creds
+        return result

@@ -62,6 +62,31 @@ async def get_discovery(
 
 
 @discovery_router.get(
+    "/discovery/influxdb",
+    response_model_exclude_none=True,
+    summary="List InfluxDB connection details",
+    description=(
+        "Returns a dictionary of InfluxDB database labels to connection"
+        " information, with credentials, for all databases the user has"
+        " access to."
+    ),
+)
+async def list_influxdb(
+    builder: Annotated[
+        RepertoireBuilderWithSecrets, Depends(builder_dependency)
+    ],
+    events: Annotated[Events, Depends(events_dependency)],
+    logger: Annotated[BoundLogger, Depends(auth_logger_dependency)],
+    username: Annotated[str, Depends(auth_dependency)],
+) -> dict[str, InfluxDatabaseWithCredentials]:
+    result = builder.list_influxdb_with_credentials()
+    for database in result:
+        event = InfluxCredentialsEvent(username=username, label=database)
+        await events.influx_creds.publish(event)
+    return result
+
+
+@discovery_router.get(
     "/discovery/influxdb/{database}",
     response_model_exclude_none=True,
     summary="InfluxDB connection information",
