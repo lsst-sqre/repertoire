@@ -25,6 +25,7 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 - Add new route `/discovery/influxdb` that returns connection information with credentials for every InfluxDB database known to Repertoire.
 - Mark `description` and `docs_url` as optional for datasets in the service discovery model so that the same model can be used to parse the restricted output for Nublado. These fields remain mandatory in the Repertoire configuration, so in practice will always be present. This simplifies creation of mock data for service test suites.
 - Allow the `services` key to be omitted in the service discovery model to simplify the creation of mock data for service test suites.
+- Publish multi-platform images that support both linux/amd64 and linux/arm64.
 
 <a id='changelog-0.5.0'></a>
 ## 0.5.0 (2025-10-03)
