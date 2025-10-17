@@ -294,15 +294,15 @@ class DiscoveryClient:
             Raised on error fetching discovery information from Repertoire.
         """
         discovery = await self._get_discovery()
-        datasets = discovery.services.data.get(service)
-        if not datasets:
+        dataset_info = discovery.datasets.get(dataset)
+        if not dataset_info:
             return None
-        info = datasets.get(dataset)
-        if info and version is not None:
-            version_info = info.versions.get(version)
+        service_info = dataset_info.services.get(service)
+        if service_info and version is not None:
+            version_info = service_info.versions.get(version)
             return str(version_info.url) if version_info else None
         else:
-            return str(info.url) if info else None
+            return str(service_info.url) if service_info else None
 
     async def url_for_internal(
         self, service: str, *, version: str | None = None
@@ -380,11 +380,11 @@ class DiscoveryClient:
             environment, returns `None`.
         """
         discovery = await self._get_discovery()
-        datasets = discovery.services.data.get(service)
-        if not datasets:
+        dataset_info = discovery.datasets.get(dataset)
+        if not dataset_info:
             return None
-        info = datasets.get(dataset)
-        return sorted(info.versions.keys()) if info else None
+        service_info = dataset_info.services.get(service)
+        return sorted(service_info.versions.keys()) if service_info else None
 
     async def versions_for_internal(self, service: str) -> list[str] | None:
         """Return the available API versions for an internal service.

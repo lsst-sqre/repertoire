@@ -24,7 +24,7 @@ def test_build_discovery() -> None:
 
     output = RepertoireBuilder(config).build_discovery(base_url)
     for dataset in output.datasets:
-        assert output.datasets[dataset].hips_list is None
+        assert "hips" not in output.datasets[dataset].services
 
 
 def test_build_influxdb() -> None:

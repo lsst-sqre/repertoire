@@ -57,8 +57,8 @@ async def test_url_for(discovery: DiscoveryClient) -> None:
         assert await discovery.url_for_ui(service) == info["url"]
     assert await discovery.url_for_ui("unknown") is None
 
-    for service, mapping in services["data"].items():
-        for dataset, info in mapping.items():
+    for dataset, mapping in output["datasets"].items():
+        for service, info in mapping["services"].items():
             result = await discovery.url_for_data(service, dataset)
             assert result == info["url"]
         assert await discovery.url_for_data(service, "unknown") is None
@@ -70,13 +70,10 @@ async def test_versions_for(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     services = output["services"]
 
-    for service, mapping in services["data"].items():
-        for dataset, info in mapping.items():
+    for dataset, mapping in output["datasets"].items():
+        for service, info in mapping["services"].items():
             result = await discovery.versions_for_data(service, dataset)
-            versions = info.get("versions")
-            if not versions:
-                assert result == []
-                continue
+            versions = info.get("versions", {})
             assert result == sorted(versions.keys())
             for version, version_info in versions.items():
                 url = await discovery.url_for_data(
