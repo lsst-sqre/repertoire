@@ -136,7 +136,7 @@ class Dataset(BaseModel):
     ] = None
 
     description: Annotated[
-        str,
+        str | None,
         Field(
             title="Description",
             description="Long description of the dataset",
@@ -145,16 +145,16 @@ class Dataset(BaseModel):
                 " telescope during commissioning"
             ],
         ),
-    ]
+    ] = None
 
     docs_url: Annotated[
-        HttpUrl,
+        HttpUrl | None,
         Field(
             title="Documentation URL",
             description="URL to more detailed documentation about the dataset",
             examples=["https://dp1.example.com/"],
         ),
-    ]
+    ] = None
 
     services: Annotated[
         dict[str, DataService],
@@ -353,6 +353,7 @@ class Discovery(BaseModel):
     services: Annotated[
         Services,
         Field(
+            default_factory=Services,
             title="Service URLs",
             description="URLs to services available in the local environment",
         ),
