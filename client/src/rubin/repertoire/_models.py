@@ -21,142 +21,6 @@ __all__ = [
 ]
 
 
-class Dataset(BaseModel):
-    """Discovery information about a single dataset."""
-
-    butler_config: Annotated[
-        HttpUrl | None,
-        Field(
-            title="Butler config URL",
-            description=(
-                "URL of Butler configuration to access this dataset, if it is"
-                " available via a Butler server"
-            ),
-            examples=["https://example.org/api/butler/repo/dp02/butler.yaml"],
-        ),
-    ] = None
-
-    description: Annotated[
-        str,
-        Field(
-            title="Description",
-            description="Long description of the dataset",
-            examples=[
-                "Data Preview 1 contains the first image data from the"
-                " telescope during commissioning"
-            ],
-        ),
-    ]
-
-    docs_url: Annotated[
-        HttpUrl,
-        Field(
-            title="Documentation URL",
-            description="URL to more detailed documentation about the dataset",
-            examples=["https://dp1.example.com/"],
-        ),
-    ]
-
-    hips_list: Annotated[
-        HttpUrl | None,
-        Field(
-            title="HiPS list URL",
-            description=(
-                "URL to the HiPS list collecting HiPS surveys for this dataset"
-            ),
-            examples=["https://example.org/api/hips/dp02/list"],
-        ),
-    ] = None
-
-    def to_nublado_dict(self) -> dict[str, str]:
-        """Convert to the reduced format used inside Nublado containers.
-
-        Returns
-        -------
-        dict of dict
-            Restricted subset of dataset discovery, suitable for JSON
-            encoding.
-        """
-        if self.butler_config:
-            return {"butler_config": str(self.butler_config)}
-        else:
-            return {}
-
-
-class InfluxDatabase(BaseModel):
-    """Connection information for an InfluxDB database."""
-
-    url: Annotated[
-        HttpUrl,
-        Field(
-            title="InfluxDB URL",
-            description="URL to InfluxDB service",
-            examples=["https://example.org/influxdb/"],
-        ),
-    ]
-
-    database: Annotated[
-        str,
-        Field(
-            title="Name of InfluxDB database",
-            description="Name of database to include in queries",
-            examples=["efd", "lsst.square.metrics"],
-        ),
-    ]
-
-    schema_registry: Annotated[
-        HttpUrl,
-        Field(
-            title="Schema registry URL",
-            description="URL of corresponding Confluent schema registry",
-            examples=["https://example.org/schema-registry"],
-        ),
-    ]
-
-
-class InfluxDatabaseWithCredentials(InfluxDatabase):
-    """InfluxDB database connection information with credentials."""
-
-    username: Annotated[
-        str | None,
-        Field(
-            title="Client username",
-            description="Username to send for authentication",
-            examples=["efdreader"],
-        ),
-    ]
-
-    password: Annotated[
-        SecretStr | None,
-        Field(
-            title="Client password",
-            description="Password to send for authentication",
-            examples=["password"],
-        ),
-        PlainSerializer(lambda p: p.get_secret_value(), when_used="json"),
-    ]
-
-
-class InfluxDatabaseWithPointer(InfluxDatabase):
-    """InfluxDB database connection information with credential pointer.
-
-    This is returned by the unauthenticated discovery route and contains a
-    pointer to the authenticated endpoint to get credential information.
-    """
-
-    credentials_url: Annotated[
-        HttpUrl,
-        Field(
-            title="URL for credentials",
-            description=(
-                "Authenticated endpoint that will return full connection"
-                " information including authentication credentials"
-            ),
-            examples=["https://example.com/discovery/influxdb/efd"],
-        ),
-    ]
-
-
 class ApiVersion(BaseModel):
     """One version of a REST API."""
 
@@ -256,36 +120,156 @@ class UiService(BaseService):
     """A user interface service."""
 
 
-class Services(BaseModel):
-    """Mappings of service names to service information."""
+class Dataset(BaseModel):
+    """Discovery information about a single dataset."""
 
-    data: Annotated[
-        dict[str, dict[str, DataService]],
+    butler_config: Annotated[
+        HttpUrl | None,
+        Field(
+            title="Butler config URL",
+            description=(
+                "URL of Butler configuration to access this dataset, if it is"
+                " available via a Butler server"
+            ),
+            examples=["https://example.org/api/butler/repo/dp02/butler.yaml"],
+        ),
+    ] = None
+
+    description: Annotated[
+        str,
+        Field(
+            title="Description",
+            description="Long description of the dataset",
+            examples=[
+                "Data Preview 1 contains the first image data from the"
+                " telescope during commissioning"
+            ],
+        ),
+    ]
+
+    docs_url: Annotated[
+        HttpUrl,
+        Field(
+            title="Documentation URL",
+            description="URL to more detailed documentation about the dataset",
+            examples=["https://dp1.example.com/"],
+        ),
+    ]
+
+    services: Annotated[
+        dict[str, DataService],
         Field(
             title="Data services",
             description=(
-                "Mapping of service names to dataset names served by that"
-                " service to service information. The dataset name will match"
-                " the name of one of the datasets in the associated discovery"
-                " reply. These are the API services used directly by users"
-                " for data access."
+                "Mapping of service names to service information. These are"
+                " the API services used directly by users for data access."
             ),
             examples=[
                 {
                     "cutout": {
-                        "dp02": {
-                            "url": "https://example.org/api/cutout/dp02",
-                            "openapi": "https://example.org/api/cutout/openapi",
-                        },
-                        "dp1": {
-                            "url": "https://example.org/api/cutout/dp1",
-                            "openapi": "https://example.org/api/cutout/openapi",
-                        },
-                    },
+                        "url": "https://example.org/api/cutout/dp02",
+                        "openapi": "https://example.org/api/cutout/openapi",
+                    }
                 }
             ],
         ),
     ] = {}
+
+    def to_nublado_dict(self) -> dict[str, str]:
+        """Convert to the reduced format used inside Nublado containers.
+
+        Returns
+        -------
+        dict of dict
+            Restricted subset of dataset discovery, suitable for JSON
+            encoding.
+        """
+        result: dict[str, Any] = {}
+        if self.butler_config:
+            result["butler_config"] = str(self.butler_config)
+        if self.services:
+            result["services"] = {}
+            for service, info in self.services.items():
+                result["services"][service] = info.to_nublado_dict()
+        return result
+
+
+class InfluxDatabase(BaseModel):
+    """Connection information for an InfluxDB database."""
+
+    url: Annotated[
+        HttpUrl,
+        Field(
+            title="InfluxDB URL",
+            description="URL to InfluxDB service",
+            examples=["https://example.org/influxdb/"],
+        ),
+    ]
+
+    database: Annotated[
+        str,
+        Field(
+            title="Name of InfluxDB database",
+            description="Name of database to include in queries",
+            examples=["efd", "lsst.square.metrics"],
+        ),
+    ]
+
+    schema_registry: Annotated[
+        HttpUrl,
+        Field(
+            title="Schema registry URL",
+            description="URL of corresponding Confluent schema registry",
+            examples=["https://example.org/schema-registry"],
+        ),
+    ]
+
+
+class InfluxDatabaseWithCredentials(InfluxDatabase):
+    """InfluxDB database connection information with credentials."""
+
+    username: Annotated[
+        str | None,
+        Field(
+            title="Client username",
+            description="Username to send for authentication",
+            examples=["efdreader"],
+        ),
+    ]
+
+    password: Annotated[
+        SecretStr | None,
+        Field(
+            title="Client password",
+            description="Password to send for authentication",
+            examples=["password"],
+        ),
+        PlainSerializer(lambda p: p.get_secret_value(), when_used="json"),
+    ]
+
+
+class InfluxDatabaseWithPointer(InfluxDatabase):
+    """InfluxDB database connection information with credential pointer.
+
+    This is returned by the unauthenticated discovery route and contains a
+    pointer to the authenticated endpoint to get credential information.
+    """
+
+    credentials_url: Annotated[
+        HttpUrl,
+        Field(
+            title="URL for credentials",
+            description=(
+                "Authenticated endpoint that will return full connection"
+                " information including authentication credentials"
+            ),
+            examples=["https://example.com/discovery/influxdb/efd"],
+        ),
+    ]
+
+
+class Services(BaseModel):
+    """Mappings of service names to service information."""
 
     internal: Annotated[
         dict[str, InternalService],
@@ -328,24 +312,6 @@ class Services(BaseModel):
             ],
         ),
     ] = {}
-
-    def to_nublado_dict(self) -> dict[str, dict[str, Any]]:
-        """Convert to the reduced format used inside Nublado containers.
-
-        Returns
-        -------
-        dict of dict
-            Restricted subset of dataset discovery, suitable for JSON
-            encoding.
-        """
-        if not self.data:
-            return {}
-        results: dict[str, dict[str, Any]] = {}
-        for service, mapping in self.data.items():
-            results[service] = {}
-            for dataset, info in mapping.items():
-                results[service][dataset] = info.to_nublado_dict()
-        return {"data": results}
 
 
 class Discovery(BaseModel):
@@ -415,6 +381,5 @@ class Discovery(BaseModel):
                 k: v.model_dump(mode="json")
                 for k, v in self.influxdb_databases.items()
             },
-            "services": self.services.to_nublado_dict(),
         }
         return {k: v for k, v in results.items() if v}

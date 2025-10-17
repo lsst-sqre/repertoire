@@ -28,6 +28,12 @@ from ._models import (
     UiService,
 )
 
+_HIPS_LIST_VERSION = "hips-list-1.0"
+"""Version to use for HiPS service pointing to the HiPS list."""
+
+_HIPS_LIST_IVOA_STANDARD_ID = "ivo://ivoa.net/std/hips#hipslist-1.0"
+"""IVOA standardID to use for the HiPS service pointing to the HiPS list."""
+
 __all__ = [
     "RepertoireBuilder",
     "RepertoireBuilderWithSecrets",
@@ -104,23 +110,99 @@ class RepertoireBuilder:
             schema_registry=influxdb.schema_registry,
         )
 
-    def _build_datasets(self, base_url: str | None) -> dict[str, Dataset]:
+    def _build_data_service_from_rule(
+        self, dataset: str, rule: DataServiceRule
+    ) -> DataService:
+        """Generate data service information based on a rule.
+
+        Parameters
+        ----------
+        dataset
+            Name of the dataset.
+        rule
+            Generation rule for the service information.
+
+        Returns
+        -------
+        DataService
+            Constructed service information.
+        """
+        context = self._build_dataset_context(dataset)
+        openapi = None
+        if rule.openapi:
+            openapi = HttpUrl(Template(rule.openapi).render(**context))
+        return DataService(
+            url=HttpUrl(Template(rule.template).render(**context)),
+            openapi=openapi,
+            versions=self._build_versions_from_rules(rule.versions, dataset),
+        )
+
+    def _build_data_services(
+        self, dataset: str, hips_base_url: str | None
+    ) -> dict[str, DataService]:
+        """Construct the data services available in an environment.
+
+        Parameters
+        ----------
+        dataset
+            Dataset for which to generate services.
+        hips_base_url
+            Base URL of the HiPS service.
+
+        Returns
+        -------
+        dict of DataService
+            Data services for a given dataset.
+        """
+        services = {}
+        for application in sorted(self._config.applications):
+            if application in self._config.use_subdomains:
+                rules = self._config.subdomain_rules.get(application, [])
+            else:
+                rules = self._config.rules.get(application, [])
+            for rule in rules:
+                if not isinstance(rule, DataServiceRule):
+                    continue
+                allowed = rule.datasets or self._config.available_datasets
+                if dataset not in allowed:
+                    continue
+                service = self._build_data_service_from_rule(dataset, rule)
+                services[rule.name] = service
+
+        # Add the HiPS service if configured.
+        if hips_base_url and self._config.hips:
+            if dataset in self._config.hips.datasets:
+                path_prefix = self._config.hips.path_prefix
+                hips_base_url = hips_base_url.rstrip("/") + path_prefix
+                hips_url = HttpUrl(hips_base_url + f"/{dataset}/list")
+                services["hips"] = DataService(
+                    url=hips_url,
+                    versions={
+                        _HIPS_LIST_VERSION: ApiVersion(
+                            url=hips_url,
+                            ivoa_standard_id=_HIPS_LIST_IVOA_STANDARD_ID,
+                        )
+                    },
+                )
+
+        # Return the results.
+        return services
+
+    def _build_dataset_context(self, dataset: str) -> dict[str, str]:
+        """Construct a Jinja template context for a given dataset."""
+        return {**self._base_context, "dataset": dataset}
+
+    def _build_datasets(self, hips_base_url: str | None) -> dict[str, Dataset]:
         """Construct the datasets available in an environment."""
         results = {}
-        for key, value in self._config.datasets.items():
-            if key not in self._config.available_datasets:
+        for dataset, value in self._config.datasets.items():
+            if dataset not in self._config.available_datasets:
                 continue
-            hips = None
-            if base_url and self._config.hips:
-                if key in self._config.hips.datasets:
-                    path_prefix = self._config.hips.path_prefix
-                    hips_base_url = base_url.rstrip("/") + path_prefix
-                    hips = HttpUrl(hips_base_url + f"/{key}/list")
-            results[key] = Dataset(
-                butler_config=self._config.butler_configs.get(key),
+            results[dataset] = Dataset(
+                butler_config=self._config.butler_configs.get(dataset),
                 description=value.description,
                 docs_url=value.docs_url,
-                hips_list=hips,
+                services=self._build_data_services(dataset, hips_base_url),
             )
         return results
 
@@ -168,51 +250,11 @@ class RepertoireBuilder:
         if rule.name:
             name = rule.name
         match rule:
-            case DataServiceRule():
-                allowed = rule.datasets or self._config.available_datasets
-                for dataset in allowed:
-                    if dataset not in self._config.available_datasets:
-                        continue
-                    service = self._build_data_service_from_rule(dataset, rule)
-                    if name not in services.data:
-                        services.data[name] = {}
-                    services.data[name][dataset] = service
             case InternalServiceRule():
                 internal_service = self._build_internal_service_from_rule(rule)
                 services.internal[name] = internal_service
             case UiServiceRule():
                 services.ui[name] = self._build_ui_service_from_rule(rule)
-
-    def _build_dataset_context(self, dataset: str) -> dict[str, str]:
-        """Construct a Jinja template context for a given dataset."""
-        return {**self._base_context, "dataset": dataset}
-
-    def _build_data_service_from_rule(
-        self, dataset: str, rule: DataServiceRule
-    ) -> DataService:
-        """Generate data service information based on a rule.
-
-        Parameters
-        ----------
-        dataset
-            Name of the dataset.
-        rule
-            Generation rule for the service information.
-
-        Returns
-        -------
-        DataService
-            Constructed service information.
-        """
-        context = self._build_dataset_context(dataset)
-        openapi = None
-        if rule.openapi:
-            openapi = HttpUrl(Template(rule.openapi).render(**context))
-        return DataService(
-            url=HttpUrl(Template(rule.template).render(**context)),
-            openapi=openapi,
-            versions=self._build_versions_from_rules(rule.versions, dataset),
-        )
 
     def _build_internal_service_from_rule(
         self, rule: InternalServiceRule

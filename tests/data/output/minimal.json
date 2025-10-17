@@ -3,7 +3,6 @@
   "datasets": {},
   "influxdb_databases": {},
   "services": {
-    "data": {},
     "internal": {},
     "ui": {}
   }
