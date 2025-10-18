@@ -46,7 +46,7 @@ jobs:
           version: ${{ env.UV_VERSION }}
 
       - name: Run nox
-        run: uv run --only-group=nox nox -P $UV_PYTHON -s lint typing test
+        run: uv run --only-group=nox nox -s lint typing test
 
   changes:
     runs-on: ubuntu-latest
