@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, AsyncIterator, Iterator
 from pathlib import Path
 
 import pytest
@@ -13,6 +13,10 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from jinja2 import Template
 from pydantic import SecretStr
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from structlog.stdlib import BoundLogger, get_logger
+from testcontainers.postgres import PostgresContainer
 
 from repertoire.config import Config
 from repertoire.dependencies.config import config_dependency
@@ -93,3 +97,56 @@ def mock_hips(
 def token() -> str:
     token_path = Path(__file__).parent / "data" / "secrets" / "token"
     return token_path.read_text().rstrip("\n")
+
+
+@pytest.fixture(scope="session")
+def postgres_container() -> Iterator[PostgresContainer]:
+    """Start a PostgreSQL container for the test session."""
+    container = PostgresContainer("postgres:15-alpine")
+    container.start()
+    yield container
+    container.stop()
+
+
+@pytest.fixture(scope="session")
+def database_url(postgres_container: PostgresContainer) -> str:
+    """Get the database URL from the container."""
+    url = postgres_container.get_connection_url()
+    return url.replace("postgresql+psycopg2://", "postgresql+asyncpg://")
+
+
+@pytest_asyncio.fixture(scope="function")
+async def engine(database_url: str) -> AsyncIterator[AsyncEngine]:
+    """Create a database engine connected to the test container."""
+    _engine = create_async_engine(database_url, echo=False)
+
+    async with _engine.begin() as conn:
+        await conn.execute(text("DROP SCHEMA IF EXISTS tap_schema CASCADE"))
+        await conn.execute(
+            text("DROP SCHEMA IF EXISTS tap_schema_staging CASCADE")
+        )
+
+    yield _engine
+
+    async with _engine.begin() as conn:
+        await conn.execute(text("DROP SCHEMA IF EXISTS tap_schema CASCADE"))
+        await conn.execute(
+            text("DROP SCHEMA IF EXISTS tap_schema_staging CASCADE")
+        )
+
+    await _engine.dispose()
+
+
+@pytest.fixture
+def logger() -> BoundLogger:
+    """Create a test logger."""
+    return get_logger("test")
+
+
+@pytest.fixture
+def tap_config_file(tmp_path: Path) -> Path:
+    """Create a config file for TAP schema CLI tests.
+
+    Note: Database credentials are overridden via --database-url in tests.
+    """
+    return data_path("config/tap.yaml")

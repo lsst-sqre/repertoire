@@ -1,0 +1,671 @@
+"""Tests for TAP schema database operations."""
+
+from __future__ import annotations
+
+import asyncio
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncEngine
+from structlog.stdlib import BoundLogger
+
+from repertoire.tap_schema.manager import TapSchemaManager
+
+
+@pytest.mark.asyncio
+async def test_initialize_schemas(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    """Test schema initialization."""
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    await manager._initialize_schemas()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT schema_name FROM information_schema.schemata "
+                "WHERE schema_name LIKE 'tap_schema_staging'"
+            )
+        )
+        schemas = [row[0] for row in result]
+        assert "tap_schema_staging" in schemas
+
+
+@pytest.mark.asyncio
+async def test_create_views(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    """Test view creation."""
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(
+            text("CREATE SCHEMA IF NOT EXISTS tap_schema_staging")
+        )
+
+        for table in [
+            "schemas11",
+            "tables11",
+            "columns11",
+            "keys11",
+            "key_columns11",
+            "version11",
+        ]:
+            await conn.execute(
+                text(
+                    f"CREATE TABLE IF NOT EXISTS tap_schema_staging.{table} "
+                    f"(id INT)"
+                )
+            )
+
+    await manager._create_views()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT table_name FROM information_schema.views "
+                "WHERE table_schema='tap_schema_staging'"
+            )
+        )
+        views = {row[0] for row in result}
+        expected_views = {
+            "schemas",
+            "tables",
+            "columns",
+            "keys",
+            "key_columns",
+            "version",
+        }
+        assert expected_views.issubset(views)
+
+
+@pytest.mark.asyncio
+async def test_record_version(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(
+            text("CREATE SCHEMA IF NOT EXISTS tap_schema_staging")
+        )
+
+    await manager._record_version()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text("SELECT version FROM tap_schema_staging.version11")
+        )
+        version = result.scalar()
+        assert version == "w.2025.43"
+
+
+@pytest.mark.asyncio
+async def test_swap_schemas(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(text("DROP SCHEMA IF EXISTS tap_schema CASCADE"))
+        await conn.execute(
+            text("DROP SCHEMA IF EXISTS tap_schema_staging CASCADE")
+        )
+        await conn.execute(text("CREATE SCHEMA tap_schema"))
+        await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
+        await conn.execute(text("CREATE TABLE tap_schema.test (id INT)"))
+        await conn.execute(
+            text("CREATE TABLE tap_schema_staging.test (id INT, name TEXT)")
+        )
+
+    await manager._swap_schemas()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema = 'tap_schema' "
+                "AND table_name = 'test' "
+                "ORDER BY column_name"
+            )
+        )
+        columns = [row[0] for row in result]
+        assert columns == ["id", "name"]
+
+
+@pytest.mark.asyncio
+async def test_validate_staging_success(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(
+            text("CREATE SCHEMA IF NOT EXISTS tap_schema_staging")
+        )
+        await conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS tap_schema_staging.schemas11 "
+                "(schema_name TEXT)"
+            )
+        )
+        await conn.execute(
+            text("INSERT INTO tap_schema_staging.schemas11 VALUES ('test')")
+        )
+
+    await manager._validate_staging()
+
+
+@pytest.mark.asyncio
+async def test_validate_staging_failure(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(
+            text("CREATE SCHEMA IF NOT EXISTS tap_schema_staging")
+        )
+        await conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS tap_schema_staging.schemas11 "
+                "(schema_name TEXT)"
+            )
+        )
+
+    with pytest.raises(RuntimeError, match="No schemas loaded"):
+        await manager._validate_staging()
+
+
+@pytest.mark.asyncio
+async def test_manager_workflow_orchestration(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+    tmp_path: Path,
+) -> None:
+    mock_yaml_dir = tmp_path / "schemas"
+    mock_yaml_dir.mkdir()
+
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["test_schema"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    with (
+        patch(
+            "repertoire.tap_schema.manager.download_schemas"
+        ) as mock_download,
+        patch.object(manager, "_initialize_schemas") as mock_init_schemas,
+        patch.object(manager, "_create_sync_engine") as mock_sync_engine,
+        patch.object(manager, "_initialize_table_manager") as mock_init_mgr,
+        patch.object(manager, "_load_schemas") as mock_load,
+        patch.object(manager, "_record_version") as mock_version,
+        patch.object(manager, "_create_views") as mock_views,
+        patch.object(manager, "_validate_staging") as mock_validate,
+        patch.object(manager, "_swap_schemas") as mock_swap,
+    ):
+        mock_download.return_value = mock_yaml_dir
+        mock_engine = MagicMock()
+        mock_engine.dispose = MagicMock()
+        mock_sync_engine.return_value = mock_engine
+        mock_init_mgr.return_value = MagicMock()
+
+        await manager.update()
+
+        mock_init_schemas.assert_called_once()
+        mock_sync_engine.assert_called_once()
+        mock_init_mgr.assert_called_once_with(mock_engine)
+        mock_download.assert_called_once()
+        mock_load.assert_called_once()
+        mock_version.assert_called_once()
+        mock_views.assert_called_once()
+        mock_validate.assert_called_once()
+        mock_swap.assert_called_once()
+        mock_engine.dispose.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_manager_cleanup_on_error(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+    tmp_path: Path,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["test_schema"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    with (
+        patch(
+            "repertoire.tap_schema.manager.download_schemas"
+        ) as mock_download,
+        patch.object(manager, "_create_sync_engine") as mock_sync_engine,
+        patch.object(manager, "_initialize_table_manager") as mock_init_mgr,
+        patch.object(manager, "_load_schemas") as mock_load,
+    ):
+        mock_download.return_value = tmp_path
+        mock_engine = MagicMock()
+        mock_engine.dispose = MagicMock()
+        mock_sync_engine.return_value = mock_engine
+        mock_init_mgr.return_value = MagicMock()
+
+        mock_load.side_effect = RuntimeError("Load failed")
+
+        with pytest.raises(RuntimeError, match="Load failed"):
+            await manager.update()
+
+        mock_engine.dispose.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_manager_handles_missing_schema_file(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+    tmp_path: Path,
+) -> None:
+    mock_yaml_dir = tmp_path / "schemas"
+    mock_yaml_dir.mkdir()
+
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["nonexistent_schema"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    with (
+        patch(
+            "repertoire.tap_schema.manager.download_schemas"
+        ) as mock_download,
+        patch.object(manager, "_initialize_schemas") as mock_init_schemas,
+        patch.object(manager, "_create_sync_engine") as mock_sync_engine,
+        patch.object(manager, "_initialize_table_manager") as mock_init_mgr,
+    ):
+        mock_download.return_value = mock_yaml_dir
+
+        mock_engine = MagicMock()
+        mock_engine.dispose = MagicMock()
+        mock_sync_engine.return_value = mock_engine
+
+        mock_mgr = MagicMock()
+        mock_init_mgr.return_value = mock_mgr
+
+        with pytest.raises(RuntimeError, match="Schema not found"):
+            await manager.update()
+
+        mock_init_schemas.assert_called_once()
+        mock_sync_engine.assert_called_once()
+        mock_init_mgr.assert_called_once()
+        mock_download.assert_called_once()
+        mock_engine.dispose.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_initialize_schemas_first_run(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    await manager._initialize_schemas()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT schema_name FROM information_schema.schemata "
+                "WHERE schema_name LIKE 'tap_schema_staging'"
+            )
+        )
+        schemas = [row[0] for row in result]
+        assert "tap_schema_staging" in schemas
+
+
+@pytest.mark.asyncio
+async def test_initialize_schemas_subsequent_run(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    async with engine.begin() as conn:
+        await conn.execute(text("CREATE SCHEMA tap_schema"))
+        await conn.execute(
+            text("CREATE TABLE tap_schema.test_table (id INT, data TEXT)")
+        )
+        await conn.execute(
+            text("INSERT INTO tap_schema.test_table VALUES (1, 'preserved')")
+        )
+
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    await manager._initialize_schemas()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT schema_name FROM information_schema.schemata "
+                "WHERE schema_name IN ('tap_schema', 'tap_schema_staging')"
+            )
+        )
+        schemas = [row[0] for row in result]
+        assert "tap_schema" in schemas
+        assert "tap_schema_staging" in schemas
+
+        result = await conn.execute(
+            text("SELECT data FROM tap_schema.test_table WHERE id = 1")
+        )
+        data = result.scalar()
+        assert data == "preserved"
+
+
+@pytest.mark.asyncio
+async def test_swap_schemas_first_run(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
+        await conn.execute(
+            text("CREATE TABLE tap_schema_staging.test (id INT, data TEXT)")
+        )
+        await conn.execute(
+            text("INSERT INTO tap_schema_staging.test VALUES (1, 'new')")
+        )
+
+    await manager._swap_schemas()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT schema_name FROM information_schema.schemata "
+                "WHERE schema_name = 'tap_schema'"
+            )
+        )
+        assert result.scalar() == "tap_schema"
+
+        result = await conn.execute(
+            text("SELECT data FROM tap_schema.test WHERE id = 1")
+        )
+        assert result.scalar() == "new"
+
+        result = await conn.execute(
+            text(
+                "SELECT schema_name FROM information_schema.schemata "
+                "WHERE schema_name = 'tap_schema_staging'"
+            )
+        )
+        assert result.scalar() is None
+
+
+@pytest.mark.asyncio
+async def test_swap_schemas_subsequent_run(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(text("CREATE SCHEMA tap_schema"))
+        await conn.execute(
+            text("CREATE TABLE tap_schema.test (id INT, data TEXT)")
+        )
+        await conn.execute(
+            text("INSERT INTO tap_schema.test VALUES (1, 'old')")
+        )
+
+        await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
+        await conn.execute(
+            text("CREATE TABLE tap_schema_staging.test (id INT, data TEXT)")
+        )
+        await conn.execute(
+            text("INSERT INTO tap_schema_staging.test VALUES (1, 'new')")
+        )
+
+    await manager._swap_schemas()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text("SELECT data FROM tap_schema.test WHERE id = 1")
+        )
+        assert result.scalar() == "new"
+
+        result = await conn.execute(
+            text("SELECT data FROM tap_schema_staging.test WHERE id = 1")
+        )
+        assert result.scalar() == "old"
+
+
+@pytest.mark.asyncio
+async def test_validate_staging_with_multiple_schemas(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2", "ivoa_obscore"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
+        await conn.execute(
+            text(
+                "CREATE TABLE tap_schema_staging.schemas11 "
+                "(schema_name TEXT, description TEXT)"
+            )
+        )
+        await conn.execute(
+            text(
+                "INSERT INTO tap_schema_staging.schemas11 VALUES "
+                "('dp02_dc2', 'Data Preview 0.2'), "
+                "('ivoa_obscore', 'IVOA ObsCore')"
+            )
+        )
+
+    await manager._validate_staging()
+
+
+@pytest.mark.asyncio
+async def test_record_version_creates_table(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
+
+    await manager._record_version()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT version FROM tap_schema_staging.version11 "
+                "WHERE version = :ver"
+            ),
+            {"ver": "w.2025.43"},
+        )
+        version = result.scalar()
+        assert version == "w.2025.43"
+
+
+@pytest.mark.asyncio
+async def test_record_version_updates_existing(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
+
+    await manager._record_version()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT loaded_at FROM tap_schema_staging.version11 "
+                "WHERE version = :ver"
+            ),
+            {"ver": "w.2025.43"},
+        )
+        first_timestamp = result.scalar()
+
+    await asyncio.sleep(0.1)
+
+    await manager._record_version()
+
+    async with engine.begin() as conn:
+        result = await conn.execute(
+            text(
+                "SELECT loaded_at FROM tap_schema_staging.version11 "
+                "WHERE version = :ver"
+            ),
+            {"ver": "w.2025.43"},
+        )
+        second_timestamp = result.scalar()
+
+    if first_timestamp is None or second_timestamp is None:
+        pytest.fail("Timestamps should not be None")
+
+    assert second_timestamp > first_timestamp
+
+
+@pytest.mark.asyncio
+async def test_create_views_accessible(
+    engine: AsyncEngine,
+    logger: BoundLogger,
+) -> None:
+    manager = TapSchemaManager(
+        engine=engine,
+        logger=logger,
+        schema_version="w.2025.43",
+        schema_list=["dp02_dc2"],
+        source_url_template="https://example.com/{version}.tar.gz",
+    )
+
+    async with engine.begin() as conn:
+        await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
+
+        for table in [
+            "schemas11",
+            "tables11",
+            "columns11",
+            "keys11",
+            "key_columns11",
+            "version11",
+        ]:
+            await conn.execute(
+                text(
+                    f"CREATE TABLE tap_schema_staging.{table} "
+                    f"(id INT, name TEXT)"
+                )
+            )
+            await conn.execute(
+                text(
+                    f"INSERT INTO tap_schema_staging.{table} "  # noqa: S608
+                    f"VALUES (1, 'test_{table}')"
+                )
+            )
+
+    await manager._create_views()
+
+    async with engine.begin() as conn:
+        for view in ["schemas", "tables", "columns"]:
+            result = await conn.execute(
+                text(
+                    f"SELECT name FROM tap_schema_staging.{view} WHERE id = 1"  # noqa: S608
+                )
+            )
+            name = result.scalar()
+            assert name == f"test_{view}11"
