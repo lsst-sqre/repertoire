@@ -11,7 +11,8 @@ import pytest
 import structlog
 from structlog.stdlib import BoundLogger
 
-from repertoire.tap_schema.download import download_schemas
+from repertoire.exceptions import TAPSchemaDownloadError
+from repertoire.storage.tap_schema import TAPSchemaStorage
 
 
 @pytest.fixture
@@ -20,10 +21,16 @@ def logger() -> BoundLogger:
     return structlog.get_logger("test")
 
 
+@pytest.fixture
+def storage(logger: BoundLogger) -> TAPSchemaStorage:
+    """Provide a test storage instance."""
+    return TAPSchemaStorage(logger)
+
+
 @pytest.mark.asyncio
 async def test_download_schemas_http_success(
     tmp_path: Path,
-    logger: BoundLogger,
+    storage: TAPSchemaStorage,
 ) -> None:
     archive_path = tmp_path / "schemas.tar.gz"
     schema_dir = tmp_path / "sdm_schemas-w.2025.43"
@@ -58,14 +65,13 @@ async def test_download_schemas_http_success(
     mock_client.__aexit__ = AsyncMock()
 
     with patch(
-        "repertoire.tap_schema.download.httpx.AsyncClient",
+        "repertoire.storage.tap_schema.httpx.AsyncClient",
         return_value=mock_client,
     ):
-        result = await download_schemas(
+        result = await storage.download_and_extract(
             schema_version="w.2025.43",
             source_url_template="https://example.com/{version}.tar.gz",
             work_dir=tmp_path / "work",
-            logger=logger,
         )
 
     assert result.exists()
@@ -76,32 +82,34 @@ async def test_download_schemas_http_success(
 @pytest.mark.asyncio
 async def test_download_schemas_http_failure(
     tmp_path: Path,
-    logger: BoundLogger,
+    storage: TAPSchemaStorage,
 ) -> None:
     with patch(
-        "repertoire.tap_schema.download._download_from_http",
-        side_effect=RuntimeError(
-            "Failed to download via HTTP: Connection failed"
+        "repertoire.storage.tap_schema.TAPSchemaStorage._download_from_http",
+        side_effect=TAPSchemaDownloadError(
+            "Failed to download via HTTP: Connection failed",
+            url="https://example.com/v1.0.tar.gz",
+            schema_version="w.2025.43",
         ),
     ):
-        with pytest.raises(RuntimeError, match="Failed to download via HTTP"):
-            await download_schemas(
+        with pytest.raises(
+            TAPSchemaDownloadError, match="Failed to download via HTTP"
+        ):
+            await storage.download_and_extract(
                 schema_version="w.2025.43",
                 source_url_template="https://example.com/{version}.tar.gz",
                 work_dir=tmp_path,
-                logger=logger,
             )
 
 
 @pytest.mark.asyncio
 async def test_download_schemas_invalid_scheme(
     tmp_path: Path,
-    logger: BoundLogger,
+    storage: TAPSchemaStorage,
 ) -> None:
     with pytest.raises(ValueError, match="Unsupported URL scheme: ftp"):
-        await download_schemas(
+        await storage.download_and_extract(
             schema_version="w.2025.43",
             source_url_template="ftp://example.com/{version}.tar.gz",
             work_dir=tmp_path,
-            logger=logger,
         )

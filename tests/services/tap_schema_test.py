@@ -11,7 +11,18 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 from structlog.stdlib import BoundLogger
 
-from repertoire.tap_schema.manager import TapSchemaManager
+from repertoire.exceptions import (
+    TAPSchemaNotFoundError,
+    TAPSchemaValidationError,
+)
+from repertoire.services.tap_schema import TAPSchemaService
+from repertoire.storage.tap_schema import TAPSchemaStorage
+
+
+@pytest.fixture
+def storage(logger: BoundLogger) -> TAPSchemaStorage:
+    """Provide a test storage instance."""
+    return TAPSchemaStorage(logger)
 
 
 @pytest.mark.asyncio
@@ -19,16 +30,15 @@ async def test_initialize_schemas(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    """Test schema initialization."""
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
     )
-
-    await manager._initialize_schemas()
+    await service._initialize_schemas()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -47,9 +57,10 @@ async def test_create_views(
     logger: BoundLogger,
 ) -> None:
     """Test view creation."""
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -75,7 +86,7 @@ async def test_create_views(
                 )
             )
 
-    await manager._create_views()
+    await service._create_views()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -101,9 +112,10 @@ async def test_record_version(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -114,7 +126,7 @@ async def test_record_version(
             text("CREATE SCHEMA IF NOT EXISTS tap_schema_staging")
         )
 
-    await manager._record_version()
+    await service._record_version()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -129,9 +141,10 @@ async def test_swap_schemas(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -149,7 +162,7 @@ async def test_swap_schemas(
             text("CREATE TABLE tap_schema_staging.test (id INT, name TEXT)")
         )
 
-    await manager._swap_schemas()
+    await service._swap_schemas()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -169,9 +182,10 @@ async def test_validate_staging_success(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -188,10 +202,12 @@ async def test_validate_staging_success(
             )
         )
         await conn.execute(
-            text("INSERT INTO tap_schema_staging.schemas11 VALUES ('test')")
+            text(
+                "INSERT INTO tap_schema_staging.schemas11 VALUES ('dp02_dc2')"
+            )
         )
 
-    await manager._validate_staging()
+    await service._validate_staging()
 
 
 @pytest.mark.asyncio
@@ -199,9 +215,10 @@ async def test_validate_staging_failure(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -218,12 +235,14 @@ async def test_validate_staging_failure(
             )
         )
 
-    with pytest.raises(RuntimeError, match="No schemas loaded"):
-        await manager._validate_staging()
+    with pytest.raises(
+        TAPSchemaValidationError, match="Expected 1 schemas but found 0"
+    ):
+        await service._validate_staging()
 
 
 @pytest.mark.asyncio
-async def test_manager_workflow_orchestration(
+async def test_service_workflow_orchestration(
     engine: AsyncEngine,
     logger: BoundLogger,
     tmp_path: Path,
@@ -231,26 +250,27 @@ async def test_manager_workflow_orchestration(
     mock_yaml_dir = tmp_path / "schemas"
     mock_yaml_dir.mkdir()
 
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["test_schema"],
         source_url_template="https://example.com/{version}.tar.gz",
     )
 
     with (
-        patch(
-            "repertoire.tap_schema.manager.download_schemas"
+        patch.object(
+            service._storage, "download_and_extract"
         ) as mock_download,
-        patch.object(manager, "_initialize_schemas") as mock_init_schemas,
-        patch.object(manager, "_create_sync_engine") as mock_sync_engine,
-        patch.object(manager, "_initialize_table_manager") as mock_init_mgr,
-        patch.object(manager, "_load_schemas") as mock_load,
-        patch.object(manager, "_record_version") as mock_version,
-        patch.object(manager, "_create_views") as mock_views,
-        patch.object(manager, "_validate_staging") as mock_validate,
-        patch.object(manager, "_swap_schemas") as mock_swap,
+        patch.object(service, "_initialize_schemas") as mock_init_schemas,
+        patch.object(service, "_create_sync_engine") as mock_sync_engine,
+        patch.object(service, "_initialize_table_manager") as mock_init_mgr,
+        patch.object(service, "_load_schemas") as mock_load,
+        patch.object(service, "_record_version") as mock_version,
+        patch.object(service, "_create_views") as mock_views,
+        patch.object(service, "_validate_staging") as mock_validate,
+        patch.object(service, "_swap_schemas") as mock_swap,
     ):
         mock_download.return_value = mock_yaml_dir
         mock_engine = MagicMock()
@@ -258,7 +278,7 @@ async def test_manager_workflow_orchestration(
         mock_sync_engine.return_value = mock_engine
         mock_init_mgr.return_value = MagicMock()
 
-        await manager.update()
+        await service.update(tmp_path)
 
         mock_init_schemas.assert_called_once()
         mock_sync_engine.assert_called_once()
@@ -273,26 +293,27 @@ async def test_manager_workflow_orchestration(
 
 
 @pytest.mark.asyncio
-async def test_manager_cleanup_on_error(
+async def test_service_cleanup_on_error(
     engine: AsyncEngine,
     logger: BoundLogger,
     tmp_path: Path,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["test_schema"],
         source_url_template="https://example.com/{version}.tar.gz",
     )
 
     with (
-        patch(
-            "repertoire.tap_schema.manager.download_schemas"
+        patch.object(
+            service._storage, "download_and_extract"
         ) as mock_download,
-        patch.object(manager, "_create_sync_engine") as mock_sync_engine,
-        patch.object(manager, "_initialize_table_manager") as mock_init_mgr,
-        patch.object(manager, "_load_schemas") as mock_load,
+        patch.object(service, "_create_sync_engine") as mock_sync_engine,
+        patch.object(service, "_initialize_table_manager") as mock_init_mgr,
+        patch.object(service, "_load_schemas") as mock_load,
     ):
         mock_download.return_value = tmp_path
         mock_engine = MagicMock()
@@ -303,13 +324,13 @@ async def test_manager_cleanup_on_error(
         mock_load.side_effect = RuntimeError("Load failed")
 
         with pytest.raises(RuntimeError, match="Load failed"):
-            await manager.update()
+            await service.update(tmp_path)
 
         mock_engine.dispose.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_manager_handles_missing_schema_file(
+async def test_service_handles_missing_schema_file(
     engine: AsyncEngine,
     logger: BoundLogger,
     tmp_path: Path,
@@ -317,21 +338,22 @@ async def test_manager_handles_missing_schema_file(
     mock_yaml_dir = tmp_path / "schemas"
     mock_yaml_dir.mkdir()
 
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["nonexistent_schema"],
         source_url_template="https://example.com/{version}.tar.gz",
     )
 
     with (
-        patch(
-            "repertoire.tap_schema.manager.download_schemas"
+        patch.object(
+            service._storage, "download_and_extract"
         ) as mock_download,
-        patch.object(manager, "_initialize_schemas") as mock_init_schemas,
-        patch.object(manager, "_create_sync_engine") as mock_sync_engine,
-        patch.object(manager, "_initialize_table_manager") as mock_init_mgr,
+        patch.object(service, "_initialize_schemas") as mock_init_schemas,
+        patch.object(service, "_create_sync_engine") as mock_sync_engine,
+        patch.object(service, "_initialize_table_manager") as mock_init_mgr,
     ):
         mock_download.return_value = mock_yaml_dir
 
@@ -342,8 +364,8 @@ async def test_manager_handles_missing_schema_file(
         mock_mgr = MagicMock()
         mock_init_mgr.return_value = mock_mgr
 
-        with pytest.raises(RuntimeError, match="Schema not found"):
-            await manager.update()
+        with pytest.raises(TAPSchemaNotFoundError, match="Schema not found"):
+            await service.update(tmp_path)
 
         mock_init_schemas.assert_called_once()
         mock_sync_engine.assert_called_once()
@@ -357,15 +379,16 @@ async def test_initialize_schemas_first_run(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
     )
 
-    await manager._initialize_schemas()
+    await service._initialize_schemas()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -392,15 +415,16 @@ async def test_initialize_schemas_subsequent_run(
             text("INSERT INTO tap_schema.test_table VALUES (1, 'preserved')")
         )
 
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
     )
 
-    await manager._initialize_schemas()
+    await service._initialize_schemas()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -425,9 +449,10 @@ async def test_swap_schemas_first_run(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -442,7 +467,7 @@ async def test_swap_schemas_first_run(
             text("INSERT INTO tap_schema_staging.test VALUES (1, 'new')")
         )
 
-    await manager._swap_schemas()
+    await service._swap_schemas()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -472,9 +497,10 @@ async def test_swap_schemas_subsequent_run(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -497,7 +523,7 @@ async def test_swap_schemas_subsequent_run(
             text("INSERT INTO tap_schema_staging.test VALUES (1, 'new')")
         )
 
-    await manager._swap_schemas()
+    await service._swap_schemas()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -516,9 +542,10 @@ async def test_validate_staging_with_multiple_schemas(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2", "ivoa_obscore"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -540,7 +567,7 @@ async def test_validate_staging_with_multiple_schemas(
             )
         )
 
-    await manager._validate_staging()
+    await service._validate_staging()
 
 
 @pytest.mark.asyncio
@@ -548,9 +575,10 @@ async def test_record_version_creates_table(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -559,7 +587,7 @@ async def test_record_version_creates_table(
     async with engine.begin() as conn:
         await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
 
-    await manager._record_version()
+    await service._record_version()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -578,9 +606,10 @@ async def test_record_version_updates_existing(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -589,7 +618,7 @@ async def test_record_version_updates_existing(
     async with engine.begin() as conn:
         await conn.execute(text("CREATE SCHEMA tap_schema_staging"))
 
-    await manager._record_version()
+    await service._record_version()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -603,7 +632,7 @@ async def test_record_version_updates_existing(
 
     await asyncio.sleep(0.1)
 
-    await manager._record_version()
+    await service._record_version()
 
     async with engine.begin() as conn:
         result = await conn.execute(
@@ -626,9 +655,10 @@ async def test_create_views_accessible(
     engine: AsyncEngine,
     logger: BoundLogger,
 ) -> None:
-    manager = TapSchemaManager(
+    service = TAPSchemaService(
         engine=engine,
         logger=logger,
+        storage=TAPSchemaStorage(logger),
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
@@ -658,7 +688,7 @@ async def test_create_views_accessible(
                 )
             )
 
-    await manager._create_views()
+    await service._create_views()
 
     async with engine.begin() as conn:
         for view in ["schemas", "tables", "columns"]:

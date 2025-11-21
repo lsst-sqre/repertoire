@@ -17,7 +17,7 @@ from repertoire.cli import main
 def test_update_tap_schema_integration(
     postgres_container: PostgresContainer,
     tap_config_file: Path,
-    tmp_path: Path,  # Standard pytest fixture
+    tmp_path: Path,
 ) -> None:
     event_loop = asyncio.new_event_loop()
     db_url = postgres_container.get_connection_url()
@@ -39,7 +39,9 @@ def test_update_tap_schema_integration(
 
     event_loop.run_until_complete(setup())
 
-    with patch("repertoire.tap_schema.manager.download_schemas") as mock_dl:
+    with patch(
+        "repertoire.storage.tap_schema.TAPSchemaStorage.download_and_extract"
+    ) as mock_dl:
         mock_yaml_dir = tmp_path / "mock_schemas"
         mock_yaml_dir.mkdir(exist_ok=True)
 
