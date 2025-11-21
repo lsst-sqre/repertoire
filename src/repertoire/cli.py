@@ -12,7 +12,7 @@ from safir.database import create_database_engine
 from sqlalchemy.engine.url import make_url
 
 from repertoire.dependencies.config import config_dependency
-from repertoire.tap_schema.manager import TapSchemaManager
+from repertoire.factory import Factory
 
 __all__ = ["main"]
 
@@ -63,20 +63,21 @@ async def update_tap_schema_command(
     """
     if config_path:
         config_dependency.set_config_path(config_path)
+
     config = config_dependency.config()
     logger = structlog.get_logger("repertoire")
 
-    try:
-        schema_version = config.get_tap_server_schema_version(app)
-    except ValueError as e:
-        raise click.ClickException(str(e)) from e
+    if app not in config.tap_servers:
+        raise click.ClickException(
+            f"Unknown TAP application: {app}\n"
+            f"Configured apps: {', '.join(config.tap_servers.keys())}"
+        )
 
     server_config = config.tap_servers[app]
 
     logger.info(
         "Starting TAP schema update",
         app=app,
-        version=schema_version,
         schemas=server_config.schemas,
         database=server_config.database,
         database_user=server_config.database_user,
@@ -91,13 +92,11 @@ async def update_tap_schema_command(
     else:
         db_user = db_user_env or server_config.database_user
         db_password = db_password_env
-
         if not db_password:
             raise click.ClickException(
                 f"Database password not found for TAP server: {app}\n"
                 f"Set REPERTOIRE_DATABASE_PASSWORD environment variable"
             )
-
         database_url = (
             f"postgresql://{db_user}@127.0.0.1:5432/{server_config.database}"
         )
@@ -105,23 +104,18 @@ async def update_tap_schema_command(
     engine = create_database_engine(database_url, db_password)
 
     try:
-        manager = TapSchemaManager(
-            engine=engine,
-            logger=logger,
-            schema_version=schema_version,
-            schema_list=server_config.schemas,
-            source_url_template=config.schema_source_template
-            or "",  # Satisfy mypy
-            database_password=db_password,
+        factory = Factory(config, engine, logger)
+        service = factory.create_tap_schema_service(
+            app=app, database_password=db_password
         )
-        await manager.update()
+        await service.update()
 
         logger.info(
             "TAP_SCHEMA update completed successfully",
             app=app,
-            version=schema_version,
-            schema_count=len(server_config.schemas),
+            schemas=len(server_config.schemas),
         )
+
     except Exception as e:
         logger.exception(
             "TAP_SCHEMA update failed",
@@ -129,5 +123,6 @@ async def update_tap_schema_command(
             error=str(e),
         )
         raise click.ClickException(f"Update failed: {e}") from e
+
     finally:
         await engine.dispose()

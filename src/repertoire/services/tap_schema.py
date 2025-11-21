@@ -1,4 +1,7 @@
-"""TAP schema manager."""
+"""TAP schema management service layer.
+
+This module provides the service layer for TAP schema management operations.
+"""
 
 from __future__ import annotations
 
@@ -8,41 +11,34 @@ from typing import TYPE_CHECKING
 
 from felis.datamodel import Schema
 from felis.tap_schema import DataLoader, MetadataInserter, TableManager
-from sqlalchemy import TIMESTAMP, Column, Engine, MetaData, String, Table, text
+from sqlalchemy import Engine, func, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import URL, create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine
-from sqlalchemy.schema import CreateSchema, CreateTable, DropSchema
+from sqlalchemy.schema import CreateSchema, DropSchema
 
-from .download import download_schemas
+from repertoire.exceptions import (
+    TAPSchemaNotFoundError,
+    TAPSchemaValidationError,
+)
+from repertoire.schema.version import TAPSchemaVersion
+from repertoire.storage.tap_schema import TAPSchemaStorage
 
 if TYPE_CHECKING:
     from structlog.stdlib import BoundLogger
 
-__all__ = ["TapSchemaManager"]
+__all__ = ["TAPSchemaService"]
 
 STAGING_SCHEMA = "tap_schema_staging"  # Temporary schema for loading new data
 PRODUCTION_SCHEMA = "tap_schema"  # Live schema used by TAP
 TEMP_SCHEMA = "tap_schema_temp"  # Temporary name during swap
 
-_staging_metadata = MetaData(schema=STAGING_SCHEMA)
-VERSION_TABLE = Table(
-    "version",
-    _staging_metadata,
-    Column("version", String, primary_key=True),
-    Column(
-        "loaded_at",
-        TIMESTAMP(timezone=True),
-        server_default=text("CURRENT_TIMESTAMP"),
-    ),
-)
 
+class TAPSchemaService:
+    """Manage TAP_SCHEMA updates and operations.
 
-class TapSchemaManager:
-    """Manages TAP_SCHEMA updates and operations.
-
-    This class orchestrates the workflow for updating TAP_SCHEMA, including:
+    Orchestrates the workflow for updating TAP_SCHEMA, including:
     - Initializing staging schema
     - Downloading and loading schema files
     - Validating the staged data
@@ -53,58 +49,112 @@ class TapSchemaManager:
     engine
         Async SQLAlchemy engine for database operations.
     logger
-        Structured logger.
+        Logger for debug messages and errors.
+    storage
+        The underlying schema storage layer for downloading and extracting
+        schemas.
     schema_version
-        Version identifier for schemas.
+        Version identifier for schemas to load.
     schema_list
         List of schema names to load.
     source_url_template
         URL template with {version} placeholder for schema downloads.
     database_password
-        Optional password for database connections.
+        Optional password for database connections (used for sync engine).
+    table_postfix
+        Postfix for TAP_SCHEMA table names (default: "11").
     """
 
     def __init__(
         self,
+        *,
         engine: AsyncEngine,
         logger: BoundLogger,
+        storage: TAPSchemaStorage,
         schema_version: str,
         schema_list: list[str],
         source_url_template: str,
         database_password: str | None = None,
         table_postfix: str = "11",
+        extensions_path: str | None = None,
     ) -> None:
         self._engine = engine
         self._logger = logger
+        self._storage = storage
         self._schema_version = schema_version
         self._schema_list = schema_list
         self._source_url_template = source_url_template
         self._database_password = database_password
         self._table_postfix = table_postfix
+        self._extensions_path = extensions_path
 
-    async def update(self) -> None:
+    async def update(self, work_dir: Path | None = None) -> None:
         """Execute complete TAP_SCHEMA update workflow.
 
         Initialize -> download -> load -> validate -> swap
 
+        Parameters
+        ----------
+        work_dir
+            Working directory for temporary files. If not provided, a
+            temporary directory will be created and cleaned up automatically.
+
         Raises
         ------
-        RuntimeError
-            If validation fails or no schemas are loaded.
+        TAPSchemaDownloadError
+            If schema download fails.
+        TAPSchemaValidationError
+            If schema validation fails.
         """
+        if work_dir is None:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                work_dir = Path(tmpdir)
+                await self._execute_update(work_dir)
+        else:
+            await self._execute_update(work_dir)
+
+    async def _execute_update(self, work_dir: Path) -> None:
+        """Execute the update workflow with a given work directory.
+
+        Parameters
+        ----------
+        work_dir
+            Working directory for temporary files.
+        """
+        self._logger.info(
+            "Starting TAP schema update execution",
+            schema_version=self._schema_version,
+            schemas=self._schema_list,
+            work_dir=str(work_dir),
+        )
+
         await self._initialize_schemas()
         sync_engine = self._create_sync_engine()
 
         try:
             mgr = self._initialize_table_manager(sync_engine)
-            with tempfile.TemporaryDirectory() as tmpdir:
-                yaml_dir = await download_schemas(
-                    self._schema_version,
-                    self._source_url_template,
-                    Path(tmpdir),
-                    self._logger,
-                )
-                self._load_schemas(yaml_dir, mgr, sync_engine)
+
+            self._logger.info(
+                "Downloading and extracting schemas",
+                schema_version=self._schema_version,
+                source_url_template=self._source_url_template,
+            )
+            yaml_dir = await self._storage.download_and_extract(
+                self._schema_version,
+                self._source_url_template,
+                work_dir,
+            )
+            self._logger.info(
+                "Schemas extracted",
+                yaml_dir=str(yaml_dir),
+            )
+
+            self._logger.info(
+                "Loading schemas into database",
+                schemas_to_load=self._schema_list,
+            )
+            self._load_schemas(yaml_dir, mgr, sync_engine)
+            self._logger.info("Schemas loaded successfully")
 
             await self._record_version()
             await self._create_views()
@@ -115,12 +165,14 @@ class TapSchemaManager:
             sync_engine.dispose()
 
     async def _initialize_schemas(self) -> None:
-        """Initialize any required schemas in the database."""
+        """Initialize required schemas in the database."""
+        self._logger.info("Initializing staging schema", schema=STAGING_SCHEMA)
         async with self._engine.begin() as conn:
             await conn.execute(
                 DropSchema(STAGING_SCHEMA, cascade=True, if_exists=True)
             )
             await conn.execute(CreateSchema(STAGING_SCHEMA))
+        self._logger.info("Staging schema initialized")
 
     def _create_sync_engine(self) -> Engine:
         """Create synchronous engine for felis operations.
@@ -154,15 +206,26 @@ class TapSchemaManager:
         TableManager
             Initialized table manager for schema operations.
         """
+        self._logger.info(
+            "Initializing TAP_SCHEMA tables",
+            schema=STAGING_SCHEMA,
+            table_postfix=self._table_postfix,
+        )
+        extensions_path = (
+            self._extensions_path
+            or "resource://felis/config/tap_schema/tap_schema_extensions.yaml"
+        )
+
         mgr = TableManager(
             schema_name=STAGING_SCHEMA,
             table_name_postfix=self._table_postfix,
             apply_schema_to_metadata=True,
+            extensions_path=extensions_path,
         )
         mgr.initialize_database(sync_engine)
         inserter = MetadataInserter(mgr, sync_engine)
         inserter.insert_metadata()
-
+        self._logger.info("TAP_SCHEMA tables initialized")
         return mgr
 
     def _load_schemas(
@@ -171,10 +234,7 @@ class TapSchemaManager:
         mgr: TableManager,
         sync_engine: Engine,
     ) -> None:
-        """Load schemas from YAML files using felis.
-
-        Iterates through the schema list and loads each schema
-        definition into the TAP_SCHEMA tables in staging.
+        """Load schemas from YAML files.
 
         Parameters
         ----------
@@ -187,18 +247,34 @@ class TapSchemaManager:
 
         Raises
         ------
-        RuntimeError
+        TAPSchemaNotFoundError
             If a required schema file is not found.
         """
-        for schema_name in self._schema_list:
+        self._logger.info(
+            "Starting schema loading",
+            schemas_count=len(self._schema_list),
+            yaml_dir=str(yaml_dir),
+        )
+
+        for i, schema_name in enumerate(self._schema_list, 1):
             schema_file = yaml_dir / f"{schema_name}.yaml"
 
             if not schema_file.exists():
-                available = [f.stem for f in yaml_dir.glob("*.yaml")]
-                raise RuntimeError(
-                    f"Schema not found: {schema_name}.yaml\n"
-                    f"Available: {', '.join(available)}"
+                available = sorted([f.stem for f in yaml_dir.glob("*.yaml")])
+                self._logger.error(
+                    "Schema file not found",
+                    schema_name=schema_name,
+                    schema_file=str(schema_file),
+                    available=available,
                 )
+                raise TAPSchemaNotFoundError(schema_name, available)
+
+            self._logger.info(
+                "Loading schema",
+                schema_number=f"{i}/{len(self._schema_list)}",
+                schema_name=schema_name,
+                schema_file=str(schema_file),
+            )
 
             felis_schema = Schema.from_uri(
                 str(schema_file), context={"id_generation": True}
@@ -211,8 +287,14 @@ class TapSchemaManager:
             )
             loader.load()
 
+            self._logger.info(
+                "Schema loaded successfully", schema_name=schema_name
+            )
+
     async def _create_views(self) -> None:
         """Create views for TAP_SCHEMA tables."""
+        self._logger.info("Creating TAP_SCHEMA views", schema=STAGING_SCHEMA)
+
         views = {
             "schemas": f"schemas{self._table_postfix}",
             "tables": f"tables{self._table_postfix}",
@@ -223,93 +305,80 @@ class TapSchemaManager:
         }
 
         async with self._engine.begin() as conn:
-            for view, table in views.items():
+            for view_name, table_name in views.items():
                 await conn.execute(
                     text(
-                        f"CREATE OR REPLACE VIEW {STAGING_SCHEMA}.{view} AS "  # noqa: S608
-                        f"SELECT * FROM {STAGING_SCHEMA}.{table}"
+                        f"CREATE "  # noqa: S608
+                        f"OR REPLACE VIEW {STAGING_SCHEMA}.{view_name} AS "
+                        f"SELECT * FROM {STAGING_SCHEMA}.{table_name}"
                     )
                 )
 
+        self._logger.info("All views created successfully", count=len(views))
+
     async def _record_version(self) -> None:
         """Record schema version in version table."""
-        self._logger.info("Recording version", version=self._schema_version)
-        version_table = Table(
-            f"version{self._table_postfix}",
-            MetaData(schema=STAGING_SCHEMA),
-            Column("version", String, primary_key=True),
-            Column(
-                "loaded_at",
-                TIMESTAMP(timezone=True),
-                server_default=text("CURRENT_TIMESTAMP"),
-            ),
+        self._logger.info(
+            "Recording schema version", version=self._schema_version
         )
-        async with self._engine.begin() as conn:
-            await conn.execute(CreateTable(version_table, if_not_exists=True))
 
+        async with self._engine.begin() as conn:
+            await conn.run_sync(TAPSchemaVersion.metadata.create_all)
             stmt = (
-                insert(version_table)
-                .values(
-                    version=self._schema_version,
-                    loaded_at=text("CURRENT_TIMESTAMP"),
-                )
+                insert(TAPSchemaVersion)
+                .values(version=self._schema_version, loaded_at=func.now())
                 .on_conflict_do_update(
                     index_elements=["version"],
-                    set_={"loaded_at": text("CURRENT_TIMESTAMP")},
+                    set_={"loaded_at": func.now()},
                 )
             )
             await conn.execute(stmt)
 
+        self._logger.info(
+            "Schema version recorded", version=self._schema_version
+        )
+
     async def _validate_staging(self) -> None:
-        """Validate staging schema has data.
+        """Validate staging schema has expected data.
 
         Raises
         ------
-        RuntimeError
-            If no schemas were loaded to staging.
+        TAPSchemaValidationError
+            If validation fails.
         """
-        async with self._engine.begin() as conn:
-            required_tables = [
-                f"schemas{self._table_postfix}",
-                f"tables{self._table_postfix}",
-                f"columns{self._table_postfix}",
-                f"keys{self._table_postfix}",
-                f"key_columns{self._table_postfix}",
-            ]
+        self._logger.info(
+            "Validating staging schema",
+            schema=STAGING_SCHEMA,
+            expected_count=len(self._schema_list),
+        )
 
-            # Check schemas table is populated
+        async with self._engine.begin() as conn:
+            schemas_table = f"schemas{self._table_postfix}"
             result = await conn.execute(
                 text(
                     f"SELECT COUNT(*) FROM {STAGING_SCHEMA}."  # noqa: S608
-                    f"schemas{self._table_postfix}"
+                    f"{schemas_table} WHERE schema_name != 'tap_schema'"
                 )
             )
             count = result.scalar()
 
-            if count == 0:
-                raise RuntimeError("No schemas loaded to staging")
-
-            # Check required tables exist
-            result = await conn.execute(
-                text(
-                    f"SELECT schema_name FROM {STAGING_SCHEMA}"  # noqa: S608
-                    f".schemas{self._table_postfix}"
-                )
+            self._logger.info(
+                "Schemas table row count",
+                table=schemas_table,
+                count=count,
+                expected=len(self._schema_list),
             )
-            loaded_schemas = {row[0] for row in result}
 
-            missing = set(self._schema_list) - loaded_schemas
-            if missing:
-                self._logger.warning(
-                    "Some schemas not found in TAP_SCHEMA",
-                    missing=list(missing),
-                    loaded=list(loaded_schemas),
+            if count != len(self._schema_list):
+                raise TAPSchemaValidationError(
+                    f"Expected {len(self._schema_list)} schemas "
+                    f"but found {count}",
+                    schema_version=self._schema_version,
                 )
 
             self._logger.info(
                 "Validation passed",
-                tables_checked=len(required_tables),
-                schemas_loaded=len(loaded_schemas),
+                schemas_loaded=count,
             )
 
     async def _swap_schemas(self) -> None:
@@ -330,11 +399,17 @@ class TapSchemaManager:
             )
             prod_exists = result.scalar() is not None
 
+            self._logger.info(
+                "Production schema status",
+                schema=PRODUCTION_SCHEMA,
+                exists=prod_exists,
+            )
+
             if not prod_exists:
                 self._logger.info(
-                    "First run detected, performing initial deployment",
-                    source=STAGING_SCHEMA,
-                    target=PRODUCTION_SCHEMA,
+                    "First deployment: renaming staging to production",
+                    from_schema=STAGING_SCHEMA,
+                    to_schema=PRODUCTION_SCHEMA,
                 )
 
                 await conn.execute(
@@ -343,6 +418,7 @@ class TapSchemaManager:
                         f"RENAME TO {PRODUCTION_SCHEMA}"
                     )
                 )
+                self._logger.info("Schema renamed successfully")
             else:
                 self._logger.info(
                     "Existing deployment detected, performing swap",
@@ -350,23 +426,28 @@ class TapSchemaManager:
                     staging=STAGING_SCHEMA,
                     temp=TEMP_SCHEMA,
                 )
+
                 await conn.execute(
                     text(
                         f"ALTER SCHEMA {PRODUCTION_SCHEMA} "
                         f"RENAME TO {TEMP_SCHEMA}"
                     )
                 )
+
                 await conn.execute(
                     text(
                         f"ALTER SCHEMA {STAGING_SCHEMA} "
                         f"RENAME TO {PRODUCTION_SCHEMA}"
                     )
                 )
+
                 await conn.execute(
                     text(
                         f"ALTER SCHEMA {TEMP_SCHEMA} "
                         f"RENAME TO {STAGING_SCHEMA}"
                     )
                 )
+
+                self._logger.info("Schema swap completed successfully")
 
         self._logger.info("Schema swap complete, TAP_SCHEMA is now live")

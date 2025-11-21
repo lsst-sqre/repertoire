@@ -157,6 +157,15 @@ class Config(RepertoireSettings):
         ),
     )
 
+    tap_schema_extensions_path: str | None = Field(
+        None,
+        title="Path to TAP_SCHEMA extensions",
+        description=(
+            "YAML file with TAP_SCHEMA extension columns. "
+            "Defaults to felis resource if not set."
+        ),
+    )
+
     tap_servers: dict[str, TapServerConfig] = Field(
         default_factory=dict,
         title="TAP schema configuration by application",
