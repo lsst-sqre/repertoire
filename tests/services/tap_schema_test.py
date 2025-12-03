@@ -77,7 +77,7 @@ async def test_create_views(
             "columns11",
             "keys11",
             "key_columns11",
-            "version11",
+            "version",
         ]:
             await conn.execute(
                 text(
@@ -102,7 +102,6 @@ async def test_create_views(
             "columns",
             "keys",
             "key_columns",
-            "version",
         }
         assert expected_views.issubset(views)
 
@@ -130,7 +129,7 @@ async def test_record_version(
 
     async with engine.begin() as conn:
         result = await conn.execute(
-            text("SELECT version FROM tap_schema_staging.version11")
+            text("SELECT version FROM tap_schema_staging.version")
         )
         version = result.scalar()
         assert version == "w.2025.43"
@@ -592,7 +591,7 @@ async def test_record_version_creates_table(
     async with engine.begin() as conn:
         result = await conn.execute(
             text(
-                "SELECT version FROM tap_schema_staging.version11 "
+                "SELECT version FROM tap_schema_staging.version "
                 "WHERE version = :ver"
             ),
             {"ver": "w.2025.43"},
@@ -623,7 +622,7 @@ async def test_record_version_updates_existing(
     async with engine.begin() as conn:
         result = await conn.execute(
             text(
-                "SELECT loaded_at FROM tap_schema_staging.version11 "
+                "SELECT loaded_at FROM tap_schema_staging.version "
                 "WHERE version = :ver"
             ),
             {"ver": "w.2025.43"},
@@ -637,7 +636,7 @@ async def test_record_version_updates_existing(
     async with engine.begin() as conn:
         result = await conn.execute(
             text(
-                "SELECT loaded_at FROM tap_schema_staging.version11 "
+                "SELECT loaded_at FROM tap_schema_staging.version "
                 "WHERE version = :ver"
             ),
             {"ver": "w.2025.43"},
@@ -673,7 +672,7 @@ async def test_create_views_accessible(
             "columns11",
             "keys11",
             "key_columns11",
-            "version11",
+            "version",
         ]:
             await conn.execute(
                 text(

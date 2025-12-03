@@ -15,7 +15,7 @@ __all__ = ["TAPSchemaVersion"]
 class TAPSchemaVersion(SchemaBase):
     """Table holding TAP_SCHEMA version information."""
 
-    __tablename__ = "version11"
+    __tablename__ = "version"
     __table_args__ = ({"schema": "tap_schema_staging"},)
 
     version: Mapped[str] = mapped_column(String, primary_key=True)

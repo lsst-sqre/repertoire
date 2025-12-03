@@ -67,13 +67,13 @@ async def update_tap_schema_command(
     config = config_dependency.config()
     logger = structlog.get_logger("repertoire")
 
-    if app not in config.tap_servers:
+    if app not in config.tap.servers:
         raise click.ClickException(
             f"Unknown TAP application: {app}\n"
-            f"Configured apps: {', '.join(config.tap_servers.keys())}"
+            f"Configured apps: {', '.join(config.tap.servers.keys())}"
         )
 
-    server_config = config.tap_servers[app]
+    server_config = config.tap.servers[app]
 
     logger.info(
         "Starting TAP schema update",

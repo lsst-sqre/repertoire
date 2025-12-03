@@ -107,7 +107,7 @@ tables:
             assert count > 0, "No schemas found in tap_schema.schemas view"
 
             res = await conn.execute(
-                text("SELECT version FROM tap_schema.version11")
+                text("SELECT version FROM tap_schema.version")
             )
             version = res.scalar()
             assert version == "w.2025.43", f"Wrong version: {version}"
