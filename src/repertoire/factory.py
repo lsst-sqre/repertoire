@@ -75,7 +75,7 @@ class Factory:
             If the app is not configured or schema version cannot be resolved.
         """
         schema_version = self._config.get_tap_server_schema_version(app)
-        server_config = self._config.tap_servers[app]
+        server_config = self._config.tap.servers[app]
         storage = self.create_schema_storage()
 
         return TAPSchemaService(
@@ -84,8 +84,8 @@ class Factory:
             storage=storage,
             schema_version=schema_version,
             schema_list=server_config.schemas,
-            source_url_template=self._config.schema_source_template or "",
+            source_url_template=self._config.tap.schema_source_template or "",
             database_password=database_password,
             table_postfix="11",
-            extensions_path=self._config.tap_schema_extensions_path,
+            extensions_path=self._config.tap.schema_extensions_path,
         )

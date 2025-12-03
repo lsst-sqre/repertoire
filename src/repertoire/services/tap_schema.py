@@ -63,6 +63,8 @@ class TAPSchemaService:
         Optional password for database connections (used for sync engine).
     table_postfix
         Postfix for TAP_SCHEMA table names (default: "11").
+    extensions_path
+        Optional path to YAML file with TAP_SCHEMA extensions.
     """
 
     def __init__(
@@ -211,6 +213,9 @@ class TAPSchemaService:
             schema=STAGING_SCHEMA,
             table_postfix=self._table_postfix,
         )
+        # Use custom extensions path if provided, otherwise fall back to the
+        # default TAP_SCHEMA extensions configuration bundled with felis.
+        # The resource:// URI references a file within the felis package.
         extensions_path = (
             self._extensions_path
             or "resource://felis/config/tap_schema/tap_schema_extensions.yaml"
@@ -301,7 +306,6 @@ class TAPSchemaService:
             "columns": f"columns{self._table_postfix}",
             "keys": f"keys{self._table_postfix}",
             "key_columns": f"key_columns{self._table_postfix}",
-            "version": f"version{self._table_postfix}",
         }
 
         async with self._engine.begin() as conn:
