@@ -26,5 +26,5 @@ apt-get update
 # Install security updates:
 apt-get -y upgrade
 
-# Example of installing a new package, without unnecessary packages:
-#apt-get -y install --no-install-recommends git
+# Install runtime dependencies for PostgreSQL connections
+apt-get -y install --no-install-recommends libpq5
