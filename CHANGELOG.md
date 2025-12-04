@@ -11,6 +11,17 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.6.1'></a>
+## 0.6.1 (2025-12-04)
+
+### Bug fixes
+
+- Use updated Safir so that app metrics won't break the app in rare situations if the underlying Kafka infrastructure is down.
+
+### Other changes
+
+- Repertoire is now tested with Python 3.14 as well as 3.12 and 3.13.
+
 <a id='changelog-0.6.0'></a>
 ## 0.6.0 (2025-10-17)
 
