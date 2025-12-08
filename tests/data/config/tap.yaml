@@ -9,6 +9,6 @@ tap:
       schemaVersion: "w.2025.43"
       schemas:
         - dp02_dc2
-      database: "test_db"
-      databaseUser: "test_user"
+      database: "test"
+      databaseUser: "test"
       databasePasswordKey: "test_password"

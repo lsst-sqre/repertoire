@@ -29,6 +29,7 @@ def storage(logger: BoundLogger) -> TAPSchemaStorage:
 async def test_initialize_schemas(
     engine: AsyncEngine,
     logger: BoundLogger,
+    database_password: str,
 ) -> None:
     service = TAPSchemaService(
         engine=engine,
@@ -37,6 +38,7 @@ async def test_initialize_schemas(
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
+        database_password=database_password,
     )
     await service._initialize_schemas()
 
@@ -55,6 +57,7 @@ async def test_initialize_schemas(
 async def test_create_views(
     engine: AsyncEngine,
     logger: BoundLogger,
+    database_password: str,
 ) -> None:
     """Test view creation."""
     service = TAPSchemaService(
@@ -64,6 +67,7 @@ async def test_create_views(
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
+        database_password=database_password,
     )
 
     async with engine.begin() as conn:
@@ -110,6 +114,7 @@ async def test_create_views(
 async def test_record_version(
     engine: AsyncEngine,
     logger: BoundLogger,
+    database_password: str,
 ) -> None:
     service = TAPSchemaService(
         engine=engine,
@@ -118,6 +123,7 @@ async def test_record_version(
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
+        database_password=database_password,
     )
 
     async with engine.begin() as conn:
@@ -139,6 +145,7 @@ async def test_record_version(
 async def test_swap_schemas(
     engine: AsyncEngine,
     logger: BoundLogger,
+    database_password: str,
 ) -> None:
     service = TAPSchemaService(
         engine=engine,
@@ -147,6 +154,7 @@ async def test_swap_schemas(
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
+        database_password=database_password,
     )
 
     async with engine.begin() as conn:
@@ -180,6 +188,7 @@ async def test_swap_schemas(
 async def test_validate_staging_success(
     engine: AsyncEngine,
     logger: BoundLogger,
+    database_password: str,
 ) -> None:
     service = TAPSchemaService(
         engine=engine,
@@ -188,6 +197,7 @@ async def test_validate_staging_success(
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
+        database_password=database_password,
     )
 
     async with engine.begin() as conn:
@@ -213,6 +223,7 @@ async def test_validate_staging_success(
 async def test_validate_staging_failure(
     engine: AsyncEngine,
     logger: BoundLogger,
+    database_password: str,
 ) -> None:
     service = TAPSchemaService(
         engine=engine,
@@ -221,6 +232,7 @@ async def test_validate_staging_failure(
         schema_version="w.2025.43",
         schema_list=["dp02_dc2"],
         source_url_template="https://example.com/{version}.tar.gz",
+        database_password=database_password,
     )
 
     async with engine.begin() as conn:
@@ -245,6 +257,7 @@ async def test_service_workflow_orchestration(
     engine: AsyncEngine,
     logger: BoundLogger,
     tmp_path: Path,
+    database_url: str,
 ) -> None:
     mock_yaml_dir = tmp_path / "schemas"
     mock_yaml_dir.mkdir()
@@ -258,13 +271,18 @@ async def test_service_workflow_orchestration(
         source_url_template="https://example.com/{version}.tar.gz",
     )
 
+    sync_url = database_url.replace(
+        "postgresql+asyncpg://", "postgresql+psycopg2://"
+    )
+
     with (
         patch.object(
             service._storage, "download_and_extract"
         ) as mock_download,
         patch.object(service, "_initialize_schemas") as mock_init_schemas,
-        patch.object(service, "_create_sync_engine") as mock_sync_engine,
-        patch.object(service, "_initialize_table_manager") as mock_init_mgr,
+        patch.object(service, "_create_sync_url") as mock_create_url,
+        patch.object(service, "_create_table_manager") as mock_create_mgr,
+        patch.object(service, "_initialize_database") as mock_init_db,
         patch.object(service, "_load_schemas") as mock_load,
         patch.object(service, "_record_version") as mock_version,
         patch.object(service, "_create_views") as mock_views,
@@ -272,23 +290,21 @@ async def test_service_workflow_orchestration(
         patch.object(service, "_swap_schemas") as mock_swap,
     ):
         mock_download.return_value = mock_yaml_dir
-        mock_engine = MagicMock()
-        mock_engine.dispose = MagicMock()
-        mock_sync_engine.return_value = mock_engine
-        mock_init_mgr.return_value = MagicMock()
+        mock_create_url.return_value = sync_url
+        mock_create_mgr.return_value = MagicMock()
 
         await service.update(tmp_path)
 
         mock_init_schemas.assert_called_once()
-        mock_sync_engine.assert_called_once()
-        mock_init_mgr.assert_called_once_with(mock_engine)
+        mock_create_url.assert_called_once()
+        mock_create_mgr.assert_called_once()
+        mock_init_db.assert_called_once()
         mock_download.assert_called_once()
         mock_load.assert_called_once()
         mock_version.assert_called_once()
         mock_views.assert_called_once()
         mock_validate.assert_called_once()
         mock_swap.assert_called_once()
-        mock_engine.dispose.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -296,6 +312,7 @@ async def test_service_cleanup_on_error(
     engine: AsyncEngine,
     logger: BoundLogger,
     tmp_path: Path,
+    database_url: str,
 ) -> None:
     service = TAPSchemaService(
         engine=engine,
@@ -306,26 +323,26 @@ async def test_service_cleanup_on_error(
         source_url_template="https://example.com/{version}.tar.gz",
     )
 
+    sync_url = database_url.replace(
+        "postgresql+asyncpg://", "postgresql+psycopg2://"
+    )
+
     with (
         patch.object(
             service._storage, "download_and_extract"
         ) as mock_download,
-        patch.object(service, "_create_sync_engine") as mock_sync_engine,
-        patch.object(service, "_initialize_table_manager") as mock_init_mgr,
+        patch.object(service, "_create_sync_url") as mock_create_url,
+        patch.object(service, "_create_table_manager") as mock_create_mgr,
         patch.object(service, "_load_schemas") as mock_load,
     ):
         mock_download.return_value = tmp_path
-        mock_engine = MagicMock()
-        mock_engine.dispose = MagicMock()
-        mock_sync_engine.return_value = mock_engine
-        mock_init_mgr.return_value = MagicMock()
+        mock_create_url.return_value = sync_url
+        mock_create_mgr.return_value = MagicMock()
 
         mock_load.side_effect = RuntimeError("Load failed")
 
         with pytest.raises(RuntimeError, match="Load failed"):
             await service.update(tmp_path)
-
-        mock_engine.dispose.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -333,6 +350,7 @@ async def test_service_handles_missing_schema_file(
     engine: AsyncEngine,
     logger: BoundLogger,
     tmp_path: Path,
+    database_url: str,
 ) -> None:
     mock_yaml_dir = tmp_path / "schemas"
     mock_yaml_dir.mkdir()
@@ -346,31 +364,33 @@ async def test_service_handles_missing_schema_file(
         source_url_template="https://example.com/{version}.tar.gz",
     )
 
+    sync_url = database_url.replace(
+        "postgresql+asyncpg://", "postgresql+psycopg2://"
+    )
+
     with (
         patch.object(
             service._storage, "download_and_extract"
         ) as mock_download,
         patch.object(service, "_initialize_schemas") as mock_init_schemas,
-        patch.object(service, "_create_sync_engine") as mock_sync_engine,
-        patch.object(service, "_initialize_table_manager") as mock_init_mgr,
+        patch.object(service, "_create_sync_url") as mock_create_url,
+        patch.object(service, "_create_table_manager") as mock_create_mgr,
+        patch.object(service, "_initialize_database") as mock_init_db,
     ):
         mock_download.return_value = mock_yaml_dir
-
-        mock_engine = MagicMock()
-        mock_engine.dispose = MagicMock()
-        mock_sync_engine.return_value = mock_engine
+        mock_create_url.return_value = sync_url
 
         mock_mgr = MagicMock()
-        mock_init_mgr.return_value = mock_mgr
+        mock_create_mgr.return_value = mock_mgr
 
         with pytest.raises(TAPSchemaNotFoundError, match="Schema not found"):
             await service.update(tmp_path)
 
         mock_init_schemas.assert_called_once()
-        mock_sync_engine.assert_called_once()
-        mock_init_mgr.assert_called_once()
+        mock_create_url.assert_called_once()
+        mock_create_mgr.assert_called_once()
+        mock_init_db.assert_called_once()
         mock_download.assert_called_once()
-        mock_engine.dispose.assert_called_once()
 
 
 @pytest.mark.asyncio

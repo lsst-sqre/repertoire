@@ -10,10 +10,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from felis.datamodel import Schema
+from felis.db.database_context import DatabaseContext, create_database_context
 from felis.tap_schema import DataLoader, MetadataInserter, TableManager
-from sqlalchemy import Engine, func, text
+from sqlalchemy import func, text
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.engine import URL, create_engine
+from sqlalchemy.engine import URL
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.schema import CreateSchema, DropSchema
@@ -131,10 +132,10 @@ class TAPSchemaService:
         )
 
         await self._initialize_schemas()
-        sync_engine = self._create_sync_engine()
-
-        try:
-            mgr = self._initialize_table_manager(sync_engine)
+        sync_url_str = self._create_sync_url()
+        mgr = self._create_table_manager(sync_url_str)
+        with create_database_context(sync_url_str, mgr.metadata) as db_ctx:
+            self._initialize_database(mgr, db_ctx)
 
             self._logger.info(
                 "Downloading and extracting schemas",
@@ -146,25 +147,19 @@ class TAPSchemaService:
                 self._source_url_template,
                 work_dir,
             )
-            self._logger.info(
-                "Schemas extracted",
-                yaml_dir=str(yaml_dir),
-            )
+            self._logger.info("Schemas extracted", yaml_dir=str(yaml_dir))
 
             self._logger.info(
                 "Loading schemas into database",
                 schemas_to_load=self._schema_list,
             )
-            self._load_schemas(yaml_dir, mgr, sync_engine)
+            self._load_schemas(yaml_dir, mgr, db_ctx)
             self._logger.info("Schemas loaded successfully")
 
-            await self._record_version()
-            await self._create_views()
-            await self._validate_staging()
-            await self._swap_schemas()
-
-        finally:
-            sync_engine.dispose()
+        await self._record_version()
+        await self._create_views()
+        await self._validate_staging()
+        await self._swap_schemas()
 
     async def _initialize_schemas(self) -> None:
         """Initialize required schemas in the database."""
@@ -176,13 +171,13 @@ class TAPSchemaService:
             await conn.execute(CreateSchema(STAGING_SCHEMA))
         self._logger.info("Staging schema initialized")
 
-    def _create_sync_engine(self) -> Engine:
-        """Create synchronous engine for felis operations.
+    def _create_sync_url(self) -> str:
+        """Create a synchronous database URL from the async engine URL.
 
         Returns
         -------
-        Engine
-            Synchronous SQLAlchemy engine.
+        str
+            Synchronous PostgreSQL database URL string.
         """
         async_url = make_url(str(self._engine.url))
         sync_url = URL.create(
@@ -193,26 +188,23 @@ class TAPSchemaService:
             port=async_url.port,
             database=async_url.database,
         )
-        return create_engine(sync_url)
 
-    def _initialize_table_manager(self, sync_engine: Engine) -> TableManager:
-        """Initialize TAP_SCHEMA tables and metadata.
+        # Use render_as_string to properly encode the password
+        return sync_url.render_as_string(hide_password=False)
+
+    def _create_table_manager(self, sync_url_str: str) -> TableManager:
+        """Create a TableManager with TAP_SCHEMA metadata loaded from YAML.
 
         Parameters
         ----------
-        sync_engine
-            Synchronous database engine.
+        sync_url_str
+            String representation of the sync database URL.
 
         Returns
         -------
         TableManager
-            Initialized table manager for schema operations.
+            Table manager with metadata loaded from extensions YAML.
         """
-        self._logger.info(
-            "Initializing TAP_SCHEMA tables",
-            schema=STAGING_SCHEMA,
-            table_postfix=self._table_postfix,
-        )
         # Use custom extensions path if provided, otherwise fall back to the
         # default TAP_SCHEMA extensions configuration bundled with felis.
         # The resource:// URI references a file within the felis package.
@@ -221,23 +213,42 @@ class TAPSchemaService:
             or "resource://felis/config/tap_schema/tap_schema_extensions.yaml"
         )
 
-        mgr = TableManager(
+        return TableManager(
+            engine_url=sync_url_str,
             schema_name=STAGING_SCHEMA,
             table_name_postfix=self._table_postfix,
-            apply_schema_to_metadata=True,
             extensions_path=extensions_path,
         )
-        mgr.initialize_database(sync_engine)
-        inserter = MetadataInserter(mgr, sync_engine)
+
+    def _initialize_database(
+        self, mgr: TableManager, db_ctx: DatabaseContext
+    ) -> None:
+        """Initialize TAP_SCHEMA database tables and insert metadata.
+
+        Parameters
+        ----------
+        mgr
+            Table manager with loaded metadata.
+        db_ctx
+            Database context for operations.
+        """
+        self._logger.info(
+            "Initializing TAP_SCHEMA tables",
+            schema=STAGING_SCHEMA,
+            table_postfix=self._table_postfix,
+        )
+
+        mgr.initialize_database(db_ctx)
+        inserter = MetadataInserter(mgr, db_ctx)
         inserter.insert_metadata()
+
         self._logger.info("TAP_SCHEMA tables initialized")
-        return mgr
 
     def _load_schemas(
         self,
         yaml_dir: Path,
         mgr: TableManager,
-        sync_engine: Engine,
+        db_ctx: DatabaseContext,
     ) -> None:
         """Load schemas from YAML files.
 
@@ -247,8 +258,8 @@ class TAPSchemaService:
             Directory containing schema YAML files.
         mgr
             Table manager for database operations.
-        sync_engine
-            Synchronous database engine.
+        db_ctx
+            Database context for operations.
 
         Raises
         ------
@@ -288,7 +299,7 @@ class TAPSchemaService:
             loader = DataLoader(
                 schema=felis_schema,
                 mgr=mgr,
-                engine=sync_engine,
+                db_context=db_ctx,
             )
             loader.load()
 

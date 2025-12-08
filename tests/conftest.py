@@ -115,6 +115,12 @@ def database_url(postgres_container: PostgresContainer) -> str:
     return url.replace("postgresql+psycopg2://", "postgresql+asyncpg://")
 
 
+@pytest.fixture(scope="session")
+def database_password(postgres_container: PostgresContainer) -> str:
+    """Get the database password from the container."""
+    return postgres_container.password
+
+
 @pytest_asyncio.fixture(scope="function")
 async def engine(database_url: str) -> AsyncIterator[AsyncEngine]:
     """Create a database engine connected to the test container."""
