@@ -21,16 +21,25 @@ classifiers = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "click>=8",
     "fastapi>=0.100",
+    "google-cloud-storage>=3.4.1",
+    "lsst-felis>=0.3.0",
     "jinja2>=3",
+    "psycopg2>=2.9.11",
     "pydantic>2",
     "pydantic-settings>=2",
     "rubin-repertoire",
-    "safir[kafka]>=14.1.2",
+    "safir[kafka,db]>=14.1.2",
+    "sqlalchemy[asyncio]>=2.0",
     "structlog>=25",
+    "testcontainers[postgres]>=4.0.0",
     "uvicorn[standard]>=0.34",
 ]
 dynamic = ["version"]
+
+[project.scripts]
+repertoire = "repertoire.cli:main"
 
 [project.urls]
 Homepage = "https://repertoire.lsst.io"

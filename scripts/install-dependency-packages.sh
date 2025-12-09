@@ -28,4 +28,5 @@ apt-get update
 # C modules, particularly when upgrading to newer Python versions. git is
 # required by setuptools_scm for package installation. libffi-dev is sometimes
 # needed to build cffi (a cryptography dependency).
-apt-get -y install --no-install-recommends build-essential git libffi-dev
+# libpq-dev is required to build psycopg2.
+apt-get -y install --no-install-recommends build-essential git libffi-dev libpq-dev

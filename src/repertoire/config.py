@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 
-from pydantic import AliasChoices, BaseModel, Field, SecretStr
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    SecretStr,
+    model_validator,
+)
+from pydantic.alias_generators import to_camel
 from safir.logging import (
     LogLevel,
     Profile,
@@ -26,6 +34,104 @@ class SentryConfig(BaseModel):
     """
 
     enabled: bool = Field(False, title="Whether to send exceptions to Sentry")
+
+
+class TapServerConfig(BaseModel):
+    """Configuration for a TAP server."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        extra="forbid",
+        populate_by_name=True,
+    )
+
+    enabled: bool = Field(
+        True,
+        title="Enable TAP schema management for this server",
+        description=(
+            "Controls whether repertoire manages TAP_SCHEMA for this server. "
+            "Set to false in environments where this TAP server doesn't exist "
+            "or doesn't use CloudSQL."
+        ),
+    )
+
+    schema_version: str | None = Field(
+        None,
+        title="Schema version override for this server",
+        description=(
+            "Override the global schemaVersion for this specific server. "
+            "If not set, uses config.tap.schemaVersion."
+        ),
+    )
+
+    schemas: list[str] = Field(
+        ...,
+        min_length=1,
+        title="List of schema names to load",
+        description="Schema YAML file names (without .yaml extension)",
+    )
+
+    database: str = Field(
+        ...,
+        title="Database name",
+        description="Database name for this TAP server",
+    )
+
+    database_user: str = Field(
+        ...,
+        title="Database username",
+        description="Username for this TAP server",
+    )
+
+    database_password_key: str = Field(
+        ...,
+        title="Secret key for database password",
+        description="Key in repertoire secret containing the server password",
+    )
+
+
+class TapConfig(BaseModel):
+    """Configuration for TAP schema management."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        extra="forbid",
+        populate_by_name=True,
+    )
+
+    schema_version: str | None = Field(
+        None,
+        title="Default schema version",
+        description="Schema version to use",
+    )
+
+    schema_source_template: str | None = Field(
+        None,
+        title="URL template for schema downloads",
+        description=(
+            "Template for schema download URLs. "
+            "Examples: 'gs://bucket/{version}.tar.gz'"
+        ),
+    )
+
+    schema_extensions_path: str | None = Field(
+        None,
+        title="Path to TAP_SCHEMA extensions",
+        description=(
+            "YAML file with TAP_SCHEMA extension columns. "
+            "Defaults to felis resource if not set."
+        ),
+    )
+
+    servers: dict[str, TapServerConfig] = Field(
+        default_factory=dict,
+        title="TAP schema configuration by application",
+        description=(
+            "Configuration for TAP servers whose TAP_SCHEMA tables are "
+            "managed by repertoire. Keys are application names "
+            "(tap, ssotap, etc)."
+        ),
+    )
 
 
 class Config(RepertoireSettings):
@@ -72,6 +178,12 @@ class Config(RepertoireSettings):
         validation_alias=AliasChoices("REPERTOIRE_TOKEN", "token"),
     )
 
+    tap: TapConfig = Field(
+        default_factory=TapConfig,
+        title="TAP schema management configuration",
+        description="Configuration for TAP_SCHEMA management",
+    )
+
     def configure_logging(self) -> None:
         """Configure logging based on the Repertoire configuration."""
         configure_logging(
@@ -81,3 +193,81 @@ class Config(RepertoireSettings):
         )
         if self.log_profile == Profile.production:
             configure_uvicorn_logging(self.log_level)
+
+    def get_tap_server_schema_version(self, server_name: str) -> str:
+        """Get the schema version for a TAP server.
+
+        Parameters
+        ----------
+        server_name
+            Name of the TAP server.
+
+        Returns
+        -------
+        str
+            The schema version to use (server-specific or global default).
+
+        Raises
+        ------
+        ValueError
+            If no schema version is configured at either level.
+        """
+        server_config = self.tap.servers.get(server_name)
+        if not server_config:
+            raise ValueError(f"Unknown TAP server: {server_name}")
+
+        version = server_config.schema_version or self.tap.schema_version
+
+        if not version:
+            raise ValueError(
+                f"No schema version configured for server '{server_name}'. "
+                f"Set either config.tap.schemaVersion or "
+                f"config.tap.servers.{server_name}.schemaVersion"
+            )
+
+        return version
+
+    @model_validator(mode="after")
+    def validate_tap_servers(self) -> Config:
+        """Validate TAP server config consistency.
+
+        Returns
+        -------
+        Config
+            The validated configuration.
+
+        Raises
+        ------
+        ValueError
+            If any enabled TAP server is missing required settings.
+        """
+        if not self.tap.servers:
+            return self
+
+        enabled_servers = [
+            name for name, cfg in self.tap.servers.items() if cfg.enabled
+        ]
+
+        if not enabled_servers:
+            return self
+
+        if not self.tap.schema_source_template:
+            raise ValueError(
+                "schema_source_template must be set when tap.servers "
+                "has enabled servers"
+            )
+
+        # Check each server has a version
+        for server_name in enabled_servers:
+            server_config = self.tap.servers[server_name]
+            has_server_version = server_config.schema_version
+            has_global_version = self.tap.schema_version
+            if not has_server_version and not has_global_version:
+                raise ValueError(
+                    f"No schema version configured for enabled server "
+                    f"'{server_name}'. "
+                    f"Set either config.tap.schemaVersion or "
+                    f"config.tap.servers.{server_name}.schemaVersion"
+                )
+
+        return self

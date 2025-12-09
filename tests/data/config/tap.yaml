@@ -1,0 +1,14 @@
+# TAP Servers sample configuration.
+baseHostname: "data-dev.lsst.cloud"
+butlerConfigs: {}
+tap:
+  schemaVersion: "w.2025.43"
+  schemaSourceTemplate: "gs://sdm-schemas-releases/{schemaVersion}.tar.gz"
+  servers:
+    tap:
+      schemaVersion: "w.2025.43"
+      schemas:
+        - dp02_dc2
+      database: "test"
+      databaseUser: "test"
+      databasePasswordKey: "test_password"
