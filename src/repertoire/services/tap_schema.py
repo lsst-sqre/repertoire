@@ -293,7 +293,11 @@ class TAPSchemaService:
             )
 
             felis_schema = Schema.from_uri(
-                str(schema_file), context={"id_generation": True}
+                str(schema_file),
+                context={
+                    "id_generation": True,
+                    "force_unbounded_arraysize": True,
+                },
             )
 
             loader = DataLoader(
