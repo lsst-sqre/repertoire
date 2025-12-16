@@ -89,6 +89,18 @@ class TapServerConfig(BaseModel):
         description="Key in repertoire secret containing the server password",
     )
 
+    database_host: str = Field(
+        ...,
+        title="Database host",
+        description="Database host for this TAP_SCHEMA server",
+    )
+
+    database_port: int = Field(
+        ...,
+        title="Database port",
+        description="Database port for this TAP_SCHEMA server",
+    )
+
 
 class TapConfig(BaseModel):
     """Configuration for TAP schema management."""

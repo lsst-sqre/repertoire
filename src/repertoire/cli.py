@@ -81,6 +81,8 @@ async def update_tap_schema_command(
         schemas=server_config.schemas,
         database=server_config.database,
         database_user=server_config.database_user,
+        database_host=server_config.database_host,
+        database_port=server_config.database_port,
     )
 
     db_password_env = os.getenv("REPERTOIRE_DATABASE_PASSWORD")
@@ -97,9 +99,9 @@ async def update_tap_schema_command(
                 f"Database password not found for TAP server: {app}\n"
                 f"Set REPERTOIRE_DATABASE_PASSWORD environment variable"
             )
-        database_url = (
-            f"postgresql://{db_user}@127.0.0.1:5432/{server_config.database}"
-        )
+        db_host = server_config.database_host
+        db_port = server_config.database_port
+        database_url = f"postgresql://{db_user}@{db_host}:{db_port}/{server_config.database}"
 
     engine = create_database_engine(database_url, db_password)
 
