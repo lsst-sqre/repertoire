@@ -11,6 +11,20 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.7.0'></a>
+## 0.7.0 (2025-12-15)
+
+## New features
+
+- Add cli to to allow updating a TAP_SCHEMA database
+- Add tap_schema service and storage classes to manage tap schema updates
+
+### Backwards-incompatible changes
+
+- Add tap.servers to configure individual TAP servers.
+- Each enabled server requires either a server-specific or global schema_version
+- Requires tap.schema_source_template to be set if any servers are enabled.
+
 <a id='changelog-0.6.1'></a>
 ## 0.6.1 (2025-12-04)
 
