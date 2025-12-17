@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 from pydantic import Field
 from safir.dependencies.metrics import EventDependency, EventMaker
 from safir.metrics import EventManager, EventPayload
@@ -38,6 +40,7 @@ class Events(EventMaker):
         User retrieved InfluxDB credentials.
     """
 
+    @override
     async def initialize(self, manager: EventManager) -> None:
         self.influx_creds = await manager.create_publisher(
             "influxdb_credentials", InfluxCredentialsEvent

@@ -250,6 +250,8 @@ class RepertoireBuilder:
         if rule.name:
             name = rule.name
         match rule:
+            case DataServiceRule():
+                pass
             case InternalServiceRule():
                 internal_service = self._build_internal_service_from_rule(rule)
                 services.internal[name] = internal_service
