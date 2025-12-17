@@ -16,14 +16,8 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 ## New features
 
-- Add cli to to allow updating a TAP_SCHEMA database
-- Add tap_schema service and storage classes to manage tap schema updates
-
-### Backwards-incompatible changes
-
-- Add tap.servers to configure individual TAP servers.
-- Each enabled server requires either a server-specific or global schema_version
-- Requires tap.schema_source_template to be set if any servers are enabled.
+- Add configuration for known TAP servers and their schema information. Currently, this is not used for discovery information, only for schema management.
+- Add a new command-line tool to update a `TAP_SCHEMA` database using the new configuration information and [Felis](https://felis.lsst.io/).
 
 <a id='changelog-0.6.1'></a>
 ## 0.6.1 (2025-12-04)
