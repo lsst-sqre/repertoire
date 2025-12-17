@@ -32,14 +32,10 @@ jobs:
         with:
           fetch-depth: 0 # full history for setuptools_scm
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.python }}
-
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
+          python-version: ${{ matrix.python }}
           version: ${{ env.UV_VERSION }}
 
       - name: Update dependencies
@@ -67,15 +63,14 @@ jobs:
         with:
           fetch-depth: 0 # full history for Sphinx
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version-file: ".python-version"
-
       - name: Install uv
         uses: astral-sh/setup-uv@v7
         with:
+          python-version: ${{ matrix.python }}
           version: ${{ env.UV_VERSION }}
+
+      - name: Update dependencies
+        run: make update-deps
 
       - name: Install extra packages
         run: |
