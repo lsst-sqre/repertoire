@@ -9,8 +9,5 @@ tap:
       schemaVersion: "w.2025.43"
       schemas:
         - dp02_dc2
-      database: "test"
-      databaseUser: "test"
+      databaseUrl: "postgresql://test@127.0.0.1:5432/test"
       databasePasswordKey: "test_password"
-      databaseHost: "127.0.0.1"
-      databasePort: 5432

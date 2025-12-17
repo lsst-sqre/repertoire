@@ -8,8 +8,5 @@ tap:
     tap:
       schemas:
         - dp02_dc2
-      database: "test"
-      databaseUser: "test"
+      databaseUrl: "postgresql://test@example.database.host:5433/test"
       databasePasswordKey: "test_password"
-      databaseHost: "example.database.host"
-      databasePort: 5433

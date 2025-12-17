@@ -79,29 +79,25 @@ async def update_tap_schema_command(
         "Starting TAP schema update",
         app=app,
         schemas=server_config.schemas,
-        database=server_config.database,
-        database_user=server_config.database_user,
-        database_host=server_config.database_host,
-        database_port=server_config.database_port,
+        database_url=server_config.database_url,
     )
 
     db_password_env = os.getenv("REPERTOIRE_DATABASE_PASSWORD")
-    db_user_env = os.getenv("REPERTOIRE_DATABASE_USER")
 
     if database_url:
         url_parts = make_url(database_url)
         db_password = url_parts.password or db_password_env
     else:
-        db_user = db_user_env or server_config.database_user
-        db_password = db_password_env
-        if not db_password:
-            raise click.ClickException(
-                f"Database password not found for TAP server: {app}\n"
-                f"Set REPERTOIRE_DATABASE_PASSWORD environment variable"
-            )
-        db_host = server_config.database_host
-        db_port = server_config.database_port
-        database_url = f"postgresql://{db_user}@{db_host}:{db_port}/{server_config.database}"
+        database_url = server_config.database_url
+        url_parts = make_url(database_url)
+        db_password = url_parts.password or db_password_env
+
+    if not db_password:
+        raise click.ClickException(
+            f"Database password not found for TAP server: {app}\n"
+            f"Set REPERTOIRE_DATABASE_PASSWORD environment variable or "
+            f"include password in database URL"
+        )
 
     engine = create_database_engine(database_url, db_password)
 
