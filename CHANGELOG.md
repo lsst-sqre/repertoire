@@ -14,7 +14,7 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 <a id='changelog-0.7.0'></a>
 ## 0.7.0 (2025-12-15)
 
-## New features
+### New features
 
 - Add configuration for known TAP servers and their schema information. Currently, this is not used for discovery information, only for schema management.
 - Add a new command-line tool to update a `TAP_SCHEMA` database using the new configuration information and [Felis](https://felis.lsst.io/).
