@@ -1,4 +1,4 @@
-# TAP Servers sample configuration.
+# TAP Servers configuration with custom database host and port.
 baseHostname: "data-dev.lsst.cloud"
 butlerConfigs: {}
 tap:
@@ -6,8 +6,7 @@ tap:
   schemaSourceTemplate: "gs://sdm-schemas-releases/{schemaVersion}.tar.gz"
   servers:
     tap:
-      schemaVersion: "w.2025.43"
       schemas:
         - dp02_dc2
-      databaseUrl: "postgresql://test@127.0.0.1:5432/test"
+      databaseUrl: "postgresql://test@example.database.host:5433/test"
       databasePasswordKey: "test_password"
