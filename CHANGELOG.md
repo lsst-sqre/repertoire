@@ -11,6 +11,13 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.8.0'></a>
+## 0.8.0 (2026-01-05)
+
+### Backwards-incompatible changes
+
+- TAP schema configuration now requires `databaseUrl` instead of individual `database` and `databaseUser` fields.
+
 <a id='changelog-0.7.0'></a>
 ## 0.7.0 (2025-12-15)
 
