@@ -71,16 +71,15 @@ class TapServerConfig(BaseModel):
         description="Schema YAML file names (without .yaml extension)",
     )
 
-    database: str = Field(
+    database_url: str = Field(
         ...,
-        title="Database name",
-        description="Database name for this TAP server",
-    )
-
-    database_user: str = Field(
-        ...,
-        title="Database username",
-        description="Username for this TAP server",
+        title="Database URL",
+        description=(
+            "Database URL for this TAP server (e.g., "
+            "postgresql://user@host:port/database). "
+            "Password should be provided separately via "
+            "REPERTOIRE_DATABASE_PASSWORD environment variable."
+        ),
     )
 
     database_password_key: str = Field(
