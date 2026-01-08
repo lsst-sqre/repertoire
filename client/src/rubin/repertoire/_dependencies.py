@@ -20,14 +20,16 @@ class DiscoveryDependency:
     """
 
     def __init__(self) -> None:
+        self._http_client: AsyncClient | None = None
         self._client: DiscoveryClient | None = None
 
     async def __call__(
         self,
         http_client: Annotated[AsyncClient, Depends(http_client_dependency)],
     ) -> DiscoveryClient:
-        if not self._client:
+        if not self._client or self._http_client != http_client:
             self._client = DiscoveryClient(http_client)
+            self._http_client = http_client
         return self._client
 
 
