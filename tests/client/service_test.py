@@ -45,6 +45,12 @@ async def test_butler_repositories(discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_environment_name(discovery: DiscoveryClient) -> None:
+    output = read_test_json("output/phalanx")
+    assert await discovery.environment_name() == output["environment_name"]
+
+
+@pytest.mark.asyncio
 async def test_url_for(discovery: DiscoveryClient) -> None:
     output = read_test_json("output/phalanx")
     services = output["services"]

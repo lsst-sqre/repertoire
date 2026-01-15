@@ -394,6 +394,19 @@ class RepertoireSettings(BaseSettings):
         ),
     ] = {}
 
+    environment_name: Annotated[
+        str | None,
+        Field(
+            title="Name of environment",
+            description=(
+                "Human-readable name of the environment, intended for use"
+                " in status or error reporting. This may be a hostname if"
+                " that is the most descriptive name, but should not be"
+                " assumed to be a hostname or used to construct any URLs."
+            ),
+        ),
+    ] = None
+
     hips: Annotated[
         HipsConfig | None,
         Field(

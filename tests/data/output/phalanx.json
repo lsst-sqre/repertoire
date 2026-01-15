@@ -131,6 +131,7 @@
       }
     }
   },
+  "environment_name": "data.example.com",
   "influxdb_databases": {
     "idfdev_efd": {
       "url": "https://data.example.com/influxdb/",
