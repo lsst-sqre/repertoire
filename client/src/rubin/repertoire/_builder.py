@@ -80,6 +80,7 @@ class RepertoireBuilder:
             applications=sorted(self._config.applications),
             datasets=self._build_datasets(hips_base_url),
             influxdb_databases=self._build_influxdb_databases(base_url),
+            environment_name=self._config.environment_name,
             services=self._build_services(),
         )
 

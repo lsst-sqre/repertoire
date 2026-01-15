@@ -339,6 +339,19 @@ class Discovery(BaseModel):
         ),
     ] = {}
 
+    environment_name: Annotated[
+        str | None,
+        Field(
+            title="Name of environment",
+            description=(
+                "Human-readable name of the environment, intended for use"
+                " in status or error reporting. This may be a hostname if"
+                " that is the most descriptive name, but should not be"
+                " assumed to be a hostname or used to construct any URLs."
+            ),
+        ),
+    ] = None
+
     influxdb_databases: Annotated[
         dict[str, InfluxDatabaseWithPointer],
         Field(

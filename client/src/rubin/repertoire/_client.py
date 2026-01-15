@@ -176,6 +176,29 @@ class DiscoveryClient:
         discovery = await self._get_discovery()
         return sorted(discovery.datasets.keys())
 
+    async def environment_name(self) -> str | None:
+        """Get the name of the local Phalanx environment.
+
+        If pressent, this will be a short, human-readable name for the local
+        Phalanx environment, intended for use in status reporting or other
+        contexts where identifying the environment to humans is useful. It
+        should not be treated as a hostname or URL or used to locate any
+        services.
+
+        Returns
+        -------
+        str or None
+            Human-readable name of the environment, or `None` if no
+            environment name was set.
+
+        Raises
+        ------
+        RepertoireError
+            Raised on error fetching discovery information from Repertoire.
+        """
+        discovery = await self._get_discovery()
+        return discovery.environment_name
+
     async def influxdb_connection_info(
         self, database: str
     ) -> InfluxDatabase | None:
