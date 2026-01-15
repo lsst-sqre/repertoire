@@ -78,7 +78,8 @@ class TapServerConfig(BaseModel):
             "Database URL for this TAP server (e.g., "
             "postgresql://user@host:port/database). "
             "Password should be provided separately via "
-            "REPERTOIRE_DATABASE_PASSWORD environment variable."
+            "the Repertoire secret in the field named by "
+            "config.tap.databasePasswordKey."
         ),
     )
 
@@ -127,7 +128,7 @@ class TapConfig(BaseModel):
         title="TAP schema configuration by application",
         description=(
             "Configuration for TAP servers whose TAP_SCHEMA tables are "
-            "managed by repertoire. Keys are application names "
+            "managed by repertoire. Keys are Phalanx application names "
             "(tap, ssotap, etc)."
         ),
     )
