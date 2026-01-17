@@ -27,11 +27,12 @@ async def test_register_model(respx_mock: respx.Router) -> None:
             }
         )
     )
+    expected = results.model_dump(mode="json", exclude_defaults=True)
     base_url = "https://example.com/repertoire"
     assert register_mock_discovery(respx_mock, results, base_url) == results
     async with AsyncClient() as client:
         r = await client.get(base_url + "/discovery")
-        assert r.json() == results.model_dump(mode="json", exclude_none=True)
+        assert r.json() == expected
 
 
 @pytest.mark.asyncio

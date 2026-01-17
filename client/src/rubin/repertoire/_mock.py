@@ -62,7 +62,7 @@ def register_mock_discovery(
         discovery = Discovery.model_validate_json(results.read_text())
     else:
         discovery = Discovery.model_validate(results)
-    discovery_json = discovery.model_dump(mode="json", exclude_none=True)
+    discovery_json = discovery.model_dump(mode="json", exclude_defaults=True)
     if not base_url:
         base_url = os.getenv("REPERTOIRE_BASE_URL")
         if not base_url:
