@@ -19,7 +19,7 @@ def test_build_discovery() -> None:
     config = RepertoireSettings.from_file(config_path)
 
     output = RepertoireBuilder(config).build_discovery(base_url, hips_base_url)
-    output_json = output.model_dump(mode="json", exclude_none=True)
+    output_json = output.model_dump(mode="json", exclude_defaults=True)
     assert output_json == read_test_json("output/phalanx")
 
     output = RepertoireBuilder(config).build_discovery(base_url)
@@ -35,7 +35,7 @@ def test_build_influxdb() -> None:
     # Check the output.
     output = RepertoireBuilder(config).build_influxdb("idfdev_efd")
     assert output
-    assert output.model_dump(mode="json", exclude_none=True) == expected
+    assert output.model_dump(mode="json", exclude_defaults=True) == expected
 
 
 def test_build_influxdb_creds() -> None:
@@ -48,14 +48,14 @@ def test_build_influxdb_creds() -> None:
     builder = RepertoireBuilderWithSecrets(config, secrets_path)
     output = builder.build_influxdb_with_credentials("idfdev_efd")
     assert output
-    output_json = output.model_dump(mode="json", exclude_none=True)
+    output_json = output.model_dump(mode="json", exclude_defaults=True)
     assert output_json == read_test_json("output/idfdev_efd-creds")
 
     # Now test with a str parameter and a secret file not ending in a newline.
     builder = RepertoireBuilderWithSecrets(config, str(secrets_path))
     output = builder.build_influxdb_with_credentials("idfdev_metrics")
     assert output
-    output_json = output.model_dump(mode="json", exclude_none=True)
+    output_json = output.model_dump(mode="json", exclude_defaults=True)
     assert output_json == read_test_json("output/idfdev_metrics-creds")
 
     # Unknown InfluxDB databases should return None.
@@ -70,7 +70,7 @@ def test_list_influxdb_creds() -> None:
     builder = RepertoireBuilderWithSecrets(config, secrets_path)
     output = builder.list_influxdb_with_credentials()
     output_json = {
-        k: v.model_dump(mode="json", exclude_none=True)
+        k: v.model_dump(mode="json", exclude_defaults=True)
         for k, v in output.items()
     }
     assert output_json == {

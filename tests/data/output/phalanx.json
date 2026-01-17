@@ -58,12 +58,10 @@
         },
         "sia": {
           "url": "https://data.example.com/api/sia/dp02",
-          "versions": {},
           "openapi": "https://data.example.com/api/sia/openapi.json"
         },
         "tap": {
-          "url": "https://data.example.com/api/tap",
-          "versions": {}
+          "url": "https://data.example.com/api/tap"
         }
       }
     },
@@ -86,8 +84,7 @@
           "openapi": "https://data.example.com/api/cutout/openapi.json"
         },
         "tap": {
-          "url": "https://data.example.com/api/ssotap",
-          "versions": {}
+          "url": "https://data.example.com/api/ssotap"
         }
       }
     },
@@ -121,12 +118,10 @@
         },
         "sia": {
           "url": "https://data.example.com/api/sia/dp1",
-          "versions": {},
           "openapi": "https://data.example.com/api/sia/openapi.json"
         },
         "tap": {
-          "url": "https://data.example.com/api/tap",
-          "versions": {}
+          "url": "https://data.example.com/api/tap"
         }
       }
     }
@@ -159,7 +154,6 @@
       },
       "mobu": {
         "url": "https://data.example.com/mobu",
-        "versions": {},
         "openapi": "https://data.example.com/mobu/openapi.json"
       },
       "noteburst": {
@@ -173,12 +167,10 @@
       },
       "semaphore": {
         "url": "https://data.example.com/semaphore",
-        "versions": {},
         "openapi": "https://data.example.com/semaphore/openapi.json"
       },
       "wobbly": {
         "url": "https://data.example.com/wobbly",
-        "versions": {},
         "openapi": "https://data.example.com/wobbly/openapi.json"
       }
     },

@@ -52,7 +52,7 @@ async def get_root(
 
 @discovery_router.get(
     "/discovery",
-    response_model_exclude_none=True,
+    response_model_exclude_defaults=True,
     summary="Discovery information",
 )
 async def get_discovery(
@@ -63,7 +63,7 @@ async def get_discovery(
 
 @discovery_router.get(
     "/discovery/influxdb",
-    response_model_exclude_none=True,
+    response_model_exclude_defaults=True,
     summary="List InfluxDB connection details",
     description=(
         "Returns a dictionary of InfluxDB database labels to connection"
@@ -88,7 +88,7 @@ async def list_influxdb(
 
 @discovery_router.get(
     "/discovery/influxdb/{database}",
-    response_model_exclude_none=True,
+    response_model_exclude_defaults=True,
     summary="InfluxDB connection information",
 )
 async def get_influxdb(

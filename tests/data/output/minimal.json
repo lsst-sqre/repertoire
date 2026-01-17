@@ -1,9 +1,1 @@
-{
-  "applications": [],
-  "datasets": {},
-  "influxdb_databases": {},
-  "services": {
-    "internal": {},
-    "ui": {}
-  }
-}
+{}
