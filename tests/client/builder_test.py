@@ -1,7 +1,5 @@
 """Tests for the discovery data builder."""
 
-from __future__ import annotations
-
 from rubin.repertoire import (
     RepertoireBuilder,
     RepertoireBuilderWithSecrets,

@@ -1,7 +1,5 @@
 """Metrics events for Repertoire."""
 
-from __future__ import annotations
-
 from typing import override
 
 from pydantic import Field

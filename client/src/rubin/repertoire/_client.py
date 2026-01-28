@@ -1,7 +1,5 @@
 """Client for service discovery."""
 
-from __future__ import annotations
-
 import os
 from typing import Any
 

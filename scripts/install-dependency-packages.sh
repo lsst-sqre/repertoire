@@ -24,9 +24,12 @@ export DEBIAN_FRONTEND=noninteractive
 # Update the package listing, so we know what packages exist:
 apt-get update
 
-# Install build-essential because sometimes Python dependencies need to build
-# C modules, particularly when upgrading to newer Python versions. git is
-# required by setuptools_scm for package installation. libffi-dev is sometimes
-# needed to build cffi (a cryptography dependency).
-# libpq-dev is required to build psycopg2.
-apt-get -y install --no-install-recommends build-essential git libffi-dev libpq-dev
+# Install various dependencies that may be required to install Repertoire.
+#
+# build-essential: sometimes needed to build Python modules
+# git: required by setuptools_scm
+# libffi-dev: sometimes needed to build cffi, a cryptography dependency
+# libpq-dev: required to build psycopg2
+# zlib1g-dev: sometimes needed to build aiokafka
+apt-get -y install --no-install-recommends \
+    build-essential git libffi-dev libpq-dev zlib1g-dev

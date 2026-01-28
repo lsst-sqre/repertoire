@@ -3,11 +3,8 @@
 This module provides the service layer for TAP schema management operations.
 """
 
-from __future__ import annotations
-
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 from felis.datamodel import Schema
 from felis.db.database_context import DatabaseContext, create_database_context
@@ -18,6 +15,7 @@ from sqlalchemy.engine import URL
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.schema import CreateSchema, DropSchema
+from structlog.stdlib import BoundLogger
 
 from repertoire.exceptions import (
     TAPSchemaNotFoundError,
@@ -25,9 +23,6 @@ from repertoire.exceptions import (
 )
 from repertoire.schema.version import TAPSchemaVersion
 from repertoire.storage.tap_schema import TAPSchemaStorage
-
-if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
 
 __all__ = ["TAPSchemaService"]
 

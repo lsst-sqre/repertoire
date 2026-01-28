@@ -1,7 +1,5 @@
 """Mock for a HiPS file server backend."""
 
-from __future__ import annotations
-
 import re
 
 import respx

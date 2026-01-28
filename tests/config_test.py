@@ -1,7 +1,5 @@
 """Tests for configuration parsing."""
 
-from __future__ import annotations
-
 from repertoire.config import Config
 
 from .support.data import data_path

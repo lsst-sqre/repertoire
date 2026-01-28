@@ -11,6 +11,18 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.9.0'></a>
+## 0.9.0 (2026-01-28)
+
+### New features
+
+- Add `DiscoveryClient.environment_name` and a corresponding `environmentName` configuration setting to provide a human-readable name for the local Phalanx environment. Callers should be aware that this method may return `None` if no name is defined.
+
+### Bug fixes
+
+- In the FastAPI Repertoire client dependency, recreate the client if the underlying HTTPX client from the Safir dependency has changed. This case will not generally arise in production but fixes problems in test suites that repeatedly recreate the underlying HTTPX client pool.
+- Suppress discovery values equal to their defaults. This ensures that discovery output is less cluttered with, for example, empty `versions` keys when viewed in a web browser.
+
 <a id='changelog-0.8.0'></a>
 ## 0.8.0 (2026-01-05)
 

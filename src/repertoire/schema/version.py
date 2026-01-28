@@ -1,7 +1,5 @@
 """SQLAlchemy schema for TAP_SCHEMA version table."""
 
-from __future__ import annotations
-
 from datetime import datetime
 
 from sqlalchemy import TIMESTAMP, String, func

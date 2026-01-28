@@ -1,7 +1,5 @@
 """Tests for schema download functionality."""
 
-from __future__ import annotations
-
 import tarfile
 from collections.abc import AsyncIterator
 from pathlib import Path

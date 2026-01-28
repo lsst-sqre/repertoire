@@ -1,7 +1,5 @@
 """Exception classes for Repertoire."""
 
-from __future__ import annotations
-
 from safir.slack.blockkit import SlackException, SlackWebException
 
 __all__ = [

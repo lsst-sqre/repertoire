@@ -4,24 +4,19 @@ This module is responsible for downloading the schema archives from multiple
 sources (GCS, HTTP/HTTPS) and extracting them to a working directory.
 """
 
-from __future__ import annotations
-
 import tarfile
 from pathlib import Path
-from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
 import httpx
 from google.cloud import storage
+from structlog.stdlib import BoundLogger
 
 from repertoire.exceptions import (
     TAPSchemaDirectoryError,
     TAPSchemaDownloadError,
     TAPSchemaExtractionError,
 )
-
-if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
 
 __all__ = ["TAPSchemaStorage"]
 
