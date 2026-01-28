@@ -1,7 +1,5 @@
 """Mock for the Repertoire discovery service."""
 
-from __future__ import annotations
-
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -21,7 +19,7 @@ __all__ = ["register_mock_discovery"]
 
 
 def register_mock_discovery(
-    respx_mock: respx.Router,
+    respx_mock: "respx.Router",
     results: Discovery | dict[str, Any] | Path,
     base_url: str | None = None,
 ) -> Discovery:

@@ -1,7 +1,5 @@
 """Test the client mocks."""
 
-from __future__ import annotations
-
 import pytest
 import respx
 from httpx import AsyncClient

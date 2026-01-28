@@ -1,7 +1,5 @@
 """Tests for TAP schema database operations."""
 
-from __future__ import annotations
-
 import asyncio
 from pathlib import Path
 from unittest.mock import MagicMock, patch

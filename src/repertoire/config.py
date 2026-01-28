@@ -1,6 +1,6 @@
 """Configuration definition."""
 
-from __future__ import annotations
+from typing import Self
 
 from pydantic import (
     AliasChoices,
@@ -228,7 +228,7 @@ class Config(RepertoireSettings):
         return version
 
     @model_validator(mode="after")
-    def validate_tap_servers(self) -> Config:
+    def validate_tap_servers(self) -> Self:
         """Validate TAP server config consistency.
 
         Returns

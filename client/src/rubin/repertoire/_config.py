@@ -1,7 +1,5 @@
 """Configuration model for Repertoire."""
 
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Annotated, Literal, Self
 

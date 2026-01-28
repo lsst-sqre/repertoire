@@ -1,7 +1,5 @@
 """Tests for the InfluxDB discovery client."""
 
-from __future__ import annotations
-
 import pytest
 import respx
 from httpx import Request, Response

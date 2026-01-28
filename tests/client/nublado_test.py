@@ -1,7 +1,5 @@
 """Tests for generation of stripped-down discovery information for Nublado."""
 
-from __future__ import annotations
-
 import pytest
 
 from rubin.repertoire import Discovery, DiscoveryClient

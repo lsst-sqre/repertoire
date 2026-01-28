@@ -1,7 +1,5 @@
 """Test fixtures for Repertoire tests."""
 
-from __future__ import annotations
-
 from collections.abc import AsyncGenerator, AsyncIterator, Iterator
 from pathlib import Path
 

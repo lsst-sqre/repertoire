@@ -1,7 +1,5 @@
 """Custom exceptions for the Repertoire server."""
 
-from __future__ import annotations
-
 from fastapi import status
 from safir.fastapi import ClientRequestError
 from safir.slack.blockkit import SlackWebException

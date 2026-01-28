@@ -1,17 +1,11 @@
 """Factory for creating Repertoire service and storage objects."""
 
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
-
 from sqlalchemy.ext.asyncio import AsyncEngine
+from structlog.stdlib import BoundLogger
 
 from repertoire.config import Config
 from repertoire.services.tap_schema import TAPSchemaService
 from repertoire.storage.tap_schema import TAPSchemaStorage
-
-if TYPE_CHECKING:
-    from structlog.stdlib import BoundLogger
 
 __all__ = ["Factory"]
 

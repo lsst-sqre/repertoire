@@ -1,7 +1,5 @@
 """Test the packaging."""
 
-from __future__ import annotations
-
 from repertoire import __version__
 
 

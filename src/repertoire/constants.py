@@ -1,7 +1,5 @@
 """Constants for Repertoire."""
 
-from __future__ import annotations
-
 from pathlib import Path
 
 __all__ = ["CONFIG_PATH", "SECRETS_PATH"]
