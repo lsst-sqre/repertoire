@@ -299,6 +299,7 @@ class TAPSchemaService:
                 schema=felis_schema,
                 mgr=mgr,
                 db_context=db_ctx,
+                tap_schema_index=i,
             )
             loader.load()
 
