@@ -11,6 +11,13 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.10.0'></a>
+## 0.10.0 (2026-02-03)
+
+### Bug fixes
+
+- Add `tap_schema_index` to DataLoader call so that the schema_index is properly propagated
+
 <a id='changelog-0.9.0'></a>
 ## 0.9.0 (2026-01-28)
 
