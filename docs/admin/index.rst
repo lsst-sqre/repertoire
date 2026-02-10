@@ -10,4 +10,5 @@ It is considered part of Phalanx infrastructure and is normally installed in eve
 .. toctree::
    :caption: Maintaining the server
 
+   tap-schema
    metrics
