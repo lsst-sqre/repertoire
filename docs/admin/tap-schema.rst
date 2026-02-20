@@ -20,11 +20,11 @@ Clients use this metadata to discover what data is queryable, either via ADQL qu
 
 Repertoire populates TAP_SCHEMA by:
 
-1. Downloading schema definitions from `sdm_schemas <https://github.com/lsst/sdm_schemas>`__ (or another configurable source).
-2. Parsing the YAML schema files using `Felis <https://felis.lsst.io/>`__.
-3. Loading the schema metadata into a staging PostgreSQL schema.
-4. Validating the staged data.
-5. Performing an atomic swap to make the new metadata live.
+#. Downloading schema definitions from `sdm_schemas <https://github.com/lsst/sdm_schemas>`__ (or another configurable source).
+#. Parsing the YAML schema files using `Felis <https://felis.lsst.io/>`__.
+#. Loading the schema metadata into a staging PostgreSQL schema.
+#. Validating the staged data.
+#. Performing an atomic swap to make the new metadata live.
 
 This process runs automatically as a Helm **pre-install/pre-upgrade hook** during Argo CD syncs of Repertoire.
 
@@ -144,22 +144,22 @@ Updating the sdm_schemas version
 
 To update the schema definitions to a new sdm_schemas release:
 
-1. Change ``config.tap.schemaVersion`` in ``applications/repertoire/values.yaml`` to the new version tag for sdm_schemas.
+#. Change ``config.tap.schemaVersion`` in ``applications/repertoire/values.yaml`` to the new version tag for sdm_schemas.
 
-2. If the ``cadc-tap`` chart's ``config.datalinkPayloadUrl`` references a specific sdm_schemas version, update that as well in ``charts/cadc-tap/values.yaml``.
+#. If the ``cadc-tap`` chart's ``config.datalinkPayloadUrl`` references a specific sdm_schemas version, update that as well in ``charts/cadc-tap/values.yaml``.
 
-3. Commit and push the changes, then sync the Repertoire application via ArgoCD. A helm hook will run for each enabled TAP service, and will automatically download the new schema version and update TAP_SCHEMA.
+#. Commit and push the changes, then sync the Repertoire application via ArgoCD. A helm hook will run for each enabled TAP service, and will automatically download the new schema version and update TAP_SCHEMA.
 
 Adding or removing schemas from a TAP server
 ---------------------------------------------
 
 To change which schemas are served by a TAP application:
 
-1. Edit the ``schemas`` list under ``config.tap.servers.<name>`` in ``applications/repertoire/values.yaml``.
+#. Edit the ``schemas`` list under ``config.tap.servers.<name>`` in ``applications/repertoire/values.yaml``.
 
-2. Add or remove schemas. Added schema names must match YAML file names in the sdm_schemas package (without the ``.yaml`` extension).
+#. Add or remove schemas. Added schema names must match YAML file names in the sdm_schemas package (without the ``.yaml`` extension).
 
-3. Sync the Repertoire application. The Helm hook will reload all schemas for that server.
+#. Sync the Repertoire application. The Helm hook will reload all schemas for that server.
 
 Changing schema display order
 -----------------------------
@@ -179,7 +179,7 @@ Adding a new TAP server to Repertoire management
 
 To have Repertoire manage TAP_SCHEMA for a new TAP application:
 
-1. Add a new entry under ``config.tap.servers`` in ``applications/repertoire/values.yaml``:
+#. Add a new entry under ``config.tap.servers`` in ``applications/repertoire/values.yaml``:
 
    .. code-block:: yaml
 
@@ -193,7 +193,7 @@ To have Repertoire manage TAP_SCHEMA for a new TAP application:
               databaseUrl: "postgresql://newtap@127.0.0.1:5432/newtap"
               databasePasswordKey: "newtap-database-password"
 
-2. Add the corresponding secret to ``applications/repertoire/secrets.yaml``:
+#. Add the corresponding secret to ``applications/repertoire/secrets.yaml``:
 
    .. code-block:: yaml
 
@@ -206,7 +206,7 @@ To have Repertoire manage TAP_SCHEMA for a new TAP application:
           application: newtap
           key: tap-schema-password
 
-3. Enable the server in the appropriate environment values file (e.g., ``applications/repertoire/values-idfint.yaml``):
+#. Enable the server in the appropriate environment values file (e.g., ``applications/repertoire/values-idfint.yaml``):
 
    .. code-block:: yaml
 
@@ -216,7 +216,7 @@ To have Repertoire manage TAP_SCHEMA for a new TAP application:
             newtap:
               enabled: true
 
-4. Ensure the TAP application itself has ``tap-schema-password`` in its Vault secrets and that the TAP_SCHEMA database type is set to ``"cloudsql"`` or ``"external"`` (not ``"containerized"``).
+#. Ensure the TAP application itself has ``tap-schema-password`` in its Vault secrets and that the TAP_SCHEMA database type is set to ``"cloudsql"`` or ``"external"`` (not ``"containerized"``).
 
 .. _tap-schema-secrets:
 
@@ -252,9 +252,9 @@ These images are configured in the TAP application's Helm values:
 
 To update TAP_SCHEMA metadata for a containerized deployment:
 
-1. Build a new Docker image containing the updated schema metadata.
-2. Push the image to the container registry.
-3. Update ``tapSchema.image.tag`` in the environment-specific TAP values file.
-4. Sync the TAP application via Argo CD.
+#. Build a new Docker image containing the updated schema metadata.
+#. Push the image to the container registry.
+#. Update ``tapSchema.image.tag`` in the environment-specific TAP values file.
+#. Sync the TAP application via Argo CD.
 
 For information on setting up TAP database infrastructure, see the `Phalanx TAP database configuration guide <https://phalanx.lsst.io/applications/tap/databases.html>`__.
