@@ -5,6 +5,7 @@ from typing import Annotated
 from fastapi import Depends
 from httpx import AsyncClient
 from safir.dependencies.http_client import http_client_dependency
+from structlog.stdlib import BoundLogger
 
 from ._client import DiscoveryClient
 
@@ -22,15 +23,20 @@ class DiscoveryDependency:
     def __init__(self) -> None:
         self._http_client: AsyncClient | None = None
         self._client: DiscoveryClient | None = None
+        self._logger: BoundLogger | None = None
 
     async def __call__(
         self,
         http_client: Annotated[AsyncClient, Depends(http_client_dependency)],
     ) -> DiscoveryClient:
         if not self._client or self._http_client != http_client:
-            self._client = DiscoveryClient(http_client)
+            self._client = DiscoveryClient(http_client, logger=self._logger)
             self._http_client = http_client
         return self._client
+
+    def initialize(self, logger: BoundLogger) -> None:
+        """Set the logger to use for service discovery."""
+        self._logger = logger
 
 
 discovery_dependency = DiscoveryDependency()
