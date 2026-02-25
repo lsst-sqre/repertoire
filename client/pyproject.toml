@@ -28,6 +28,7 @@ dependencies = [
     "pydantic-settings>=2.6,<3",
     "pyyaml>=6,<7",
     "safir>=4,<15",
+    "structlog>=25",
 ]
 dynamic = ["version"]
 

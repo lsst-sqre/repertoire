@@ -14,4 +14,5 @@
 .. _scriv: https://scriv.readthedocs.io/en/stable/
 .. _semver: https://semver.org/
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
+.. _structlog: https://www.structlog.org/en/stable/index.html
 .. _uv: https://docs.astral.sh/uv/
