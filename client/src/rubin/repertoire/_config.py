@@ -40,12 +40,12 @@ class DatasetConfig(BaseModel):
     ]
 
     docs_url: Annotated[
-        HttpUrl,
+        HttpUrl | None,
         Field(
             title="Documentation URL",
             description="URL to more detailed documentation about the dataset",
         ),
-    ]
+    ] = None
 
 
 class HipsDatasetConfig(BaseModel):
