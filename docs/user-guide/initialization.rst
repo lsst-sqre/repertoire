@@ -105,6 +105,16 @@ That configuration can be added to the HTTPX client before passing it into the `
 If you provide an HTTPX client, you do not need to call `DiscoveryClient.aclose`.
 You are responsible for closing the provided client when appropriate.
 
+Override the cache duration
+---------------------------
+
+Rarely, the client may want to override the default service discovery cache duration of five minutes.
+To do so, pass a `~datetime.timedelta` as the ``cache_timeout`` argument to the `DiscoveryClient` constructor.
+
+Most users of the client should not override the default cache timeout.
+It was chosen to minimize network traffic but still allow Phalanx services to eventually converge on updated service discovery state.
+If it is critical that a specific application immediately pick up new service discovery information, it should be restarted.
+
 Next steps
 ==========
 
