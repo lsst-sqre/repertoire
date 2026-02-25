@@ -1,5 +1,7 @@
 """Tests for the service discovery client."""
 
+from datetime import timedelta
+
 import pytest
 import respx
 from httpx import Response
@@ -120,3 +122,45 @@ async def test_default_client(respx_mock: respx.Router) -> None:
     discovery = DiscoveryClient(base_url=base_url + "/")
     assert await discovery.applications() == output["applications"]
     await discovery.aclose()
+
+
+@pytest.mark.asyncio
+async def test_cache(respx_mock: respx.Router) -> None:
+    initial = read_test_json("output/phalanx")
+    base_url = "https://api.example.com/repertoire"
+    response = Response(200, json=initial)
+    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+
+    discovery = DiscoveryClient(base_url=base_url)
+    assert await discovery.applications() == initial["applications"]
+
+    # Replace the discovery information with different information. The client
+    # should not see any changes since the information is cached.
+    new = read_test_json("output/minimal")
+    response = Response(200, json=new)
+    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+    assert await discovery.applications() == initial["applications"]
+
+    # A new client will see the new information.
+    discovery = DiscoveryClient(base_url=base_url)
+    assert await discovery.applications() == []
+
+
+@pytest.mark.asyncio
+async def test_cache_timeout(respx_mock: respx.Router) -> None:
+    initial = read_test_json("output/phalanx")
+    base_url = "https://api.example.com/repertoire"
+    response = Response(200, json=initial)
+    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+
+    discovery = DiscoveryClient(
+        base_url=base_url, cache_timeout=timedelta(seconds=0)
+    )
+    assert await discovery.applications() == initial["applications"]
+
+    # Since the cache timeout is set to 0, replacing the output should produce
+    # an immedate change in the results.
+    new = read_test_json("output/minimal")
+    response = Response(200, json=new)
+    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+    assert await discovery.applications() == []

@@ -1,6 +1,7 @@
 """Client for service discovery."""
 
 import os
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from httpx import AsyncClient, HTTPError
@@ -44,6 +45,9 @@ class DiscoveryClient:
         environment variable. If this parameter is not provided and
         ``REPERTOIRE_BASE_URL`` is not set in the environment,
         `RepertoireUrlError` will be raised.
+    cache_timeout
+        How long to cache results for. This is configurable primarily for the
+        test suite. Most clients should leave this set to the default.
     """
 
     def __init__(
@@ -51,10 +55,14 @@ class DiscoveryClient:
         http_client: AsyncClient | None = None,
         *,
         base_url: str | None = None,
+        cache_timeout: timedelta = timedelta(minutes=5),
     ) -> None:
         self._client = http_client or AsyncClient()
         self._close_client = http_client is None
+        self._cache_timeout = cache_timeout
+
         self._discovery_cache: Discovery | None = None
+        self._discovery_cache_time = datetime.now(tz=UTC)
 
         if base_url is not None:
             self._base_url = base_url.rstrip("/")
@@ -464,9 +472,14 @@ class DiscoveryClient:
 
     async def _get_discovery(self) -> Discovery:
         """Fetch and cache discovery information."""
-        if self._discovery_cache is None:
-            route = self._build_url("/discovery")
-            self._discovery_cache = await self._get(route, Discovery)
+        now = datetime.now(tz=UTC)
+        if self._discovery_cache:
+            expires = self._discovery_cache_time + self._cache_timeout
+            if now <= expires:
+                return self._discovery_cache
+        route = self._build_url("/discovery")
+        self._discovery_cache = await self._get(route, Discovery)
+        self._discovery_cache_time = now
         return self._discovery_cache
 
     def _build_url(self, route: str) -> str:
