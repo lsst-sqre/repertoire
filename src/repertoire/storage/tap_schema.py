@@ -82,7 +82,7 @@ class TAPSchemaStorage:
 
         url = source_url_template.format(version=schema_version)
         parsed = urlparse(url)
-        archive_path = schema_dir / f"{schema_version}.tar.gz"
+        archive_path = schema_dir / "schemas.tar.gz"
 
         if parsed.scheme == "gs":
             await self._download_from_gcs(url, archive_path, schema_version)
