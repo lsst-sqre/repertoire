@@ -12,6 +12,7 @@ from httpx import ASGITransport, AsyncClient
 from jinja2 import Template
 from pydantic import SecretStr
 from safir.logging import LogLevel, Profile, configure_logging
+from safir.testing.data import Data
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from structlog.stdlib import BoundLogger, get_logger
@@ -24,13 +25,21 @@ from repertoire.main import create_app
 from rubin.repertoire import DiscoveryClient
 
 from .support.constants import TEST_BASE_URL
-from .support.data import data_path
 from .support.hips import register_mock_hips
+
+
+def pytest_addoption(parser: pytest.Parser) -> None:
+    parser.addoption(
+        "--update-test-data",
+        action="store_true",
+        default=False,
+        help="Overwrite expected test output with current results",
+    )
 
 
 @pytest_asyncio.fixture(params=["phalanx"])
 async def app(
-    request: pytest.FixtureRequest, token: str
+    data: Data, token: str, request: pytest.FixtureRequest
 ) -> AsyncGenerator[FastAPI]:
     """Return a configured test application.
 
@@ -49,12 +58,12 @@ async def app(
        async def test_something() -> None: ...
     """
     config_path = f"config/{request.param}.yaml"
-    config_dependency.set_config_path(data_path(config_path))
+    config_dependency.set_config_path(data.path(config_path))
     config = config_dependency.config()
     if config.hips and config.hips.datasets:
         config.token = SecretStr(token)
     hips_list_dependency.clear_cache()
-    app = create_app(secrets_root=data_path("secrets"))
+    app = create_app(secrets_root=data.path("secrets"))
     async with LifespanManager(app):
         yield app
 
@@ -71,40 +80,9 @@ async def client(app: FastAPI) -> AsyncGenerator[AsyncClient]:
 
 
 @pytest.fixture
-def discovery(
-    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
-) -> DiscoveryClient:
-    repertoire_url = TEST_BASE_URL.rstrip("/") + "/repertoire"
-    return DiscoveryClient(client, base_url=repertoire_url)
-
-
-@pytest.fixture(autouse=True)
-def mock_hips(
-    respx_mock: respx.Router, monkeypatch: pytest.MonkeyPatch, token: str
-) -> None:
-    monkeypatch.setenv("REPERTOIRE_TOKEN", token)
-    config = Config.from_file(data_path("config/phalanx.yaml"))
-    assert config.hips
-    monkeypatch.delenv("REPERTOIRE_TOKEN")
-    template = Template(config.hips.source_template)
-    for dataset in config.hips.datasets:
-        context = {"base_hostname": config.base_hostname, "dataset": dataset}
-        register_mock_hips(respx_mock, template.render(**context))
-
-
-@pytest.fixture(scope="session")
-def token() -> str:
-    token_path = Path(__file__).parent / "data" / "secrets" / "token"
-    return token_path.read_text().rstrip("\n")
-
-
-@pytest.fixture(scope="session")
-def postgres_container() -> Iterator[PostgresContainer]:
-    """Start a PostgreSQL container for the test session."""
-    container = PostgresContainer("postgres:15-alpine")
-    container.start()
-    yield container
-    container.stop()
+def data(request: pytest.FixtureRequest) -> Data:
+    update = request.config.getoption("--update-test-data")
+    return Data(Path(__file__).parent / "data", update_test_data=update)
 
 
 @pytest.fixture(scope="session")
@@ -118,6 +96,50 @@ def database_url(postgres_container: PostgresContainer) -> str:
 def database_password(postgres_container: PostgresContainer) -> str:
     """Get the database password from the container."""
     return postgres_container.password
+
+
+@pytest.fixture
+def discovery(
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+) -> DiscoveryClient:
+    repertoire_url = TEST_BASE_URL.rstrip("/") + "/repertoire"
+    return DiscoveryClient(client, base_url=repertoire_url)
+
+
+@pytest.fixture
+def logger() -> BoundLogger:
+    """Create a test debug logger."""
+    configure_logging(
+        profile=Profile.production, log_level=LogLevel.DEBUG, name="test"
+    )
+    return get_logger("test")
+
+
+@pytest.fixture(autouse=True)
+def mock_hips(
+    *,
+    data: Data,
+    token: str,
+    respx_mock: respx.Router,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("REPERTOIRE_TOKEN", token)
+    config = Config.from_file(data.path("config/phalanx.yaml"))
+    assert config.hips
+    monkeypatch.delenv("REPERTOIRE_TOKEN")
+    template = Template(config.hips.source_template)
+    for dataset in config.hips.datasets:
+        context = {"base_hostname": config.base_hostname, "dataset": dataset}
+        register_mock_hips(data, respx_mock, template.render(**context))
+
+
+@pytest.fixture(scope="session")
+def postgres_container() -> Iterator[PostgresContainer]:
+    """Start a PostgreSQL container for the test session."""
+    container = PostgresContainer("postgres:15-alpine")
+    container.start()
+    yield container
+    container.stop()
 
 
 @pytest_asyncio.fixture(scope="function")
@@ -142,19 +164,7 @@ async def engine(database_url: str) -> AsyncIterator[AsyncEngine]:
     await _engine.dispose()
 
 
-@pytest.fixture
-def logger() -> BoundLogger:
-    """Create a test debug logger."""
-    configure_logging(
-        profile=Profile.production, log_level=LogLevel.DEBUG, name="test"
-    )
-    return get_logger("test")
-
-
-@pytest.fixture
-def tap_config_file(tmp_path: Path) -> Path:
-    """Create a config file for TAP schema CLI tests.
-
-    Note: Database credentials are overridden via --database-url in tests.
-    """
-    return data_path("config/tap.yaml")
+@pytest.fixture(scope="session")
+def token() -> str:
+    token_path = Path(__file__).parent / "data" / "secrets" / "token"
+    return token_path.read_text().rstrip("\n")

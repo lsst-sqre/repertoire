@@ -1,19 +1,18 @@
 """Tests for generation of stripped-down discovery information for Nublado."""
 
 import pytest
+from safir.testing.data import Data
 
 from rubin.repertoire import Discovery, DiscoveryClient
 
-from ..support.data import read_test_json
-
 
 @pytest.mark.asyncio
-async def test_nublado(discovery: DiscoveryClient) -> None:
-    output = read_test_json("output/nublado")
-    assert await discovery.build_nublado_dict() == output
+async def test_nublado(data: Data, discovery: DiscoveryClient) -> None:
+    nublado = await discovery.build_nublado_dict()
+    data.assert_json_matches(nublado, "output/nublado")
 
 
-def test_nublado_roundtrip() -> None:
+def test_nublado_roundtrip(data: Data) -> None:
     """Test that the reduced output can round-trip through the model."""
-    output = read_test_json("output/nublado")
+    output = data.read_json("output/nublado")
     assert Discovery.model_validate(output).to_nublado_dict() == output

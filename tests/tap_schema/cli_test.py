@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from click.testing import CliRunner
+from safir.testing.data import Data
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 from testcontainers.postgres import PostgresContainer
@@ -13,10 +14,11 @@ from repertoire.cli import main
 
 
 def test_update_tap_schema_integration(
+    data: Data,
     postgres_container: PostgresContainer,
-    tap_config_file: Path,
     tmp_path: Path,
 ) -> None:
+    tap_config_file = data.path("config/tap.yaml")
     event_loop = asyncio.new_event_loop()
     db_url = postgres_container.get_connection_url()
     async_db_url = db_url.replace(

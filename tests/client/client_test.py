@@ -6,30 +6,31 @@ from unittest.mock import ANY
 import pytest
 import respx
 from httpx import Response
+from safir.testing.data import Data
 from safir.testing.logging import parse_log_tuples
 from structlog.stdlib import BoundLogger
 
 from rubin.repertoire import DiscoveryClient, RepertoireWebError
 
-from ..support.data import read_test_json
-
 
 @pytest.mark.asyncio
-async def test_applications(discovery: DiscoveryClient) -> None:
-    output = read_test_json("output/phalanx")
+async def test_applications(data: Data, discovery: DiscoveryClient) -> None:
+    output = data.read_json("output/phalanx")
     assert await discovery.applications() == output["applications"]
 
 
 @pytest.mark.asyncio
-async def test_datasets(discovery: DiscoveryClient) -> None:
-    output = read_test_json("output/phalanx")
+async def test_datasets(data: Data, discovery: DiscoveryClient) -> None:
+    output = data.read_json("output/phalanx")
     expected = sorted(output["datasets"].keys())
     assert await discovery.datasets() == expected
 
 
 @pytest.mark.asyncio
-async def test_butler_config_for(discovery: DiscoveryClient) -> None:
-    output = read_test_json("output/phalanx")
+async def test_butler_config_for(
+    data: Data, discovery: DiscoveryClient
+) -> None:
+    output = data.read_json("output/phalanx")
     for dataset in output["datasets"]:
         result = await discovery.butler_config_for(dataset)
         assert result == output["datasets"][dataset].get("butler_config")
@@ -37,8 +38,10 @@ async def test_butler_config_for(discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_butler_repositories(discovery: DiscoveryClient) -> None:
-    output = read_test_json("output/phalanx")
+async def test_butler_repositories(
+    data: Data, discovery: DiscoveryClient
+) -> None:
+    output = data.read_json("output/phalanx")
     expected = {
         k: v["butler_config"]
         for k, v in output["datasets"].items()
@@ -48,14 +51,16 @@ async def test_butler_repositories(discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_environment_name(discovery: DiscoveryClient) -> None:
-    output = read_test_json("output/phalanx")
+async def test_environment_name(
+    data: Data, discovery: DiscoveryClient
+) -> None:
+    output = data.read_json("output/phalanx")
     assert await discovery.environment_name() == output["environment_name"]
 
 
 @pytest.mark.asyncio
-async def test_url_for(discovery: DiscoveryClient) -> None:
-    output = read_test_json("output/phalanx")
+async def test_url_for(data: Data, discovery: DiscoveryClient) -> None:
+    output = data.read_json("output/phalanx")
     services = output["services"]
 
     for service, info in services["internal"].items():
@@ -75,8 +80,8 @@ async def test_url_for(discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_versions_for(discovery: DiscoveryClient) -> None:
-    output = read_test_json("output/phalanx")
+async def test_versions_for(data: Data, discovery: DiscoveryClient) -> None:
+    output = data.read_json("output/phalanx")
     services = output["services"]
 
     for dataset, mapping in output["datasets"].items():
@@ -110,8 +115,8 @@ async def test_versions_for(discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_default_client(respx_mock: respx.Router) -> None:
-    output = read_test_json("output/phalanx")
+async def test_default_client(data: Data, respx_mock: respx.Router) -> None:
+    output = data.read_json("output/phalanx")
     base_url = "https://api.example.com/repertoire"
     response = Response(200, json=output)
     respx_mock.get(base_url + "/discovery").mock(return_value=response)
@@ -128,7 +133,7 @@ async def test_default_client(respx_mock: respx.Router) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cache(respx_mock: respx.Router) -> None:
+async def test_cache(data: Data, respx_mock: respx.Router) -> None:
     base_url = "https://api.example.com/repertoire"
     respx_mock.get(base_url + "/discovery").mock(return_value=Response(404))
 
@@ -138,7 +143,7 @@ async def test_cache(respx_mock: respx.Router) -> None:
     with pytest.raises(RepertoireWebError):
         await discovery.applications()
 
-    initial = read_test_json("output/phalanx")
+    initial = data.read_json("output/phalanx")
     base_url = "https://api.example.com/repertoire"
     response = Response(200, json=initial)
     respx_mock.get(base_url + "/discovery").mock(return_value=response)
@@ -148,7 +153,7 @@ async def test_cache(respx_mock: respx.Router) -> None:
 
     # Replace the discovery information with different information. The client
     # should not see any changes since the information is cached.
-    new = read_test_json("output/minimal")
+    new = data.read_json("output/minimal")
     response = Response(200, json=new)
     respx_mock.get(base_url + "/discovery").mock(return_value=response)
     assert await discovery.applications() == initial["applications"]
@@ -159,8 +164,8 @@ async def test_cache(respx_mock: respx.Router) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cache_timeout(respx_mock: respx.Router) -> None:
-    initial = read_test_json("output/phalanx")
+async def test_cache_timeout(data: Data, respx_mock: respx.Router) -> None:
+    initial = data.read_json("output/phalanx")
     base_url = "https://api.example.com/repertoire"
     response = Response(200, json=initial)
     respx_mock.get(base_url + "/discovery").mock(return_value=response)
@@ -171,7 +176,7 @@ async def test_cache_timeout(respx_mock: respx.Router) -> None:
 
     # Since the cache timeout is set to 0, replacing the output should produce
     # an immedate change in the results.
-    new = read_test_json("output/minimal")
+    new = data.read_json("output/minimal")
     response = Response(200, json=new)
     respx_mock.get(base_url + "/discovery").mock(return_value=response)
     assert await discovery.applications() == []
@@ -179,6 +184,8 @@ async def test_cache_timeout(respx_mock: respx.Router) -> None:
 
 @pytest.mark.asyncio
 async def test_cache_failure(
+    *,
+    data: Data,
     logger: BoundLogger,
     respx_mock: respx.Router,
     caplog: pytest.LogCaptureFixture,
@@ -194,7 +201,7 @@ async def test_cache_failure(
         await discovery.applications()
 
     # Configure with real data.
-    output = read_test_json("output/phalanx")
+    output = data.read_json("output/phalanx")
     response = Response(200, json=output)
     respx_mock.get(base_url + "/discovery").mock(return_value=response)
 

@@ -1,5 +1,7 @@
 """Tests for the discovery data builder."""
 
+from safir.testing.data import Data
+
 from rubin.repertoire import (
     RepertoireBuilder,
     RepertoireBuilderWithSecrets,
@@ -7,38 +9,38 @@ from rubin.repertoire import (
 )
 
 from ..support.constants import TEST_BASE_URL
-from ..support.data import data_path, read_test_json
 
 
-def test_build_discovery() -> None:
-    config_path = data_path("config/phalanx.yaml")
+def test_build_discovery(data: Data) -> None:
+    config_path = data.path("config/phalanx.yaml")
     hips_base_url = TEST_BASE_URL.rstrip("/")
     base_url = hips_base_url + "/repertoire"
     config = RepertoireSettings.from_file(config_path)
 
     output = RepertoireBuilder(config).build_discovery(base_url, hips_base_url)
     output_json = output.model_dump(mode="json", exclude_defaults=True)
-    assert output_json == read_test_json("output/phalanx")
+    data.assert_json_matches(output_json, "output/phalanx")
 
     output = RepertoireBuilder(config).build_discovery(base_url)
     for dataset in output.datasets:
         assert "hips" not in output.datasets[dataset].services
 
 
-def test_build_influxdb() -> None:
-    config_path = data_path("config/phalanx.yaml")
+def test_build_influxdb(data: Data) -> None:
+    config_path = data.path("config/phalanx.yaml")
     config = RepertoireSettings.from_file(config_path)
-    expected = read_test_json("output/idfdev_efd")
 
     # Check the output.
     output = RepertoireBuilder(config).build_influxdb("idfdev_efd")
     assert output
-    assert output.model_dump(mode="json", exclude_defaults=True) == expected
+    data.assert_pydantic_matches(
+        output, "output/idfdev_efd", exclude_defaults=True
+    )
 
 
-def test_build_influxdb_creds() -> None:
-    config_path = data_path("config/phalanx.yaml")
-    secrets_path = data_path("secrets")
+def test_build_influxdb_creds(data: Data) -> None:
+    config_path = data.path("config/phalanx.yaml")
+    secrets_path = data.path("secrets")
     config = RepertoireSettings.from_file(config_path)
 
     # First test with a Path parameter to RepertoireBuilderWithSecrets and a
@@ -46,32 +48,35 @@ def test_build_influxdb_creds() -> None:
     builder = RepertoireBuilderWithSecrets(config, secrets_path)
     output = builder.build_influxdb_with_credentials("idfdev_efd")
     assert output
-    output_json = output.model_dump(mode="json", exclude_defaults=True)
-    assert output_json == read_test_json("output/idfdev_efd-creds")
+    data.assert_pydantic_matches(
+        output, "output/idfdev_efd-creds", exclude_defaults=True
+    )
 
     # Now test with a str parameter and a secret file not ending in a newline.
     builder = RepertoireBuilderWithSecrets(config, str(secrets_path))
     output = builder.build_influxdb_with_credentials("idfdev_metrics")
     assert output
-    output_json = output.model_dump(mode="json", exclude_defaults=True)
-    assert output_json == read_test_json("output/idfdev_metrics-creds")
+    data.assert_pydantic_matches(
+        output, "output/idfdev_metrics-creds", exclude_defaults=True
+    )
 
     # Unknown InfluxDB databases should return None.
     assert builder.build_influxdb("invalid") is None
 
 
-def test_list_influxdb_creds() -> None:
-    config_path = data_path("config/phalanx.yaml")
-    secrets_path = data_path("secrets")
+def test_list_influxdb_creds(data: Data) -> None:
+    config_path = data.path("config/phalanx.yaml")
+    secrets_path = data.path("secrets")
     config = RepertoireSettings.from_file(config_path)
 
     builder = RepertoireBuilderWithSecrets(config, secrets_path)
     output = builder.list_influxdb_with_credentials()
-    output_json = {
-        k: v.model_dump(mode="json", exclude_defaults=True)
-        for k, v in output.items()
-    }
-    assert output_json == {
-        "idfdev_efd": read_test_json("output/idfdev_efd-creds"),
-        "idfdev_metrics": read_test_json("output/idfdev_metrics-creds"),
-    }
+    assert list(output.keys()) == ["idfdev_efd", "idfdev_metrics"]
+    data.assert_pydantic_matches(
+        output["idfdev_efd"], "output/idfdev_efd-creds", exclude_defaults=True
+    )
+    data.assert_pydantic_matches(
+        output["idfdev_metrics"],
+        "output/idfdev_metrics-creds",
+        exclude_defaults=True,
+    )

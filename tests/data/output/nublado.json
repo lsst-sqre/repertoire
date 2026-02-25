@@ -81,16 +81,16 @@
   },
   "influxdb_databases": {
     "idfdev_efd": {
-      "url": "https://data.example.com/influxdb/",
+      "credentials_url": "https://example.com/repertoire/discovery/influxdb/idfdev_efd",
       "database": "efd",
       "schema_registry": "http://sasquatch-schema-registry.sasquatch:8081/",
-      "credentials_url": "https://example.com/repertoire/discovery/influxdb/idfdev_efd"
+      "url": "https://data.example.com/influxdb/"
     },
     "idfdev_metrics": {
-      "url": "https://data.example.com/influxdb/",
+      "credentials_url": "https://example.com/repertoire/discovery/influxdb/idfdev_metrics",
       "database": "lsst.square.metrics",
       "schema_registry": "http://sasquatch-schema-registry.sasquatch:8081/",
-      "credentials_url": "https://example.com/repertoire/discovery/influxdb/idfdev_metrics"
+      "url": "https://data.example.com/influxdb/"
     }
   }
 }

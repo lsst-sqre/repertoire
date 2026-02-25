@@ -3,12 +3,12 @@
 import pytest
 from httpx import AsyncClient
 from safir.metrics import MockEventPublisher
+from safir.testing.data import Data
 
 from repertoire.dependencies.config import config_dependency
 from repertoire.dependencies.events import events_dependency
 
 from ..support.constants import TEST_BASE_URL
-from ..support.data import read_test_json
 
 
 @pytest.mark.asyncio
@@ -26,32 +26,32 @@ async def test_get_index(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app", ["minimal"], indirect=True)
-async def test_minimal(client: AsyncClient) -> None:
+async def test_minimal(data: Data, client: AsyncClient) -> None:
     r = await client.get("/repertoire/discovery")
     assert r.status_code == 200, f"error body: {r.text}"
-    assert r.json() == read_test_json("output/minimal")
+    data.assert_json_matches(r.json(), "output/minimal")
 
 
 @pytest.mark.asyncio
-async def test_get_discovery(client: AsyncClient) -> None:
+async def test_get_discovery(data: Data, client: AsyncClient) -> None:
     r = await client.get("/repertoire/discovery")
     assert r.status_code == 200, f"error body: {r.text}"
-    assert r.json() == read_test_json("output/phalanx")
+    data.assert_json_matches(r.json(), "output/phalanx")
 
 
 @pytest.mark.asyncio
-async def test_get_influxdb(client: AsyncClient) -> None:
+async def test_get_influxdb(data: Data, client: AsyncClient) -> None:
     r = await client.get("/repertoire/discovery")
     assert r.status_code == 200, f"error body: {r.text}"
 
     seen = r.json()["influxdb_databases"]["idfdev_efd"]
     url = seen["credentials_url"]
     del seen["credentials_url"]
-    assert seen == read_test_json("output/idfdev_efd")
+    data.assert_json_matches(seen, "output/idfdev_efd")
     assert url == f"{TEST_BASE_URL}repertoire/discovery/influxdb/idfdev_efd"
     r = await client.get(url, headers={"X-Auth-Request-User": "some-user"})
     assert r.status_code == 200, f"error body: {r.text}"
-    assert r.json() == read_test_json("output/idfdev_efd-creds")
+    data.assert_json_matches(r.json(), "output/idfdev_efd-creds")
 
     r = await client.get(
         f"{TEST_BASE_URL}repertoire/discovery/influxdb/bogus",
