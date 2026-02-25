@@ -6,6 +6,7 @@ from typing import Any
 
 from httpx import AsyncClient, HTTPError
 from pydantic import BaseModel, HttpUrl, ValidationError
+from structlog.stdlib import BoundLogger, get_logger
 
 from ._exceptions import (
     RepertoireUrlError,
@@ -48,6 +49,9 @@ class DiscoveryClient:
     cache_timeout
         How long to cache results for. This is configurable primarily for the
         test suite. Most clients should leave this set to the default.
+    logger
+        structlog_ logger to use. If not provided, a default structlog logger
+        will be used instead.
     """
 
     def __init__(
@@ -56,10 +60,12 @@ class DiscoveryClient:
         *,
         base_url: str | None = None,
         cache_timeout: timedelta = timedelta(minutes=5),
+        logger: BoundLogger | None = None,
     ) -> None:
         self._client = http_client or AsyncClient()
         self._close_client = http_client is None
         self._cache_timeout = cache_timeout
+        self._logger = logger or get_logger()
 
         self._discovery_cache: Discovery | None = None
         self._discovery_cache_time = datetime.now(tz=UTC)
@@ -473,14 +479,34 @@ class DiscoveryClient:
     async def _get_discovery(self) -> Discovery:
         """Fetch and cache discovery information."""
         now = datetime.now(tz=UTC)
+
+        # If cached information exists, return it if it hasn't expired.
         if self._discovery_cache:
             expires = self._discovery_cache_time + self._cache_timeout
             if now <= expires:
                 return self._discovery_cache
+
+        # Retrieve discovery information. If there is any problem and cached
+        # data exists, return the cached data but log a warning.
         route = self._build_url("/discovery")
-        self._discovery_cache = await self._get(route, Discovery)
-        self._discovery_cache_time = now
-        return self._discovery_cache
+        try:
+            self._discovery_cache = await self._get(route, Discovery)
+        except Exception as e:
+            if not self._discovery_cache:
+                raise
+            msg = (
+                "Failed to refresh service discovery information, returning"
+                " cached data"
+            )
+            self._logger.warning(msg, error=f"{type(e).__name__}: {e!s}")
+            return self._discovery_cache
+        else:
+            self._logger.debug(
+                "Retrieved service discovery information",
+                timeout=self._cache_timeout.total_seconds(),
+            )
+            self._discovery_cache_time = now
+            return self._discovery_cache
 
     def _build_url(self, route: str) -> str:
         """Construct a Repertoire URL for a given route."""

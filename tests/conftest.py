@@ -11,6 +11,7 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 from jinja2 import Template
 from pydantic import SecretStr
+from safir.logging import LogLevel, Profile, configure_logging
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from structlog.stdlib import BoundLogger, get_logger
@@ -143,7 +144,10 @@ async def engine(database_url: str) -> AsyncIterator[AsyncEngine]:
 
 @pytest.fixture
 def logger() -> BoundLogger:
-    """Create a test logger."""
+    """Create a test debug logger."""
+    configure_logging(
+        profile=Profile.production, log_level=LogLevel.DEBUG, name="test"
+    )
     return get_logger("test")
 
 

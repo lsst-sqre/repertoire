@@ -68,6 +68,24 @@ This requires the ``REPERTOIRE_BASE_URL`` environment variable be set to the bas
 
 When you are done using the client, call `DiscoveryClient.aclose` to clean up the internal HTTP pool.
 
+Provide a structlog logger
+--------------------------
+
+Users of Repertoire that use structlog_ should provide their configured structlog logger to the Repertoire client.
+
+.. code-block:: python
+
+   from rubin.repertoire import DiscoveryClient
+   from structlog.stdlib import get_logger
+
+
+   logger = get_logger("service")
+   discovery = DiscoveryClient(logger=logger)
+
+This will provide formatted and level-appropriate logging of actions taken by the Repertoire client.
+
+If a logger is not provided, `DiscoveryClient` will use a default structlog logger, which may not have the desired configuration.
+
 Override the base URL
 ---------------------
 
