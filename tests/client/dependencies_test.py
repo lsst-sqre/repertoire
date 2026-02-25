@@ -10,6 +10,8 @@ from asgi_lifespan import LifespanManager
 from fastapi import Depends, FastAPI
 from httpx import ASGITransport, AsyncClient
 from safir.dependencies.http_client import http_client_dependency
+from safir.testing.logging import parse_log_tuples
+from structlog.stdlib import BoundLogger
 
 from rubin.repertoire import (
     DiscoveryClient,
@@ -22,7 +24,11 @@ from ..support.data import read_test_json
 
 @pytest.mark.asyncio
 async def test_dependency(
-    respx_mock: respx.Router, monkeypatch: pytest.MonkeyPatch
+    *,
+    logger: BoundLogger,
+    respx_mock: respx.Router,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     cached_client = None
     output = read_test_json("output/phalanx")
@@ -35,6 +41,7 @@ async def test_dependency(
         await http_client_dependency.aclose()
 
     app = FastAPI(lifespan=lifespan)
+    discovery_dependency.initialize(logger)
 
     @app.get("/")
     async def get_root(
@@ -46,6 +53,7 @@ async def test_dependency(
         assert discovery == cached_client
         assert await discovery.applications() == output["applications"]
 
+    caplog.clear()
     async with LifespanManager(app):
         async with AsyncClient(
             base_url="https://example.com/", transport=ASGITransport(app=app)
@@ -54,6 +62,16 @@ async def test_dependency(
             assert r.status_code == 200
             r = await client.get("/")
             assert r.status_code == 200
+
+    # Check that the correct logger was used and the fetch of data was logged.
+    seen = parse_log_tuples("test", caplog.record_tuples)
+    assert seen == [
+        {
+            "event": "Retrieved service discovery information",
+            "timeout": 300.0,
+            "severity": "debug",
+        }
+    ]
 
     # When the HTTPX client dependency is shut down and recreated, this should
     # result in a new Gafaelfawr client. Otherwise, the Gafaelfawr client

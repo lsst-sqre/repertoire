@@ -25,6 +25,7 @@ rst_epilog_file = "_rst_epilog.rst"
 aioinflux = "https://aioinflux.readthedocs.io/en/stable"
 python = "https://docs.python.org/3.13"
 safir = "https://safir.lsst.io"
+structlog = "https://www.structlog.org/en/stable"
 
 [sphinx.linkcheck]
 ignore = [

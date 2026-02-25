@@ -30,8 +30,21 @@ Use the FastAPI dependency
 If the client is a FastAPI application, it's usually easiest to use the provided FastAPI dependency.
 This maintains a singleton process-global Repertoire client that shares an HTTP connection pool with the Safir `~safir.dependencies.http_client.http_client_dependency`.
 
-To use this dependency, no initialization is required.
-Simply import it and include it in the parameters to whatever route needs to do service discovery:
+When using this dependency in an application that uses structlog_, call `~DiscoveryDependency.initialize` to set the logger used for service discovery to the application's configured structlog logger:
+
+.. code-block:: python
+
+   import structlog
+   from rubin.repertoire import discovery_dependency
+
+
+   # ... initialize logger (probably with configure_logging) ...
+   logger = structlog.get_logger("<application>")
+   discovery_dependency.initialize(logger)
+
+This should be done during application startup, before any of its routes are accessed.
+
+Then, import the Repertoire dependency and include it in the parameters to whatever route needs to do service discovery:
 
 .. code-block:: python
 
