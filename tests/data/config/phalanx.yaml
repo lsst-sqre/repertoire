@@ -59,7 +59,6 @@ datasets:
   other:
     description: >-
       Test dataset not listed in availableDatasets.
-    docsUrl: "https://unknown.example.com/"
 environmentName: "data.example.com"
 hips:
   datasets:
