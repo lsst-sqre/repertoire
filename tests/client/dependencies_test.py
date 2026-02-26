@@ -10,6 +10,7 @@ from asgi_lifespan import LifespanManager
 from fastapi import Depends, FastAPI
 from httpx import ASGITransport, AsyncClient
 from safir.dependencies.http_client import http_client_dependency
+from safir.testing.data import Data
 from safir.testing.logging import parse_log_tuples
 from structlog.stdlib import BoundLogger
 
@@ -19,19 +20,18 @@ from rubin.repertoire import (
     register_mock_discovery,
 )
 
-from ..support.data import read_test_json
-
 
 @pytest.mark.asyncio
 async def test_dependency(
     *,
+    data: Data,
     logger: BoundLogger,
     respx_mock: respx.Router,
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     cached_client = None
-    output = read_test_json("output/phalanx")
+    output = data.read_json("output/phalanx")
     monkeypatch.setenv("REPERTOIRE_BASE_URL", "https://example.com/repertoire")
     register_mock_discovery(respx_mock, output)
 
