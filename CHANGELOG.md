@@ -11,6 +11,20 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.11.0'></a>
+## 0.11.0 (2026-02-26)
+
+### New features
+
+- Fetch service discovery information again after a cache timeout period, defaulting to five minutes. This allows running Repertoire clients to slowly converge on the current state without restarting, while still minimizing unnecessary network traffic.
+- Users of the Repertoire client may provide a structlog logger, which will be used to log debug information about feetching discovery data and warnings when refresh of cached data fails. If a logger is not provided, a default structlog logger will be used.
+- Add an `initialize` method to `discovery_dependency` to set the structlog logger to the configured logger for the application.
+
+### Bug fixes
+
+- Make `docsUrl` an optional attribute for a dataset. Some internal datasets may not have meaningful documentation sites.
+- Fix failure in downloading TAP schemas from Google Cloud Storage when the version contains a slash.
+
 <a id='changelog-0.10.0'></a>
 ## 0.10.0 (2026-02-03)
 

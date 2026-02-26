@@ -159,7 +159,6 @@ extend = "ruff-shared.toml"
 
 [tool.ruff.lint.isort]
 known-first-party = ["repertoire", "rubin.repertoire", "tests"]
-split-on-trailing-comma = false
 
 [tool.scriv]
 categories = [
