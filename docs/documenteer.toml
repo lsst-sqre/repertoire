@@ -18,12 +18,14 @@ disable_primary_sidebars = ["index", "changelog"]
 nitpick_ignore = [
     # Modules that do not provide intersphinx documentation.
     ["py:class", "respx.router.Router"],
+    # Bug in Sphinx with Python 3.14
+    ["py:data", "typing.Union"],
 ]
 rst_epilog_file = "_rst_epilog.rst"
 
 [sphinx.intersphinx.projects]
 aioinflux = "https://aioinflux.readthedocs.io/en/stable"
-python = "https://docs.python.org/3.13"
+python = "https://docs.python.org/3.14"
 safir = "https://safir.lsst.io"
 structlog = "https://www.structlog.org/en/stable"
 
