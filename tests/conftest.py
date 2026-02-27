@@ -24,7 +24,7 @@ from repertoire.dependencies.hips import hips_list_dependency
 from repertoire.main import create_app
 from rubin.repertoire import DiscoveryClient
 
-from .support.constants import TEST_BASE_URL
+from .support.constants import POSTGRES_IMAGE, TEST_BASE_URL
 from .support.hips import register_mock_hips
 
 
@@ -39,7 +39,7 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 @pytest_asyncio.fixture(params=["phalanx"])
 async def app(
-    data: Data, token: str, request: pytest.FixtureRequest
+    data: Data, request: pytest.FixtureRequest
 ) -> AsyncGenerator[FastAPI]:
     """Return a configured test application.
 
@@ -61,7 +61,7 @@ async def app(
     config_dependency.set_config_path(data.path(config_path))
     config = config_dependency.config()
     if config.hips and config.hips.datasets:
-        config.token = SecretStr(token)
+        config.token = SecretStr(data.read_text("secrets/token", strip=True))
     hips_list_dependency.clear_cache()
     app = create_app(secrets_root=data.path("secrets"))
     async with LifespanManager(app):
@@ -106,6 +106,17 @@ def discovery(
     return DiscoveryClient(client, base_url=repertoire_url)
 
 
+@pytest_asyncio.fixture
+async def engine(database_url: str) -> AsyncIterator[AsyncEngine]:
+    """Create a database engine connected to the test container."""
+    engine = create_async_engine(database_url, echo=False)
+    async with engine.begin() as conn:
+        for table in ("tap_schema", "tap_schema_staging"):
+            await conn.execute(text(f"DROP SCHEMA IF EXISTS {table} CASCADE"))
+    yield engine
+    await engine.dispose()
+
+
 @pytest.fixture
 def logger() -> BoundLogger:
     """Create a test debug logger."""
@@ -117,12 +128,11 @@ def logger() -> BoundLogger:
 
 @pytest.fixture(autouse=True)
 def mock_hips(
-    *,
     data: Data,
-    token: str,
     respx_mock: respx.Router,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    token = data.read_text("secrets/token", strip=True)
     monkeypatch.setenv("REPERTOIRE_TOKEN", token)
     config = Config.from_file(data.path("config/phalanx.yaml"))
     assert config.hips
@@ -136,35 +146,7 @@ def mock_hips(
 @pytest.fixture(scope="session")
 def postgres_container() -> Iterator[PostgresContainer]:
     """Start a PostgreSQL container for the test session."""
-    container = PostgresContainer("postgres:15-alpine")
+    container = PostgresContainer(POSTGRES_IMAGE)
     container.start()
     yield container
     container.stop()
-
-
-@pytest_asyncio.fixture(scope="function")
-async def engine(database_url: str) -> AsyncIterator[AsyncEngine]:
-    """Create a database engine connected to the test container."""
-    _engine = create_async_engine(database_url, echo=False)
-
-    async with _engine.begin() as conn:
-        await conn.execute(text("DROP SCHEMA IF EXISTS tap_schema CASCADE"))
-        await conn.execute(
-            text("DROP SCHEMA IF EXISTS tap_schema_staging CASCADE")
-        )
-
-    yield _engine
-
-    async with _engine.begin() as conn:
-        await conn.execute(text("DROP SCHEMA IF EXISTS tap_schema CASCADE"))
-        await conn.execute(
-            text("DROP SCHEMA IF EXISTS tap_schema_staging CASCADE")
-        )
-
-    await _engine.dispose()
-
-
-@pytest.fixture(scope="session")
-def token() -> str:
-    token_path = Path(__file__).parent / "data" / "secrets" / "token"
-    return token_path.read_text().rstrip("\n")
