@@ -28,9 +28,9 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 <a id='changelog-0.10.0'></a>
 ## 0.10.0 (2026-02-03)
 
-### Bug fixes
+### New features
 
-- Add `tap_schema_index` to DataLoader call so that the schema_index is properly propagated
+- When creating TAP schema databases, pass the index number of each schema down to Felis so that the `schema_index` parameter is set based on the order of schemas in the Repertoire configuration.
 
 <a id='changelog-0.9.0'></a>
 ## 0.9.0 (2026-01-28)
