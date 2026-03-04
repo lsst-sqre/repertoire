@@ -29,6 +29,7 @@ async def test_get_index(client: AsyncClient) -> None:
 async def test_minimal(data: Data, client: AsyncClient) -> None:
     r = await client.get("/repertoire/discovery")
     assert r.status_code == 200, f"error body: {r.text}"
+    assert r.headers["Access-Control-Allow-Origin"] == "*"
     data.assert_json_matches(r.json(), "output/minimal")
 
 
@@ -51,12 +52,14 @@ async def test_get_influxdb(data: Data, client: AsyncClient) -> None:
     assert url == f"{TEST_BASE_URL}repertoire/discovery/influxdb/idfdev_efd"
     r = await client.get(url, headers={"X-Auth-Request-User": "some-user"})
     assert r.status_code == 200, f"error body: {r.text}"
+    assert "Access-Control-Allow-Origin" not in r.headers
     data.assert_json_matches(r.json(), "output/idfdev_efd-creds")
 
     r = await client.get(
         f"{TEST_BASE_URL}repertoire/discovery/influxdb/bogus",
         headers={"X-Auth-Request-User": "some-user"},
     )
+    assert "Access-Control-Allow-Origin" not in r.headers
     assert r.status_code == 404
 
     publisher = (await events_dependency()).influx_creds
