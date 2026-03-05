@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from safir.dependencies.gafaelfawr import (
     auth_dependency,
     auth_logger_dependency,
@@ -57,7 +57,9 @@ async def get_root(
 )
 async def get_discovery(
     discovery: Annotated[Discovery, Depends(discovery_dependency)],
+    response: Response,
 ) -> Discovery:
+    response.headers["Access-Control-Allow-Origin"] = "*"
     return discovery
 
 
