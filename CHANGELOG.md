@@ -11,6 +11,13 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.12.0'></a>
+## 0.12.0 (2026-03-04)
+
+### New features
+
+- Allow unauthenticated cross-site requests for the basic discovery information from any origin (but do not allow cross-site requests for any other routes).
+
 <a id='changelog-0.11.0'></a>
 ## 0.11.0 (2026-02-26)
 
