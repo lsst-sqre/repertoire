@@ -53,6 +53,18 @@ This configuration applies to all TAP servers unless overridden per-server.
 
    Supported URL schemes: ``https://``, ``http://``, ``gs://`` (Google Cloud Storage).
 
+   To use the GCS artifacts published by the sdm_schemas workflow, use one of
+   the following templates:
+
+   - **Tagged release**: ``"gs://rubin-sdm-schemas-artifacts/releases/{version}/schemas.tar.gz"``
+     with ``schemaVersion`` set to the tag name (e.g. ``"w.2025.01.1"``).
+   - **Ticket branch**: ``"gs://rubin-sdm-schemas-artifacts/{version}/schemas.tar.gz"``
+     with ``schemaVersion`` set to the full branch name (e.g. ``"tickets/DM-54182"``).
+
+   Note that the template differs between the two cases because the sdm_schemas
+   build workflow stores tagged releases under ``releases/<tag>/`` in GCS, while
+   for ticket branches the path is ``tickets/<branch>/``.
+
 Per-server settings
 -------------------
 
@@ -173,6 +185,33 @@ The order of schemas in the ``schemas`` list directly controls the ``tap_schema_
      - dp1
      - dp02_dc2
      - ivoa_obscore
+
+Testing schemas from a ticket branch
+-------------------------------------
+
+During development on ``sdm_schemas``, you can test unreleased schema changes in an
+environment by pointing Repertoire at the GCS artifacts published from a
+ticket branch.
+
+#. Push your changes to a ``tickets/*`` branch in the `sdm_schemas repository <https://github.com/lsst/sdm_schemas>`__.
+   The build workflow will automatically upload the schema to GCS at
+   ``gs://rubin-sdm-schemas-artifacts/tickets/<branch>/schemas.tar.gz``.
+
+#. In the appropriate environment values file (e.g. ``applications/repertoire/values-idfint.yaml``),
+   override the TAP schema settings:
+
+   .. code-block:: yaml
+
+      config:
+        tap:
+          schemaVersion: "tickets/DM-XXXXX"
+          schemaSourceTemplate: "gs://rubin-sdm-schemas-artifacts/{version}/schemas.tar.gz"
+
+#. Sync Repertoire via Argo CD. The Helm hook will download the
+   schema archive from the ticket branch path in GCS and update TAP_SCHEMA.
+
+#. Once the ticket is merged and a release tag is pushed, revert to the standard
+   configuration using the tagged release and the GCS release template.
 
 Adding a new TAP server to Repertoire management
 -------------------------------------------------
