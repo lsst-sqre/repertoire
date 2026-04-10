@@ -11,6 +11,13 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.12.1'></a>
+## 0.12.1 (2026-04-09)
+
+### Other changes
+
+- Relax the dependency on Safir in rubin.repertoire to allow Safir 15.0.0.
+
 <a id='changelog-0.12.0'></a>
 ## 0.12.0 (2026-03-04)
 
