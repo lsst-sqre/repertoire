@@ -1,0 +1,223 @@
+# Configuration for testing the OAI-PMH publishing registry.
+# Based on phalanx.yaml with registry config and registry entries added to rules.
+
+applications:
+  - "argocd"
+  - "butler"
+  - "cert-manager"
+  - "datalinker"
+  - "gafaelfawr"
+  - "ghostwriter"
+  - "google-cloud-observability"
+  - "hips"
+  - "ingress-nginx"
+  - "mobu"
+  - "noteburst"
+  - "nublado"
+  - "portal"
+  - "qserv-kafka"
+  - "sasquatch"
+  - "semaphore"
+  - "sia"
+  - "squareone"
+  - "ssotap"
+  - "strimzi"
+  - "strimzi-access-operator"
+  - "tap"
+  - "times-square"
+  - "vault-secrets-operator"
+  - "vo-cutouts"
+  - "wobbly"
+availableDatasets:
+  - "dp02"
+  - "dp03"
+  - "dp1"
+baseHostname: "data.example.com"
+butlerConfigs:
+  dp02: "https://data.example.com/api/butler/repo/dp02/butler.yaml"
+  dp1: "https://data.example.com/api/butler/repo/dp1/butler.yaml"
+datasets:
+  dp02:
+    description: >-
+      Data Preview 0.2 contains the image and catalog products of the Rubin
+      Science Pipelines v23 processing of the DESC Data Challenge 2
+      simulation, which covered 300 square degrees of the wide-fast-deep LSST
+      survey region over 5 years.
+    docsUrl: "https://dp0-2.example.com/"
+  dp03:
+    description: >-
+      Data Preview 0.3 contains the catalog products of a Solar System Science
+      Collaboration simulation of the results of SSO analysis of the
+      wide-fast-deep data from the LSST dataset.
+    docsUrl: "https://dp0-3.example.com/"
+  dp1:
+    description: >-
+      Data Preview 1 contains image and catalog products from the Rubin
+      Science Pipelines v29 processing of observations obtained with the LSST
+      Commissioning Camera of seven ~1 square degree fields, over seven weeks
+      in late 2024.
+    docsUrl: "https://dp1.example.com/"
+  other:
+    description: >-
+      Test dataset not listed in availableDatasets.
+environmentName: "data.example.com"
+hips:
+  datasets:
+    dp02:
+      paths:
+        - "deep_coadd/color_ugri"
+    dp1:
+      paths:
+        - "deep_coadd/color_ugri"
+        - "deep_coadd/color_gri"
+    unknown:
+      paths:
+        - "deep_coadd/color_gri"
+  legacy:
+    dataset: "dp1"
+    pathPrefix: "/api/hips"
+  pathPrefix: "/api/hips/v2"
+  sourceTemplate: "https://{{base_hostname}}/api/hips/v2/{{dataset}}"
+influxdbDatabases:
+  idfdev_efd:
+    url: "https://data.example.com/influxdb/"
+    database: "efd"
+    username: "efdreader"
+    passwordKey: "idfdev_efd-password"
+    schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
+  idfdev_metrics:
+    url: "https://data.example.com/influxdb/"
+    database: "lsst.square.metrics"
+    username: "efdreader"
+    passwordKey: "idfdev_metrics-password"
+    schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
+registry:
+  adminEmail: "registry@example.com"
+  authority: "ivo://example.com"
+  created: "2026-04-16T00:00:00"
+  ivoid: "ivo://example.com/registry"
+  repositoryName: "Example Publishing Registry"
+  organisation:
+    created: "2026-04-16T00:00:00Z"
+    description: "Example Observatory for testing."
+    homepage: "https://example.com"
+    ivoid: "ivo://example.com/org"
+    title: "Example Observatory"
+rules:
+  argocd:
+    - type: "ui"
+      name: "argocd"
+      template: "https://{{base_hostname}}/argo-cd"
+  gafaelfawr:
+    - type: "internal"
+      name: "gafaelfawr"
+      template: "https://{{base_hostname}}/auth/api"
+      versions:
+        v1:
+          template: "https://{{base_hostname}}/auth/api/v1"
+      openapi: "https://{{base_hostname}}/auth/openapi.json"
+  mobu:
+    - type: "internal"
+      name: "mobu"
+      template: "https://{{base_hostname}}/mobu"
+      openapi: "https://{{base_hostname}}/mobu/openapi.json"
+  noteburst:
+    - type: "internal"
+      name: "noteburst"
+      template: "https://{{base_hostname}}/noteburst"
+      versions:
+        v1:
+          template: "https://{{base_hostname}}/noteburst/v1"
+      openapi: "https://{{base_hostname}}/noteburst/openapi.json"
+  nublado:
+    - type: "ui"
+      name: "nublado"
+      template: "https://{{base_hostname}}/nb"
+  portal:
+    - type: "ui"
+      name: "portal"
+      template: "https://{{base_hostname}}/portal/app/"
+  semaphore:
+    - type: "internal"
+      name: "semaphore"
+      template: "https://{{base_hostname}}/semaphore"
+      openapi: "https://{{base_hostname}}/semaphore/openapi.json"
+  sia:
+    - type: "data"
+      name: "sia"
+      datasets:
+        - "dp02"
+        - "dp1"
+      template: "https://{{base_hostname}}/api/sia/{{dataset}}"
+      versions:
+        v2:
+          template: "https://{{base_hostname}}/api/sia/{{dataset}}/query"
+          ivoaStandardId: "ivo://ivoa.net/std/SIA#query-2.0"
+      openapi: "https://{{base_hostname}}/api/sia/openapi.json"
+      registry:
+        ivoaServiceType: "sia"
+        records:
+          dp02:
+            ivoid: "ivo://example.com/sia/dp02"
+            title: "Example SIA Service (DP02)"
+            created: "2026-04-16T00:00:00"
+            description: "SIA image access service for the DP02 dataset."
+          dp1:
+            ivoid: "ivo://example.com/sia/dp1"
+            title: "Example SIA Service (DP1)"
+            created: "2026-04-16T00:00:00"
+            description: "SIA image access service for the DP1 dataset."
+  ssotap:
+    - type: "data"
+      name: "tap"
+      datasets:
+        - "dp03"
+      template: "https://{{base_hostname}}/api/ssotap"
+  tap:
+    - type: "data"
+      name: "tap"
+      datasets:
+        - "dp02"
+        - "dp1"
+      template: "https://{{base_hostname}}/api/tap"
+      registry:
+        ivoaServiceType: "tap"
+        ivoid: "ivo://example.com/tap"
+        title: "Example TAP Service"
+        created: "2026-04-16T00:00:00"
+        description: "TAP service for Example Observatory."
+      tap:
+        adqlVersion: "2.1"
+        uploadSupported: true
+  vo-cutouts:
+    - type: "data"
+      name: "cutout"
+      datasets:
+        - "dp02"
+      template: "https://{{base_hostname}}/api/cutout"
+      versions:
+        soda-async-1.0:
+          template: "https://{{base_hostname}}/api/cutout/jobs"
+          ivoaStandardId: "ivo://ivoa.net/std/SODA#async-1.0"
+        soda-sync-1.0:
+          template: "https://{{base_hostname}}/api/cutout/sync"
+          ivoaStandardId: "ivo://ivoa.net/std/SODA#sync-1.0"
+      openapi: "https://{{base_hostname}}/api/cutout/openapi.json"
+      registry:
+        ivoaServiceType: "soda"
+        ivoid: "ivo://example.com/cutout"
+        title: "Example SODA Cutout Service"
+        created: "2026-04-16T00:00:00"
+        description: "SODA image cutout service for Example Observatory."
+  wobbly:
+    - type: "internal"
+      name: "wobbly"
+      template: "https://{{base_hostname}}/wobbly"
+      openapi: "https://{{base_hostname}}/wobbly/openapi.json"
+subdomainRules:
+  nublado:
+    - type: "ui"
+      name: "nublado"
+      template: "https://nb.{{base_hostname}}/nb"
+useSubdomains:
+  - "nublado"

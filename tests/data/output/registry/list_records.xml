@@ -1,0 +1,265 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>1970-01-01T00:00:00Z</responseDate>
+  <request verb="ListRecords" metadataPrefix="ivo_vor">https://example.com/registry/oai</request>
+  <ListRecords>
+    <record>
+      <header>
+        <identifier>ivo://example.com/registry</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" version="" xsi:type="vg:Registry">
+          <title>Example Publishing Registry</title>
+          <shortName/>
+          <identifier>ivo://example.com/registry</identifier>
+          <curation>
+            <publisher ivo-id="">Example Observatory</publisher>
+            <version/>
+            <contact ivo_id="">
+              <name ivo-id="">Example Observatory</name>
+              <address/>
+              <email>registry@example.com</email>
+              <telephone/>
+            </contact>
+          </curation>
+          <content>
+            <subject>virtual observatory</subject>
+            <description>Example Observatory for testing.</description>
+            <referenceURL>https://example.com/</referenceURL>
+          </content>
+          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/Registry" xsi:type="vg:Harvest">
+            <description/>
+            <interface version="" role="std" xsi:type="vg:OAIHTTP">
+              <accessURL use="base">https://example.com/registry/oai</accessURL>
+              <testQueryString/>
+            </interface>
+            <maxRecords>0</maxRecords>
+          </capability>
+          <full>false</full>
+          <managedAuthority>example.com</managedAuthority>
+        </ri:Resource>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" version="" xsi:type="vg:Authority">
+          <title>Example Publishing Registry</title>
+          <shortName/>
+          <identifier>ivo://example.com</identifier>
+          <curation>
+            <publisher ivo-id="">Example Observatory</publisher>
+            <version/>
+            <contact ivo_id="">
+              <name ivo-id="">Example Observatory</name>
+              <address/>
+              <email>registry@example.com</email>
+              <telephone/>
+            </contact>
+          </curation>
+          <content>
+            <subject>virtual observatory</subject>
+            <description>Example Observatory for testing.</description>
+            <referenceURL>https://example.com/</referenceURL>
+          </content>
+          <managingOrg ivo-id="ivo://example.com/org"/>
+        </ri:Resource>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com/org</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <Organisation xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" version="">
+          <title>Example Observatory</title>
+          <shortName/>
+          <identifier>ivo://example.com/org</identifier>
+          <curation>
+            <publisher ivo-id="">Example Observatory</publisher>
+            <version/>
+            <contact ivo_id="">
+              <name ivo-id="">Example Observatory</name>
+              <address/>
+              <email>registry@example.com</email>
+              <telephone/>
+            </contact>
+          </curation>
+          <content>
+            <subject>virtual observatory</subject>
+            <description>Example Observatory for testing.</description>
+            <referenceURL>https://example.com/</referenceURL>
+          </content>
+        </Organisation>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com/sia/dp02</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <Service xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" version="">
+          <title>Example SIA Service (DP02)</title>
+          <shortName/>
+          <identifier>ivo://example.com/sia/dp02</identifier>
+          <curation>
+            <publisher ivo-id="">Example Observatory</publisher>
+            <version/>
+            <contact ivo_id="">
+              <name ivo-id="">Example Observatory</name>
+              <address/>
+              <email>registry@example.com</email>
+              <telephone/>
+            </contact>
+          </curation>
+          <content>
+            <subject>virtual observatory</subject>
+            <description>SIA image access service for the DP02 dataset.</description>
+            <referenceURL>https://example.com/</referenceURL>
+          </content>
+          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SIA#query-2.0">
+            <description/>
+            <interface version="" role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="base">https://data.example.com/api/sia/dp02/query</accessURL>
+              <testQueryString/>
+            </interface>
+          </capability>
+        </Service>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com/sia/dp1</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <Service xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" version="">
+          <title>Example SIA Service (DP1)</title>
+          <shortName/>
+          <identifier>ivo://example.com/sia/dp1</identifier>
+          <curation>
+            <publisher ivo-id="">Example Observatory</publisher>
+            <version/>
+            <contact ivo_id="">
+              <name ivo-id="">Example Observatory</name>
+              <address/>
+              <email>registry@example.com</email>
+              <telephone/>
+            </contact>
+          </curation>
+          <content>
+            <subject>virtual observatory</subject>
+            <description>SIA image access service for the DP1 dataset.</description>
+            <referenceURL>https://example.com/</referenceURL>
+          </content>
+          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SIA#query-2.0">
+            <description/>
+            <interface version="" role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="base">https://data.example.com/api/sia/dp1/query</accessURL>
+              <testQueryString/>
+            </interface>
+          </capability>
+        </Service>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com/tap</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <Service xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" version="">
+          <title>Example TAP Service</title>
+          <shortName/>
+          <identifier>ivo://example.com/tap</identifier>
+          <curation>
+            <publisher ivo-id="">Example Observatory</publisher>
+            <version/>
+            <contact ivo_id="">
+              <name ivo-id="">Example Observatory</name>
+              <address/>
+              <email>registry@example.com</email>
+              <telephone/>
+            </contact>
+          </curation>
+          <content>
+            <subject>virtual observatory</subject>
+            <description>TAP service for Example Observatory.</description>
+            <referenceURL>https://example.com/</referenceURL>
+          </content>
+          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/TAP" xsi:type="tr:TableAccess">
+            <description/>
+            <interface version="" role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="base">https://data.example.com/api/tap</accessURL>
+              <testQueryString/>
+            </interface>
+            <language>
+              <name>ADQL</name>
+              <version ivo-id="">2.1</version>
+              <description/>
+            </language>
+            <outputFormat ivo-id="">
+              <mime>application/x-votable+xml</mime>
+            </outputFormat>
+            <uploadMethod ivo-id="ivo://ivoa.net/std/DALI#upload"/>
+          </capability>
+        </Service>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com/cutout</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <Service xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" version="">
+          <title>Example SODA Cutout Service</title>
+          <shortName/>
+          <identifier>ivo://example.com/cutout</identifier>
+          <curation>
+            <publisher ivo-id="">Example Observatory</publisher>
+            <version/>
+            <contact ivo_id="">
+              <name ivo-id="">Example Observatory</name>
+              <address/>
+              <email>registry@example.com</email>
+              <telephone/>
+            </contact>
+          </curation>
+          <content>
+            <subject>virtual observatory</subject>
+            <description>SODA image cutout service for Example Observatory.</description>
+            <referenceURL>https://example.com/</referenceURL>
+          </content>
+          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SODA#async-1.0">
+            <description/>
+            <interface version="" role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="base">https://data.example.com/api/cutout/jobs</accessURL>
+              <testQueryString/>
+            </interface>
+          </capability>
+          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SODA#sync-1.0">
+            <description/>
+            <interface version="" role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="base">https://data.example.com/api/cutout/sync</accessURL>
+              <testQueryString/>
+            </interface>
+          </capability>
+        </Service>
+      </metadata>
+    </record>
+  </ListRecords>
+</OAI-PMH>

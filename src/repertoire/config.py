@@ -1,5 +1,6 @@
 """Configuration definition."""
 
+from datetime import datetime
 from typing import Self
 
 from pydantic import (
@@ -22,6 +23,58 @@ from safir.metrics import MetricsConfiguration, metrics_configuration_factory
 from rubin.repertoire import RepertoireSettings
 
 __all__ = ["Config"]
+
+
+class OrgRegistryConfig(BaseModel):
+    """Configuration for the organisation registry."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        extra="forbid",
+        populate_by_name=True,
+    )
+    created: datetime = Field(..., title="Creation timestamp of the registry")
+    description: str = Field(..., title="Description of the registry")
+    homepage: str = Field(..., title="URL of the registry homepage")
+    ivoid: str = Field(..., title="IVOA identifier for the registry")
+    title: str = Field(..., title="Title of the registry")
+
+
+class RegistryConfig(BaseModel):
+    """Configuration for the registry."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        extra="forbid",
+        populate_by_name=True,
+    )
+
+    admin_email: str = Field(
+        ..., title="Email address of the registry administrator"
+    )
+
+    authority: str = Field(..., title="Authority of the registry")
+
+    ivoid: str = Field(..., title="IVOA identifier for the registry resource")
+
+    created: datetime = Field(
+        ...,
+        title="Creation timestamp",
+        description=(
+            "Timestamp of when the authority record was first published,"
+            "Set once and never changed."
+        ),
+    )
+
+    organisation: OrgRegistryConfig = Field(
+        ...,
+        title="Organisation registry configuration",
+        description="Configuration for the organisation registry",
+    )
+
+    path_prefix: str = Field("/registry", title="URL prefix for the registry")
+
+    repository_name: str = Field(..., title="Name of the repository")
 
 
 class SentryConfig(BaseModel):
@@ -153,6 +206,12 @@ class Config(RepertoireSettings):
     name: str = Field("Repertoire", title="Name of application")
 
     path_prefix: str = Field("/repertoire", title="URL prefix for application")
+
+    registry: RegistryConfig | None = Field(
+        None,
+        title="Registry configuration",
+        description="Configuration for the registry",
+    )
 
     sentry: SentryConfig | None = Field(None, title="Sentry configuration")
 

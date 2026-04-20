@@ -1,5 +1,6 @@
 """Configuration model for Repertoire."""
 
+from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Literal, Self
 
@@ -10,16 +11,21 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 __all__ = [
     "ApiVersionRule",
+    "BaseRegistryEntry",
     "BaseRule",
     "DataServiceRule",
     "DatasetConfig",
+    "DatasetRegistryEntry",
     "HipsConfig",
     "HipsDatasetConfig",
     "HipsLegacyConfig",
     "InfluxDatabaseConfig",
     "InternalServiceRule",
+    "IvoaRegistryEntry",
+    "MultiRecordRegistryEntry",
     "RepertoireSettings",
     "Rule",
+    "TapRegistryConfig",
     "UiServiceRule",
     "VersionedServiceRule",
 ]
@@ -284,6 +290,145 @@ class VersionedServiceRule(BaseRule):
     ] = {}
 
 
+class BaseRegistryEntry(BaseModel):
+    """Shared fields for all IVOA registry entries."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    ivoid: Annotated[
+        str,
+        Field(
+            title="IVOA ID",
+            description="IVOA identifier of the service.",
+        ),
+    ]
+
+    created: Annotated[
+        datetime,
+        Field(
+            title="Creation timestamp",
+            description=(
+                "Timestamp of when the service was first published, in ISO"
+                " 8601 format. Set once and never changed."
+            ),
+        ),
+    ]
+
+    description: Annotated[
+        str,
+        Field(
+            title="Description",
+            description="Long description of the service.",
+        ),
+    ]
+
+    title: Annotated[
+        str,
+        Field(
+            title="Title",
+            description="Title of the service.",
+        ),
+    ]
+
+    docs_url: Annotated[
+        str | None,
+        Field(
+            title="Documentation URL",
+            description=(
+                "URL of a human-readable page describing the service."
+            ),
+        ),
+    ] = None
+
+
+class DatasetRegistryEntry(BaseRegistryEntry):
+    """Record metadata for one dataset within a multi-record registry entry.
+
+    Used inside ``MultiRecordRegistryEntry.records``. The ``ivoa_service_type``
+    is declared once on the parent ``MultiRecordRegistryEntry`` wrapper and is
+    not repeated here.
+    """
+
+
+class IvoaRegistryEntry(BaseRegistryEntry):
+    """IVOA registry entry for a single-record service (TAP or SODA)."""
+
+    ivoa_service_type: Annotated[
+        str,
+        Field(
+            title="IVOA service type",
+            description=(
+                "Type of IVOA record to produce. Known values: "
+                "``tap``, ``soda``."
+            ),
+        ),
+    ]
+
+
+class MultiRecordRegistryEntry(BaseModel):
+    """IVOA registry entry for a service that produces one record per dataset.
+
+    Used for services like SIA where each dataset has a distinct IVOID and
+    record. The ``ivoa_service_type`` field identifies the kind of record
+    to produce for each dataset entry.
+    """
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    ivoa_service_type: Annotated[
+        str,
+        Field(
+            title="IVOA service type",
+            description=(
+                "Type of IVOA record to produce for each dataset entry."
+                " Known values: ``sia``."
+            ),
+        ),
+    ]
+
+    records: Annotated[
+        dict[str, DatasetRegistryEntry],
+        Field(
+            title="Per-dataset registry entries",
+            description=(
+                "Mapping of dataset names to the IVOA registry entry for"
+                " that dataset."
+            ),
+        ),
+    ]
+
+
+class TapRegistryConfig(BaseModel):
+    """TAP-specific fields for a TAPRegExt registry record."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    adql_version: Annotated[
+        str,
+        Field(
+            title="ADQL version",
+            description=(
+                "Version of ADQL supported by the TAP service, used in TAP"
+                " registry entries."
+            ),
+        ),
+    ] = "2.1"
+
+    upload_supported: Annotated[
+        bool,
+        Field(
+            title="Upload support",
+            description="Whether the TAP service supports table uploads.",
+        ),
+    ] = True
+
+
 class DataServiceRule(VersionedServiceRule):
     """Rule for a Phalanx service associated with a dataset."""
 
@@ -305,6 +450,31 @@ class DataServiceRule(VersionedServiceRule):
         Field(
             title="OpenAPI schema template",
             description="Template to generate the OpenAPI schema URL",
+        ),
+    ] = None
+
+    registry: Annotated[
+        IvoaRegistryEntry | MultiRecordRegistryEntry | None,
+        Field(
+            title="IVOA registry entry",
+            description=(
+                "IVOA registry entry information for this service. Use"
+                " ``IvoaRegistryEntry`` for single-record services (TAP,"
+                " SODA) and ``MultiRecordRegistryEntry`` for per-dataset"
+                " services (SIA)."
+            ),
+        ),
+    ] = None
+
+    tap: Annotated[
+        TapRegistryConfig | None,
+        Field(
+            title="TAP registry config",
+            description=(
+                "If present, the service is treated as a TAP service and a"
+                " TAPRegExt record is produced. Holds TAP-specific fields"
+                " such as the ADQL version and upload support."
+            ),
         ),
     ] = None
 
