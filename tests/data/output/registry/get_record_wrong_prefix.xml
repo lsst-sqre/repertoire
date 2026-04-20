@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>1970-01-01T00:00:00Z</responseDate>
+  <request verb="GetRecord" identifier="ivo://example.com/tap" metadataPrefix="not_ivo_vor">https://example.com/registry/oai</request>
+  <error code="cannotDisseminateFormat">Metadata format 'not_ivo_vor' is not supported. Supported formats: ivo_vor, oai_dc.</error>
+</OAI-PMH>
