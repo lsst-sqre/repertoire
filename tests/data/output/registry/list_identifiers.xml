@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>1970-01-01T00:00:00Z</responseDate>
+  <request verb="ListIdentifiers" metadataPrefix="ivo_vor">https://example.com/registry/oai</request>
+  <ListIdentifiers>
+    <header>
+      <identifier>ivo://example.com/registry</identifier>
+      <datestamp>1970-01-01T00:00:00Z</datestamp>
+      <setSpec>ivo_managed</setSpec>
+    </header>
+    <header>
+      <identifier>ivo://example.com</identifier>
+      <datestamp>1970-01-01T00:00:00Z</datestamp>
+      <setSpec>ivo_managed</setSpec>
+    </header>
+    <header>
+      <identifier>ivo://example.com/org</identifier>
+      <datestamp>1970-01-01T00:00:00Z</datestamp>
+      <setSpec>ivo_managed</setSpec>
+    </header>
+    <header>
+      <identifier>ivo://example.com/sia/dp02</identifier>
+      <datestamp>1970-01-01T00:00:00Z</datestamp>
+      <setSpec>ivo_managed</setSpec>
+    </header>
+    <header>
+      <identifier>ivo://example.com/sia/dp1</identifier>
+      <datestamp>1970-01-01T00:00:00Z</datestamp>
+      <setSpec>ivo_managed</setSpec>
+    </header>
+    <header>
+      <identifier>ivo://example.com/tap</identifier>
+      <datestamp>1970-01-01T00:00:00Z</datestamp>
+      <setSpec>ivo_managed</setSpec>
+    </header>
+    <header>
+      <identifier>ivo://example.com/cutout</identifier>
+      <datestamp>1970-01-01T00:00:00Z</datestamp>
+      <setSpec>ivo_managed</setSpec>
+    </header>
+  </ListIdentifiers>
+</OAI-PMH>

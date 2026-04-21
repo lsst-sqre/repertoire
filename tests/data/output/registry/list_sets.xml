@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>1970-01-01T00:00:00Z</responseDate>
+  <request verb="ListSets">https://example.com/registry/oai</request>
+  <ListSets>
+    <set>
+      <setSpec>ivo_managed</setSpec>
+      <setName>IVOA Managed records</setName>
+    </set>
+  </ListSets>
+</OAI-PMH>
