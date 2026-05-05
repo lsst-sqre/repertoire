@@ -1,8 +1,10 @@
 """Factory for building IVOA VOResource records from Repertoire config."""
 
+from collections.abc import Callable
 from datetime import datetime
+from typing import Any
 
-from pydantic import AnyUrl, HttpUrl
+from pydantic import AnyUrl, TypeAdapter
 from structlog import BoundLogger
 from vo_models.tapregext.models import (
     Language,
@@ -25,25 +27,27 @@ from vo_models.voresource.models import (
     Service,
 )
 
-from repertoire.config import Config, RegistryConfig
+from repertoire.config import Config
 from repertoire.registry.constants import (
-    SODA_ASYNC_STANDARD_ID,
-    SODA_SYNC_STANDARD_ID,
     TAP_OUTPUT_FORMAT_MIME,
     TAP_UPLOAD_ID,
     VO_SUBJECT,
-    anyurl,
 )
-from repertoire.registry.models import SimpleImageAccess, SODAAsync, SODASync
+from repertoire.registry.models import (
+    SimpleImageAccess,
+    SODAAsync,
+    SODASync,
+    TypedService,
+)
 from repertoire.registry.store import RecordStore
 from rubin.repertoire import (
-    ApiService,
     DataServiceRule,
     DatasetRegistryEntry,
     Discovery,
-    IvoaRegistryEntry,
-    MultiRecordRegistryEntry,
-    TapRegistryConfig,
+    IvoaStandardId,
+    SiaRegistryEntry,
+    SodaRegistryEntry,
+    TapRegistryEntry,
 )
 
 
@@ -68,6 +72,8 @@ class ResourceRecordFactory:
     oai_url
         Absolute URL of the OAI-PMH endpoint, used as the access URL in the
         ``vg:Harvest`` capability of the registry record.
+    logger
+        Logger for recording any warnings or errors during record creation.
     """
 
     def __init__(
@@ -79,15 +85,17 @@ class ResourceRecordFactory:
         logger: BoundLogger,
     ) -> None:
         self._config = config
-        registry_config = config.registry
-        if registry_config is None:
+        if config.ivoa_registry is None:
             raise ValueError("Registry configuration is required")
-        self._registry_config: RegistryConfig = registry_config
+        self._registry_config = config.ivoa_registry
         self._discovery = discovery
         self._startup_timestamp = startup_timestamp
-        self._oai_url = oai_url
+        self._oai_url: AnyUrl = TypeAdapter(AnyUrl).validate_python(oai_url)
         self._curation = self._create_curation()
         self._logger = logger
+
+    def _service(self, **kwargs: Any) -> Service:
+        return TypedService(**kwargs)
 
     def _create_registry(self) -> Registry:
         """Create the vg:Registry record describing this publishing registry.
@@ -98,20 +106,20 @@ class ResourceRecordFactory:
             Registry record with a vg:Harvest capability pointing to the
             OAI-PMH endpoint.
         """
-        authority_id = self._registry_config.authority.removeprefix("ivo://")
+        authority_id = str(self._registry_config.authority).removeprefix(
+            "ivo://"
+        )
         return Registry(
             created=self._registry_config.created,
             updated=self._startup_timestamp,
             status="active",
             title=self._registry_config.repository_name,
-            identifier=anyurl.validate_python(self._registry_config.ivoid),
+            identifier=self._registry_config.ivoid,
             curation=self._curation,
             content=Content(
                 subject=VO_SUBJECT,
                 description=self._registry_config.organisation.description,
-                reference_url=anyurl.validate_python(
-                    self._registry_config.organisation.homepage
-                ),
+                reference_url=self._registry_config.organisation.homepage,
             ),
             capability=[
                 Harvest(
@@ -119,9 +127,7 @@ class ResourceRecordFactory:
                         OAIHTTP(
                             access_url=[
                                 AccessURL(
-                                    value=anyurl.validate_python(
-                                        self._oai_url
-                                    ),
+                                    value=self._oai_url,
                                     use="base",
                                 )
                             ],
@@ -157,7 +163,7 @@ class ResourceRecordFactory:
             ],
         )
 
-    def _create_interface(self, url: AnyUrl | str) -> ParamHTTP:
+    def _create_interface(self, url: AnyUrl) -> ParamHTTP:
         """Create a ParamHTTP interface for a given access URL.
 
         Parameters
@@ -171,32 +177,9 @@ class ResourceRecordFactory:
             A ParamHTTP interface with the given URL as a base access URL.
         """
         return ParamHTTP(
-            access_url=[
-                AccessURL(value=anyurl.validate_python(str(url)), use="base")
-            ],
+            access_url=[AccessURL(value=url, use="base")],
             role="std",
         )
-
-    @staticmethod
-    def _resolve_url(rule: DataServiceRule, service: ApiService) -> HttpUrl:
-        """Return the access URL for a service.
-
-        Parameters
-        ----------
-        rule
-            The data service rule, which may pin a specific API version.
-        service
-            The resolved service from discovery data.
-
-        Returns
-        -------
-        HttpUrl
-            The access URL for the service or its pinned version.
-        """
-        if rule.versions:
-            version_key = next(iter(rule.versions))
-            return service.versions[version_key].url
-        return service.url
 
     def _create_authority(self) -> Authority:
         """Create the IVOA authority record for this publishing registry.
@@ -211,17 +194,15 @@ class ResourceRecordFactory:
             updated=self._startup_timestamp,
             status="active",
             title=self._registry_config.repository_name,
-            identifier=anyurl.validate_python(self._registry_config.authority),
+            identifier=self._registry_config.authority,
             curation=self._curation,
             content=Content(
                 subject=VO_SUBJECT,
                 description=self._registry_config.organisation.description,
-                reference_url=anyurl.validate_python(
-                    self._registry_config.organisation.homepage
-                ),
+                reference_url=self._registry_config.organisation.homepage,
             ),
             managing_org=ResourceName(
-                ivo_id=self._registry_config.organisation.ivoid,
+                ivo_id=str(self._registry_config.organisation.ivoid),
             ),
         )
 
@@ -238,38 +219,29 @@ class ResourceRecordFactory:
             updated=self._startup_timestamp,
             status="active",
             title=self._registry_config.organisation.title,
-            identifier=anyurl.validate_python(
-                self._registry_config.organisation.ivoid
-            ),
+            identifier=self._registry_config.organisation.ivoid,
             curation=self._curation,
             content=Content(
                 subject=VO_SUBJECT,
                 description=self._registry_config.organisation.description,
-                reference_url=anyurl.validate_python(
-                    self._registry_config.organisation.homepage
-                ),
+                reference_url=self._registry_config.organisation.homepage,
             ),
         )
 
     def _create_tap(
         self,
         rule: DataServiceRule,
-        registry: IvoaRegistryEntry,
-        tap: TapRegistryConfig,
+        registry: TapRegistryEntry,
     ) -> Service:
         """Create a TAPRegExt service record for a TAP endpoint.
 
         Parameters
         ----------
         rule
-            The data service rule for this TAP service. Only the first dataset
-            in ``rule.datasets`` is used.
+            The data service rule for this TAP service.
         registry
-            The IVOA registry entry containing the IVOID, title, and
-            datestamps.
-        tap
-            TAP-specific configuration including ADQL version and upload
-            support.
+            The TAP registry entry containing the IVOID, title, datestamps,
+            and TAP-specific fields.
 
         Returns
         -------
@@ -282,19 +254,19 @@ class ResourceRecordFactory:
             )
         dataset = next(iter(rule.datasets))
         service = self._discovery.datasets[dataset].services[rule.name]
-        url = self._resolve_url(rule, service)
+        url = service.url
 
-        return Service(
+        return self._service(
             created=registry.created,
             updated=self._startup_timestamp,
             status="active",
             title=registry.title,
-            identifier=anyurl.validate_python(registry.ivoid),
+            identifier=registry.ivoid,
             curation=self._curation,
             content=Content(
                 subject=VO_SUBJECT,
                 description=registry.description,
-                reference_url=anyurl.validate_python(
+                reference_url=(
                     registry.docs_url
                     or self._registry_config.organisation.homepage
                 ),
@@ -305,14 +277,14 @@ class ResourceRecordFactory:
                     language=[
                         Language(
                             name="ADQL",
-                            version=[Version(value=tap.adql_version)],
+                            version=[Version(value=registry.adql_version)],
                             language_features=None,
                         )
                     ],
                     output_format=[OutputFormat(mime=TAP_OUTPUT_FORMAT_MIME)],
                     upload_method=(
                         [UploadMethod(ivo_id=TAP_UPLOAD_ID)]
-                        if tap.upload_supported
+                        if registry.upload_supported
                         else None
                     ),
                 )
@@ -322,7 +294,7 @@ class ResourceRecordFactory:
     def _create_soda(
         self,
         rule: DataServiceRule,
-        registry: IvoaRegistryEntry,
+        registry: SodaRegistryEntry,
     ) -> Service:
         """Create a SODA service record for an image cutout endpoint.
 
@@ -341,7 +313,7 @@ class ResourceRecordFactory:
         Returns
         -------
         Service
-            A Service record with capabilities for each SODA endpoint version.
+            A Service record with capabilities for each SODA version.
         """
         if not rule.datasets:
             raise RuntimeError(
@@ -351,35 +323,36 @@ class ResourceRecordFactory:
         service = self._discovery.datasets[dataset].services[rule.name]
         capabilities: list[Capability] = []
         for api_version in service.versions.values():
-            if api_version.ivoa_standard_id == SODA_SYNC_STANDARD_ID:
-                capabilities.append(
-                    SODASync(
-                        interface=[self._create_interface(api_version.url)]
+            match api_version.ivoa_standard_id:
+                case IvoaStandardId.SODA_SYNC_1:
+                    capabilities.append(
+                        SODASync(
+                            interface=[self._create_interface(api_version.url)]
+                        )
                     )
-                )
-            elif api_version.ivoa_standard_id == SODA_ASYNC_STANDARD_ID:
-                capabilities.append(
-                    SODAAsync(
-                        interface=[self._create_interface(api_version.url)]
+                case IvoaStandardId.SODA_ASYNC_1:
+                    capabilities.append(
+                        SODAAsync(
+                            interface=[self._create_interface(api_version.url)]
+                        )
                     )
-                )
-            else:
-                raise RuntimeError(
-                    f"Unrecognised SODA standard ID"
-                    f" '{api_version.ivoa_standard_id}'"
-                    f" for service '{rule.name}'"
-                )
-        return Service(
+                case _:
+                    raise RuntimeError(
+                        f"Unrecognised SODA standard ID"
+                        f" '{api_version.ivoa_standard_id}'"
+                        f" for service '{rule.name}'"
+                    )
+        return self._service(
             created=registry.created,
             updated=self._startup_timestamp,
             status="active",
             title=registry.title,
-            identifier=anyurl.validate_python(registry.ivoid),
+            identifier=registry.ivoid,
             curation=self._curation,
             content=Content(
                 subject=VO_SUBJECT,
                 description=registry.description,
-                reference_url=anyurl.validate_python(
+                reference_url=(
                     registry.docs_url
                     or self._registry_config.organisation.homepage
                 ),
@@ -411,19 +384,24 @@ class ResourceRecordFactory:
             A Service record with an SIA capability for this dataset.
         """
         service = self._discovery.datasets[dataset].services[rule.name]
-        url = self._resolve_url(rule, service)
+        sia_version = next(
+            v
+            for v in service.versions.values()
+            if v.ivoa_standard_id == IvoaStandardId.SIA_QUERY_2
+        )
+        url = sia_version.url
 
-        return Service(
+        return self._service(
             created=registry.created,
             updated=self._startup_timestamp,
             status="active",
             title=registry.title,
-            identifier=anyurl.validate_python(registry.ivoid),
+            identifier=registry.ivoid,
             curation=self._curation,
             content=Content(
                 subject=VO_SUBJECT,
                 description=registry.description,
-                reference_url=anyurl.validate_python(
+                reference_url=(
                     registry.docs_url
                     or self._registry_config.organisation.homepage
                 ),
@@ -435,178 +413,143 @@ class ResourceRecordFactory:
             ],
         )
 
-    def _validate_soda_standard_ids(
-        self, rule: DataServiceRule, dataset: str, service: ApiService
+    def _is_discoverable(self, rule: DataServiceRule, dataset: str) -> bool:
+        return (
+            dataset in self._discovery.datasets
+            and rule.name in self._discovery.datasets[dataset].services
+        )
+
+    def _handle_single_dataset(
+        self,
+        rule: DataServiceRule,
+        registry: TapRegistryEntry | SodaRegistryEntry,
+        records: dict[str, Resource],
+        builder: Callable[[DataServiceRule, Any], Resource],
+        kind: str,
     ) -> None:
-        """Check that a SODA service has both sync and async standard IDs.
+        """Handle TAP and SODA rules, which create one record per rule with
+        a single dataset.
 
         Parameters
         ----------
         rule
-            The data service rule being validated.
-        dataset
-            The dataset name, used in error messages.
-        service
-            The resolved service from discovery data.
+            The data service rule being processed.
+        registry
+            The IVOA registry entry for this rule.
+        records
+            The dictionary of records being built, to add the new record to.
+        builder
+            The method to call to build the record (e.g. ``_create_tap``)
+        kind
+            A str describing the kind of record being created (for logging).
 
-        Raises
-        ------
-        ValueError
-            If either sync or async standard ID is missing.
+        Returns
+        -------
+        None
         """
-        standard_ids = {
-            v.ivoa_standard_id
-            for v in service.versions.values()
-            if v.ivoa_standard_id
-        }
-        missing = {
-            SODA_SYNC_STANDARD_ID,
-            SODA_ASYNC_STANDARD_ID,
-        } - standard_ids
-        if missing:
-            raise ValueError(
-                f"SODA service '{rule.name}' for dataset"
-                f" '{dataset}' is missing standard ID(s):"
-                f" {', '.join(sorted(missing))}"
+        if not rule.datasets:
+            self._logger.debug(
+                "Rule has no datasets, skipping",
+                rule=rule.name,
             )
-
-    def _validate_dataset(self, rule: DataServiceRule, dataset: str) -> None:
-        """Validate one dataset entry for a service rule.
-
-        Parameters
-        ----------
-        rule
-            The data service rule being validated.
-        dataset
-            The dataset name to validate.
-
-        Raises
-        ------
-        ValueError
-            If the dataset or service is missing, or if standard IDs are
-            absent where required.
-        """
-        if dataset not in self._discovery.datasets:
-            raise ValueError(
-                f"Dataset '{dataset}' in rule '{rule.name}'"
-                " not found in discovery data"
-            )
-        service = self._discovery.datasets[dataset].services.get(rule.name)
-        if not service:
-            raise ValueError(
-                f"Service '{rule.name}' for dataset"
-                f" '{dataset}' not found in discovery data"
-            )
-        if rule.registry is None:
             return
-        service_type = rule.registry.ivoa_service_type
-        if service_type != "tap":
-            for version_key, api_version in service.versions.items():
-                if not api_version.ivoa_standard_id:
-                    raise ValueError(
-                        f"API version '{version_key}' for"
-                        f" service '{rule.name}' in dataset"
-                        f" '{dataset}' is missing an IVOA"
-                        " standard ID in discovery data"
-                    )
-        if service_type == "soda":
-            self._validate_soda_standard_ids(rule, dataset, service)
+        dataset = next(iter(rule.datasets))
+        if not self._is_discoverable(rule, dataset):
+            return
 
-    def _validate(self) -> None:
-        """Validate the configuration and discovery data before creating
-        records.
+        records[str(registry.ivoid)] = builder(rule, registry)
+        self._logger.debug(
+            f"Created {kind} record for rule",
+            rule=rule.name,
+        )
 
-        Checks that all service rules have corresponding discovery entries with
-        resolved URLs and standard IDs.
+    def _handle_sia(
+        self,
+        rule: DataServiceRule,
+        registry: SiaRegistryEntry,
+        records: dict[str, Resource],
+    ) -> None:
+        """Handle SIA rules, which create one record per dataset in the rule.
 
-        Raises
-        ------
-        ValueError
-            If any service rule references a dataset, service, API version, or
-            standard ID that is not found in the discovery data.
+        Parameters
+        ----------
+        rule
+            The data service rule being processed.
+        registry
+            The IVOA registry entry for this rule.
+        records
+            The dictionary of records being built.
+
+        Returns
+        -------
+        None
         """
-        for rule_list in self._config.rules.values():
-            for rule in rule_list:
-                if not isinstance(rule, DataServiceRule):
-                    continue
-                if rule.registry is None:
-                    continue
-                for dataset in rule.datasets or []:
-                    self._validate_dataset(rule, dataset)
+        for dataset, entry in registry.records.items():
+            if not self._is_discoverable(rule, dataset):
+                continue
+            records[str(entry.ivoid)] = self._create_sia(rule, dataset, entry)
+            self._logger.debug(
+                "Created SIA record for rule and dataset",
+                rule=rule.name,
+                dataset=dataset,
+            )
+
+    def _process_rule(
+        self, rule: DataServiceRule, records: dict[str, Resource]
+    ) -> None:
+        """Process one service rule from the configuration, creating
+        VOResource records.
+
+        Parameters
+        ----------
+        rule
+            The data service rule to process.
+        records
+            The dictionary of records being built.
+
+        Returns
+        -------
+        None
+        """
+        if rule.ivoa_registry is None or not rule.datasets:
+            return
+
+        registry = rule.ivoa_registry
+
+        if isinstance(registry, TapRegistryEntry):
+            self._handle_single_dataset(
+                rule, registry, records, self._create_tap, "TAP"
+            )
+        elif isinstance(registry, SodaRegistryEntry):
+            self._handle_single_dataset(
+                rule, registry, records, self._create_soda, "SODA"
+            )
+        elif isinstance(registry, SiaRegistryEntry):
+            self._handle_sia(rule, registry, records)
 
     def create_all(self) -> RecordStore:
         """Create all VOResource records and return them as a RecordStore.
 
-        Iterates over all service rules in the configuration. Rules with a
-        ``tap`` key produce TAPRegExt records, rules with a flat
-        ``registry`` entry produce SODA records and rules with a dict
-        ``registry`` entry produce one SIA record per dataset.
+        Iterates over all service rules in the configuration and dispatches
+        to the appropriate record builder based on the type of the
+        ``ivoa_registry`` entry.
 
         Returns
         -------
         RecordStore
             Store of all built records keyed by IVOID.
         """
-        self._validate()
-        records: dict[str, Resource] = {}
-        records[self._registry_config.ivoid] = self._create_registry()
-        records[self._registry_config.authority] = self._create_authority()
-        records[self._registry_config.organisation.ivoid] = (
-            self._create_organisation()
-        )
+        records: dict[str, Resource] = {
+            str(self._registry_config.ivoid): self._create_registry(),
+            str(self._registry_config.authority): self._create_authority(),
+            str(self._registry_config.organisation.ivoid): (
+                self._create_organisation()
+            ),
+        }
 
         for rule_list in self._config.rules.values():
             for rule in rule_list:
-                if not isinstance(rule, DataServiceRule):
-                    continue
-                if rule.registry is None or not rule.datasets:
-                    continue
-
-                service_type = rule.registry.ivoa_service_type
-
-                if service_type == "tap" and isinstance(
-                    rule.registry, IvoaRegistryEntry
-                ):
-                    if rule.tap is None:
-                        raise ValueError(
-                            f"TAP rule '{rule.name}' is missing a"
-                            " 'tap:' config block"
-                        )
-                    records[rule.registry.ivoid] = self._create_tap(
-                        rule, rule.registry, rule.tap
-                    )
-                    self._logger.info(
-                        "Created TAP record for rule", rule=rule.name
-                    )
-
-                elif service_type == "soda" and isinstance(
-                    rule.registry, IvoaRegistryEntry
-                ):
-                    records[rule.registry.ivoid] = self._create_soda(
-                        rule, rule.registry
-                    )
-                    self._logger.info(
-                        "Created SODA record for rule", rule=rule.name
-                    )
-
-                elif service_type == "sia" and isinstance(
-                    rule.registry, MultiRecordRegistryEntry
-                ):
-                    for dataset, entry in rule.registry.records.items():
-                        records[entry.ivoid] = self._create_sia(
-                            rule, dataset, entry
-                        )
-                        self._logger.info(
-                            "Created SIA record for rule and dataset",
-                            rule=rule.name,
-                            dataset=dataset,
-                        )
-
-                else:
-                    self._logger.warning(
-                        "Rule registry entry does not match any known"
-                        " record type, skipping",
-                        rule=rule.name,
-                    )
+                if isinstance(rule, DataServiceRule):
+                    self._process_rule(rule, records)
 
         return RecordStore(records=records)

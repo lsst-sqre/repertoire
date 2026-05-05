@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import Depends, Request
+from fastapi import Depends, HTTPException, Request
 from safir.dependencies.logger import logger_dependency
 from structlog import BoundLogger
 
@@ -56,6 +56,8 @@ class OaiHandlerDependency:
         ------
         RuntimeError
             If `initialize` has not been called.
+        HTTPException
+            With status 404 if the IVOA registry is not configured.
         """
         if self._startup_timestamp is None:
             raise RuntimeError(
@@ -64,10 +66,10 @@ class OaiHandlerDependency:
                 "any requests are processed"
             )
         if self._handler is None:
-            if config.registry is None:
-                raise RuntimeError(
-                    "OAI handler dependency called without registry"
-                    " configuration"
+            if config.ivoa_registry is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="IVOA publishing registry is not configured",
                 )
             oai_url = str(request.url_for("get_oai"))
             store = ResourceRecordFactory(
@@ -82,7 +84,7 @@ class OaiHandlerDependency:
             # Ideally this would be done at application startup, but the
             # handler needs the absolute OAI endpoint URL, which would have
             # to then be constructed from configuration.
-            self._handler = OaiHandler(store, oai_url, config.registry)
+            self._handler = OaiHandler(store, oai_url, config.ivoa_registry)
         return self._handler
 
     def initialize(self, startup_timestamp: datetime) -> None:

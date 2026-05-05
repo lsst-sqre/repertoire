@@ -4,6 +4,8 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, Field, HttpUrl, PlainSerializer, SecretStr
 
+from ._config import IvoaStandardId
+
 __all__ = [
     "ApiService",
     "ApiVersion",
@@ -32,11 +34,10 @@ class ApiVersion(BaseModel):
     ]
 
     ivoa_standard_id: Annotated[
-        str | None,
+        IvoaStandardId | None,
         Field(
             title="IVOA standardID",
             description="IVOA standardID used in service registrations",
-            examples=["ivo://ivoa.net/std/SODA#async-1.0"],
         ),
     ] = None
 

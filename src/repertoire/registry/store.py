@@ -8,8 +8,8 @@ from vo_models.voresource.models import Resource
 class RecordStore:
     """Store of VOResource records.
 
-    Records are keyed by IVOID and queried by the OAI-PMH handler to serve
-    ``GetRecord``, ``ListIdentifiers``, and ``ListRecords`` requests.
+    Records are keyed by IVOID string and queried by the OAI-PMH handler to
+    serve ``GetRecord``, ``ListIdentifiers``, and ``ListRecords`` requests.
 
     Parameters
     ----------

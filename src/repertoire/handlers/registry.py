@@ -60,7 +60,7 @@ async def oai_params(request: Request) -> OaiParameters:
 
 
 @registry_router.api_route(
-    "/oai",
+    "/ivoa",
     methods=["GET", "POST"],
     summary="IVOA Publishing Registry",
 )

@@ -9,6 +9,7 @@ from ._config import (
     ApiVersionRule,
     DataServiceRule,
     InternalServiceRule,
+    IvoaStandardId,
     RepertoireSettings,
     Rule,
     UiServiceRule,
@@ -28,9 +29,6 @@ from ._models import (
 
 _HIPS_LIST_VERSION = "hips-list-1.0"
 """Version to use for HiPS service pointing to the HiPS list."""
-
-_HIPS_LIST_IVOA_STANDARD_ID = "ivo://ivoa.net/std/hips#hipslist-1.0"
-"""IVOA standardID to use for the HiPS service pointing to the HiPS list."""
 
 __all__ = [
     "RepertoireBuilder",
@@ -179,7 +177,7 @@ class RepertoireBuilder:
                     versions={
                         _HIPS_LIST_VERSION: ApiVersion(
                             url=hips_url,
-                            ivoa_standard_id=_HIPS_LIST_IVOA_STANDARD_ID,
+                            ivoa_standard_id=IvoaStandardId.HIPS_LIST,
                         )
                     },
                 )

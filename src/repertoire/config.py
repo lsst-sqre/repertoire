@@ -5,9 +5,11 @@ from typing import Self
 
 from pydantic import (
     AliasChoices,
+    AnyUrl,
     BaseModel,
     ConfigDict,
     Field,
+    HttpUrl,
     SecretStr,
     model_validator,
 )
@@ -35,8 +37,8 @@ class OrgRegistryConfig(BaseModel):
     )
     created: datetime = Field(..., title="Creation timestamp of the registry")
     description: str = Field(..., title="Description of the registry")
-    homepage: str = Field(..., title="URL of the registry homepage")
-    ivoid: str = Field(..., title="IVOA identifier for the registry")
+    homepage: HttpUrl = Field(..., title="URL of the registry homepage")
+    ivoid: AnyUrl = Field(..., title="IVOA identifier for the registry")
     title: str = Field(..., title="Title of the registry")
 
 
@@ -53,9 +55,11 @@ class RegistryConfig(BaseModel):
         ..., title="Email address of the registry administrator"
     )
 
-    authority: str = Field(..., title="Authority of the registry")
+    authority: AnyUrl = Field(..., title="Authority of the registry")
 
-    ivoid: str = Field(..., title="IVOA identifier for the registry resource")
+    ivoid: AnyUrl = Field(
+        ..., title="IVOA identifier for the registry resource"
+    )
 
     created: datetime = Field(
         ...,
@@ -72,7 +76,7 @@ class RegistryConfig(BaseModel):
         description="Configuration for the organisation registry",
     )
 
-    path_prefix: str = Field("/registry", title="URL prefix for the registry")
+    path_prefix: str = Field("/discovery", title="URL prefix for the registry")
 
     repository_name: str = Field(..., title="Name of the repository")
 
@@ -207,7 +211,7 @@ class Config(RepertoireSettings):
 
     path_prefix: str = Field("/repertoire", title="URL prefix for application")
 
-    registry: RegistryConfig | None = Field(
+    ivoa_registry: RegistryConfig | None = Field(
         None,
         title="Registry configuration",
         description="Configuration for the registry",

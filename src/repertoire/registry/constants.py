@@ -1,6 +1,6 @@
 """Constants for the IVOA OAI-PMH publishing registry."""
 
-from pydantic import AnyUrl, TypeAdapter
+from rubin.repertoire import IvoaStandardId
 
 __all__ = [
     "DC_NS",
@@ -25,12 +25,7 @@ __all__ = [
     "TAP_UPLOAD_ID",
     "VO_SUBJECT",
     "XSI_NS",
-    "anyurl",
 ]
-
-# vo_modelss uses AnyUrl so we use a TypeAdapter to validate our strings
-anyurl: TypeAdapter[AnyUrl] = TypeAdapter(AnyUrl)
-"""Adapter for validating and constructing Pydantic AnyUrl objects."""
 
 # OAI-PMH namespaces and schema locations
 OAI_NS = "http://www.openarchives.org/OAI/2.0/"
@@ -59,10 +54,10 @@ OAI_GRANULARITY = "YYYY-MM-DDThh:mm:ssZ"
 
 SUPPORTED_PREFIXES = (IVO_VOR_PREFIX, OAI_DC_PREFIX)
 
-# IVOA standard IDs
-SIA_STANDARD_ID = "ivo://ivoa.net/std/SIA#query-2.0"
-SODA_SYNC_STANDARD_ID = "ivo://ivoa.net/std/SODA#sync-1.0"
-SODA_ASYNC_STANDARD_ID = "ivo://ivoa.net/std/SODA#async-1.0"
+# IVOA standard IDs for SIA and SODA
+SIA_STANDARD_ID = IvoaStandardId.SIA_QUERY_2
+SODA_SYNC_STANDARD_ID = IvoaStandardId.SODA_SYNC_1
+SODA_ASYNC_STANDARD_ID = IvoaStandardId.SODA_ASYNC_1
 
 # TAP output format
 TAP_OUTPUT_FORMAT_MIME = "application/x-votable+xml"

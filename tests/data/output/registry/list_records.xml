@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
   <responseDate>1970-01-01T00:00:00Z</responseDate>
-  <request verb="ListRecords" metadataPrefix="ivo_vor">https://example.com/registry/oai</request>
+  <request verb="ListRecords" metadataPrefix="ivo_vor">https://example.com/discovery/ivoa</request>
   <ListRecords>
     <record>
       <header>
@@ -32,10 +32,9 @@
           <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/Registry" xsi:type="vg:Harvest">
             <description/>
             <interface version="" role="std" xsi:type="vg:OAIHTTP">
-              <accessURL use="base">https://example.com/registry/oai</accessURL>
+              <accessURL use="base">https://example.com/discovery/ivoa</accessURL>
               <testQueryString/>
             </interface>
-            <maxRecords>0</maxRecords>
           </capability>
           <full>false</full>
           <managedAuthority>example.com</managedAuthority>
