@@ -23,7 +23,6 @@ __all__ = [
     "BaseRule",
     "DataServiceRule",
     "DatasetConfig",
-    "DatasetRegistryEntry",
     "HipsConfig",
     "HipsDatasetConfig",
     "HipsLegacyConfig",
@@ -362,24 +361,16 @@ class BaseRegistryEntry(BaseModel):
     ] = None
 
 
-class DatasetRegistryEntry(BaseRegistryEntry):
-    """Record metadata for one dataset within a multi-record registry entry.
-
-    Used inside ``MultiRecordRegistryEntry.records``. The service type is
-    declared once on the parent entry and is not repeated here.
-    """
-
-
 class SodaRegistryEntry(BaseRegistryEntry):
     """IVOA registry entry for a SODA image cutout service."""
 
-    ivoa_service_type: Literal["soda"] = "soda"
+    ivoa_service_type: Literal["soda"]
 
 
 class TapRegistryEntry(BaseRegistryEntry):
     """IVOA registry entry for a TAP service."""
 
-    ivoa_service_type: Literal["tap"] = "tap"
+    ivoa_service_type: Literal["tap"]
 
     adql_version: Annotated[
         str,
@@ -409,7 +400,7 @@ class MultiRecordRegistryEntry(BaseModel):
     )
 
     records: Annotated[
-        dict[str, DatasetRegistryEntry],
+        dict[str, BaseRegistryEntry],
         Field(
             title="Per-dataset registry entries",
             description=(
@@ -421,9 +412,20 @@ class MultiRecordRegistryEntry(BaseModel):
 
 
 class SiaRegistryEntry(MultiRecordRegistryEntry):
-    """IVOA registry entry for an SIA image access service."""
+    """Config-time IVOA registry entry for an SIA service.
 
-    ivoa_service_type: Literal["sia"] = "sia"
+    One rule covers multiple datasets. Each dataset's IVOID and metadata are
+    stored separately in ``records``. The builder will resolve this into a
+    ``SiaDatasetRegistryEntry`` per dataset when building ``Discovery``.
+    """
+
+    ivoa_service_type: Literal["sia"]
+
+
+class SiaDatasetRegistryEntry(BaseRegistryEntry):
+    """Resolved per-dataset SIA registry entry, stored on ``DataService``."""
+
+    ivoa_service_type: Literal["sia"]
 
 
 class DataServiceRule(VersionedServiceRule):
@@ -465,28 +467,34 @@ class DataServiceRule(VersionedServiceRule):
     @model_validator(mode="after")
     def _validate_ivoa_versions(self) -> Self:
         if isinstance(self.ivoa_registry, SodaRegistryEntry):
-            standard_ids = {
-                v.ivoa_standard_id
-                for v in self.versions.values()
-                if v.ivoa_standard_id
-            }
-            required = {
+            soda_ids = {
                 IvoaStandardId.SODA_SYNC_1,
                 IvoaStandardId.SODA_ASYNC_1,
             }
-            missing = required - standard_ids
+            version_ids = {
+                v.ivoa_standard_id
+                for v in self.versions.values()
+                if v.ivoa_standard_id is not None
+            }
+            missing = soda_ids - version_ids
             if missing:
                 raise ValueError(
                     f"SODA rule '{self.name}' missing standard IDs: "
                     f"{', '.join(sorted(missing))}"
                 )
+            unexpected = version_ids - soda_ids
+            if unexpected:
+                raise ValueError(
+                    f"SODA rule '{self.name}' has unexpected standard IDs: "
+                    f"{', '.join(sorted(unexpected))}"
+                )
         elif isinstance(self.ivoa_registry, SiaRegistryEntry):
-            standard_ids = {
+            version_ids = {
                 v.ivoa_standard_id
                 for v in self.versions.values()
-                if v.ivoa_standard_id
+                if v.ivoa_standard_id is not None
             }
-            if IvoaStandardId.SIA_QUERY_2 not in standard_ids:
+            if IvoaStandardId.SIA_QUERY_2 not in version_ids:
                 raise ValueError(
                     f"SIA rule '{self.name}' must have a version with"
                     f" standard ID '{IvoaStandardId.SIA_QUERY_2}'"

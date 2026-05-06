@@ -73,7 +73,7 @@ class OaiHandlerDependency:
                 )
             oai_url = str(request.url_for("get_oai"))
             store = ResourceRecordFactory(
-                config=config,
+                registry_config=config.ivoa_registry,
                 discovery=discovery,
                 startup_timestamp=self._startup_timestamp,
                 oai_url=oai_url,

@@ -5,11 +5,7 @@ from pydantic_xml import attr, element
 from vo_models.tapregext.models import TableAccess
 from vo_models.voresource.models import Capability, Service
 
-from repertoire.registry.constants import (
-    SIA_STANDARD_ID,
-    SODA_ASYNC_STANDARD_ID,
-    SODA_SYNC_STANDARD_ID,
-)
+from rubin.repertoire import IvoaStandardId
 
 
 class SimpleImageAccess(Capability, tag="capability"):
@@ -17,7 +13,7 @@ class SimpleImageAccess(Capability, tag="capability"):
 
     standard_id: AnyUrl | None = attr(
         name="standardID",
-        default=SIA_STANDARD_ID,
+        default=IvoaStandardId.SIA_QUERY_2,
     )
     type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
 
@@ -27,7 +23,7 @@ class SODASync(Capability, tag="capability"):
 
     standard_id: AnyUrl | None = attr(
         name="standardID",
-        default=SODA_SYNC_STANDARD_ID,
+        default=IvoaStandardId.SODA_SYNC_1,
     )
     type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
 
@@ -37,14 +33,9 @@ class SODAAsync(Capability, tag="capability"):
 
     standard_id: AnyUrl | None = attr(
         name="standardID",
-        default=SODA_ASYNC_STANDARD_ID,
+        default=IvoaStandardId.SODA_ASYNC_1,
     )
     type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
-
-
-CapabilityType = (
-    TableAccess | SODASync | SODAAsync | SimpleImageAccess | Capability
-)
 
 
 class TypedService(Service, tag="Service"):

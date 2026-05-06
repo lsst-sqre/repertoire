@@ -4,7 +4,12 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, Field, HttpUrl, PlainSerializer, SecretStr
 
-from ._config import IvoaStandardId
+from ._config import (
+    IvoaStandardId,
+    SiaDatasetRegistryEntry,
+    SodaRegistryEntry,
+    TapRegistryEntry,
+)
 
 __all__ = [
     "ApiService",
@@ -109,6 +114,18 @@ class ApiService(BaseService):
 
 class DataService(ApiService):
     """A user-facing API service tied to a particular dataset."""
+
+    ivoa_registry: Annotated[
+        TapRegistryEntry | SodaRegistryEntry | SiaDatasetRegistryEntry | None,
+        Field(
+            title="IVOA registry entry",
+            description=(
+                "IVOA registry metadata for this discovered service, if it"
+                " should be published through the IVOA registry."
+            ),
+            discriminator="ivoa_service_type",
+        ),
+    ] = None
 
 
 class InternalService(ApiService):

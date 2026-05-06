@@ -1,7 +1,5 @@
 """Constants for the IVOA OAI-PMH publishing registry."""
 
-from rubin.repertoire import IvoaStandardId
-
 __all__ = [
     "DC_NS",
     "IVO_MANAGED_SET",
@@ -17,9 +15,6 @@ __all__ = [
     "OAI_GRANULARITY",
     "OAI_NS",
     "OAI_SCHEMA",
-    "SIA_STANDARD_ID",
-    "SODA_ASYNC_STANDARD_ID",
-    "SODA_SYNC_STANDARD_ID",
     "SUPPORTED_PREFIXES",
     "TAP_OUTPUT_FORMAT_MIME",
     "TAP_UPLOAD_ID",
@@ -53,11 +48,6 @@ OAI_DELETED_RECORD_POLICY = "no"
 OAI_GRANULARITY = "YYYY-MM-DDThh:mm:ssZ"
 
 SUPPORTED_PREFIXES = (IVO_VOR_PREFIX, OAI_DC_PREFIX)
-
-# IVOA standard IDs for SIA and SODA
-SIA_STANDARD_ID = IvoaStandardId.SIA_QUERY_2
-SODA_SYNC_STANDARD_ID = IvoaStandardId.SODA_SYNC_1
-SODA_ASYNC_STANDARD_ID = IvoaStandardId.SODA_ASYNC_1
 
 # TAP output format
 TAP_OUTPUT_FORMAT_MIME = "application/x-votable+xml"

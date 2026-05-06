@@ -12,6 +12,10 @@ from ._config import (
     IvoaStandardId,
     RepertoireSettings,
     Rule,
+    SiaDatasetRegistryEntry,
+    SiaRegistryEntry,
+    SodaRegistryEntry,
+    TapRegistryEntry,
     UiServiceRule,
 )
 from ._models import (
@@ -132,7 +136,37 @@ class RepertoireBuilder:
             url=HttpUrl(Template(rule.template).render(**context)),
             openapi=openapi,
             versions=self._build_versions_from_rules(rule.versions, dataset),
+            ivoa_registry=self._build_ivoa_registry_from_rule(dataset, rule),
         )
+
+    def _build_ivoa_registry_from_rule(
+        self, dataset: str, rule: DataServiceRule
+    ) -> TapRegistryEntry | SodaRegistryEntry | SiaDatasetRegistryEntry | None:
+        """Build discovered IVOA registry metadata for one data service.
+
+        Parameters
+        ----------
+        dataset
+            Name of the dataset.
+        rule
+            Generation rule for the service information.
+
+        Returns
+        -------
+        TapRegistryEntry or SodaRegistryEntry or SiaDatasetRegistryEntry
+            or None. IVOA registry metadata for the service, or `None` if no
+            such metadata is available.
+        """
+        if rule.ivoa_registry is None:
+            return None
+        if isinstance(rule.ivoa_registry, SiaRegistryEntry):
+            entry = rule.ivoa_registry.records.get(dataset)
+            if entry is None:
+                return None
+            return SiaDatasetRegistryEntry.model_validate(
+                {**entry.model_dump(mode="python"), "ivoa_service_type": "sia"}
+            )
+        return rule.ivoa_registry
 
     def _build_data_services(
         self, dataset: str, hips_base_url: str | None
