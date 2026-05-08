@@ -1,6 +1,7 @@
 """Factory for building IVOA VOResource records from discovery data."""
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import AnyUrl, TypeAdapter
 from structlog import BoundLogger
@@ -19,7 +20,6 @@ from vo_models.voresource.models import (
     Contact,
     Content,
     Curation,
-    Organisation,
     Resource,
     ResourceName,
     Service,
@@ -32,10 +32,14 @@ from repertoire.registry.constants import (
     VO_SUBJECT,
 )
 from repertoire.registry.models import (
+    RegistryOrganisation,
     SimpleImageAccess,
     SODAAsync,
     SODASync,
     TypedService,
+    VOSIAvailability,
+    VOSICapabilities,
+    VOSITables,
 )
 from repertoire.registry.store import RecordStore
 from rubin.repertoire import (
@@ -153,21 +157,27 @@ class ResourceRecordFactory:
             ],
         )
 
-    def _create_interface(self, url: AnyUrl) -> ParamHTTP:
+    def _create_interface(
+        self, url: AnyUrl, *, use: Literal["full", "base", "dir"] = "base"
+    ) -> ParamHTTP:
         """Create a ParamHTTP interface for a given access URL.
 
         Parameters
         ----------
         url
             The access URL for the service endpoint.
+        use
+            Access URL ``use`` attribute: ``"base"`` for prefix-matching
+            endpoints (e.g. TAP, VOSI tables) or ``"full"`` for exact-match
+            endpoints (e.g. VOSI capabilities, VOSI availability).
 
         Returns
         -------
         ParamHTTP
-            A ParamHTTP interface with the given URL as a base access URL.
+            A ParamHTTP interface with the given URL.
         """
         return ParamHTTP(
-            access_url=[AccessURL(value=url, use="base")],
+            access_url=[AccessURL(value=url, use=use)],
             role="std",
         )
 
@@ -196,7 +206,7 @@ class ResourceRecordFactory:
             ),
         )
 
-    def _create_organisation(self) -> Organisation:
+    def _create_organisation(self) -> RegistryOrganisation:
         """Create the IVOA organisation record for Rubin Observatory.
 
         Returns
@@ -204,7 +214,7 @@ class ResourceRecordFactory:
         Organisation
             Organisation record describing the publishing institution.
         """
-        return Organisation(
+        return RegistryOrganisation(
             created=self._registry_config.organisation.created,
             updated=self._startup_timestamp,
             status="active",
@@ -234,9 +244,11 @@ class ResourceRecordFactory:
         Returns
         -------
         Service
-            A Service record with a TableAccess capability.
+            A Service record with a TableAccess capability as well as
+            tables, capabilities, and availability endpoints.
         """
         url = service.url
+        base = str(url).rstrip("/")
 
         return TypedService(
             created=registry.created,
@@ -269,7 +281,36 @@ class ResourceRecordFactory:
                         if registry.upload_supported
                         else None
                     ),
-                )
+                ),
+                VOSICapabilities(
+                    interface=[
+                        self._create_interface(
+                            TypeAdapter(AnyUrl).validate_python(
+                                f"{base}/capabilities"
+                            ),
+                            use="full",
+                        )
+                    ]
+                ),
+                VOSIAvailability(
+                    interface=[
+                        self._create_interface(
+                            TypeAdapter(AnyUrl).validate_python(
+                                f"{base}/availability"
+                            ),
+                            use="full",
+                        )
+                    ]
+                ),
+                VOSITables(
+                    interface=[
+                        self._create_interface(
+                            TypeAdapter(AnyUrl).validate_python(
+                                f"{base}/tables"
+                            ),
+                        )
+                    ]
+                ),
             ],
         )
 

@@ -323,7 +323,11 @@ class OaiHandler:
                 )
             )
         else:
-            metadata.append(etree.fromstring(record.to_xml()))
+            metadata.append(
+                etree.fromstring(
+                    record.to_xml(skip_empty=True, exclude_none=True)
+                )
+            )
 
     def _build_record_element(
         self, parent: etree._Element, record: Resource, metadata_prefix: str
