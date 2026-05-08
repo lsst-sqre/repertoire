@@ -16,6 +16,9 @@
         <identifier>ivo://example.com/registry</identifier>
         <curation>
           <publisher>Example Observatory</publisher>
+          <creator>
+            <name>Example Observatory</name>
+          </creator>
           <contact>
             <name>Example Observatory</name>
             <email>registry@example.com</email>

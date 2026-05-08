@@ -95,8 +95,10 @@ ivoaRegistry:
   adminEmail: "registry@example.com"
   authority: "ivo://example.com"
   created: "2026-04-16T00:00:00"
+  creator: "Example Observatory"
   ivoid: "ivo://example.com/registry"
   repositoryName: "Example Publishing Registry"
+  rights: "Restricted to authorized data rights holders."
   organisation:
     created: "2026-04-16T00:00:00Z"
     description: "Example Observatory for testing."

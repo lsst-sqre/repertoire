@@ -19,9 +19,11 @@ from vo_models.voresource.models import (
     Capability,
     Contact,
     Content,
+    Creator,
     Curation,
     Resource,
     ResourceName,
+    Rights,
     Service,
 )
 
@@ -108,6 +110,7 @@ class ResourceRecordFactory:
             updated=self._startup_timestamp,
             status="active",
             title=self._registry_config.repository_name,
+            short_name=self._registry_config.short_name,
             identifier=self._registry_config.ivoid,
             curation=self._curation,
             content=Content(
@@ -147,6 +150,9 @@ class ResourceRecordFactory:
             publisher=ResourceName(
                 value=self._registry_config.organisation.title
             ),
+            creator=[
+                Creator(name=ResourceName(value=self._registry_config.creator))
+            ],
             contact=[
                 Contact(
                     name=ResourceName(
@@ -265,6 +271,12 @@ class ResourceRecordFactory:
                     or self._registry_config.organisation.homepage
                 ),
             ),
+            rights=[
+                Rights(
+                    value=self._registry_config.rights,
+                    rights_uri=self._registry_config.rights_uri,
+                )
+            ],
             capability=[
                 TableAccess(
                     interface=[self._create_interface(url)],
@@ -367,6 +379,12 @@ class ResourceRecordFactory:
                     or self._registry_config.organisation.homepage
                 ),
             ),
+            rights=[
+                Rights(
+                    value=self._registry_config.rights,
+                    rights_uri=self._registry_config.rights_uri,
+                )
+            ],
             capability=capabilities,
         )
 
@@ -412,6 +430,12 @@ class ResourceRecordFactory:
                     or self._registry_config.organisation.homepage
                 ),
             ),
+            rights=[
+                Rights(
+                    value=self._registry_config.rights,
+                    rights_uri=self._registry_config.rights_uri,
+                )
+            ],
             capability=[
                 SimpleImageAccess(
                     interface=[self._create_interface(url)],

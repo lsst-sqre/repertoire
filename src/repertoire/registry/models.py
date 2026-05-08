@@ -5,7 +5,12 @@ from typing import Literal
 from pydantic import AnyUrl
 from pydantic_xml import attr, element
 from vo_models.tapregext.models import TableAccess
-from vo_models.voresource.models import Capability, Organisation, Service
+from vo_models.voresource.models import (
+    Capability,
+    Organisation,
+    Rights,
+    Service,
+)
 
 from rubin.repertoire import IvoaStandardId
 
@@ -87,6 +92,9 @@ class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
 
     type: Literal["vs:CatalogService"] = attr(
         ns="xsi", default="vs:CatalogService"
+    )
+    rights: list[Rights] | None = element(
+        tag="rights", ns="", default_factory=list
     )
     capability: (
         list[

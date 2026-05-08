@@ -15,6 +15,9 @@
           <identifier>ivo://example.com/registry</identifier>
           <curation>
             <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
             <contact>
               <name>Example Observatory</name>
               <email>registry@example.com</email>
@@ -47,6 +50,9 @@
           <identifier>ivo://example.com</identifier>
           <curation>
             <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
             <contact>
               <name>Example Observatory</name>
               <email>registry@example.com</email>
@@ -73,6 +79,9 @@
           <identifier>ivo://example.com/org</identifier>
           <curation>
             <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
             <contact>
               <name>Example Observatory</name>
               <email>registry@example.com</email>
@@ -98,6 +107,9 @@
           <identifier>ivo://example.com/sia/dp02</identifier>
           <curation>
             <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
             <contact>
               <name>Example Observatory</name>
               <email>registry@example.com</email>
@@ -108,6 +120,7 @@
             <description>SIA image access service for the DP02 dataset.</description>
             <referenceURL>https://example.com/</referenceURL>
           </content>
+          <rights>Restricted to authorized data rights holders.</rights>
           <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SIA#query-2.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/sia/dp02/query</accessURL>
@@ -128,6 +141,9 @@
           <identifier>ivo://example.com/tap</identifier>
           <curation>
             <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
             <contact>
               <name>Example Observatory</name>
               <email>registry@example.com</email>
@@ -138,6 +154,7 @@
             <description>TAP service for Example Observatory.</description>
             <referenceURL>https://example.com/</referenceURL>
           </content>
+          <rights>Restricted to authorized data rights holders.</rights>
           <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/TAP" xsi:type="tr:TableAccess">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/tap</accessURL>
@@ -181,6 +198,9 @@
           <identifier>ivo://example.com/cutout</identifier>
           <curation>
             <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
             <contact>
               <name>Example Observatory</name>
               <email>registry@example.com</email>
@@ -191,6 +211,7 @@
             <description>SODA image cutout service for Example Observatory.</description>
             <referenceURL>https://example.com/</referenceURL>
           </content>
+          <rights>Restricted to authorized data rights holders.</rights>
           <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SODA#async-1.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/cutout/jobs</accessURL>
@@ -216,6 +237,9 @@
           <identifier>ivo://example.com/sia/dp1</identifier>
           <curation>
             <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
             <contact>
               <name>Example Observatory</name>
               <email>registry@example.com</email>
@@ -226,6 +250,7 @@
             <description>SIA image access service for the DP1 dataset.</description>
             <referenceURL>https://example.com/</referenceURL>
           </content>
+          <rights>Restricted to authorized data rights holders.</rights>
           <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SIA#query-2.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/sia/dp1/query</accessURL>

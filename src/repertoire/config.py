@@ -76,9 +76,40 @@ class RegistryConfig(BaseModel):
         description="Configuration for the organisation registry",
     )
 
+    creator: str = Field(
+        ...,
+        title="Name of the creator of registry records",
+        description=(
+            "Included as <creator> in the curation block of all published"
+            " VOResource records."
+        ),
+    )
+
     path_prefix: str = Field("/discovery", title="URL prefix for the registry")
 
+    rights: str = Field(
+        ...,
+        title="Rights statement for published service records",
+        description=(
+            "Included as <rights> on the relevant VOResource records."
+        ),
+    )
+
+    rights_uri: HttpUrl | None = Field(
+        None,
+        title="URI for the rights statement",
+        description="Included as the rightsURI attribute on <rights>.",
+    )
+
     repository_name: str = Field(..., title="Name of the repository")
+
+    short_name: str | None = Field(
+        None,
+        title="Short name for the registry",
+        description=(
+            "Included as <shortName> in the registry VOResource record."
+        ),
+    )
 
 
 class SentryConfig(BaseModel):
