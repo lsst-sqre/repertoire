@@ -3,6 +3,7 @@
 import json
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 from importlib.metadata import metadata, version
 from pathlib import Path
 
@@ -19,9 +20,11 @@ from .constants import SECRETS_PATH
 from .dependencies.builder import builder_dependency
 from .dependencies.config import config_dependency
 from .dependencies.events import events_dependency
+from .dependencies.registry import oai_handler_dependency
 from .handlers.discovery import discovery_router
 from .handlers.hips import hips_legacy_router, hips_router
 from .handlers.internal import internal_router
+from .handlers.registry import registry_router
 
 __all__ = ["create_app"]
 
@@ -47,9 +50,12 @@ def create_app(
         used by the Helm chart and Docker container.
     """
     path_prefix = "/repertoire"
+    registry_prefix = "/discovery"
     if load_config:
         config = config_dependency.config()
         path_prefix = config.path_prefix
+        if config.ivoa_registry:
+            registry_prefix = config.ivoa_registry.path_prefix
 
         # Configure Slack alerts.
         if config.slack_alerts and config.slack_webhook:
@@ -65,6 +71,7 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         builder_dependency.initialize(secrets_root)
+        oai_handler_dependency.initialize(datetime.now(UTC))
         event_manager = config.metrics.make_manager()
         await event_manager.initialize()
         await events_dependency.initialize(event_manager)
@@ -92,6 +99,7 @@ def create_app(
         if config.hips.legacy:
             legacy_path_prefix = config.hips.legacy.path_prefix
             app.include_router(hips_legacy_router, prefix=legacy_path_prefix)
+    app.include_router(registry_router, prefix=registry_prefix)
 
     # Add middleware.
     app.add_middleware(XForwardedMiddleware)

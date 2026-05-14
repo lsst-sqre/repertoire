@@ -1,12 +1,15 @@
 """Configuration definition."""
 
+from datetime import datetime
 from typing import Self
 
 from pydantic import (
     AliasChoices,
+    AnyUrl,
     BaseModel,
     ConfigDict,
     Field,
+    HttpUrl,
     SecretStr,
     model_validator,
 )
@@ -22,6 +25,91 @@ from safir.metrics import MetricsConfiguration, metrics_configuration_factory
 from rubin.repertoire import RepertoireSettings
 
 __all__ = ["Config"]
+
+
+class OrgRegistryConfig(BaseModel):
+    """Configuration for the organisation registry."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        extra="forbid",
+        populate_by_name=True,
+    )
+    created: datetime = Field(..., title="Creation timestamp of the registry")
+    description: str = Field(..., title="Description of the registry")
+    homepage: HttpUrl = Field(..., title="URL of the registry homepage")
+    ivoid: AnyUrl = Field(..., title="IVOA identifier for the registry")
+    title: str = Field(..., title="Title of the registry")
+
+
+class RegistryConfig(BaseModel):
+    """Configuration for the registry."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        extra="forbid",
+        populate_by_name=True,
+    )
+
+    admin_email: str = Field(
+        ..., title="Email address of the registry administrator"
+    )
+
+    authority: AnyUrl = Field(..., title="Authority of the registry")
+
+    ivoid: AnyUrl = Field(
+        ..., title="IVOA identifier for the registry resource"
+    )
+
+    created: datetime = Field(
+        ...,
+        title="Creation timestamp",
+        description=(
+            "Timestamp of when the authority record was first published,"
+            "Set once and never changed."
+        ),
+    )
+
+    organisation: OrgRegistryConfig = Field(
+        ...,
+        title="Organisation registry configuration",
+        description="Configuration for the organisation registry",
+    )
+
+    creator: str = Field(
+        ...,
+        title="Name of the creator of registry records",
+        description=(
+            "Included as <creator> in the curation block of all published"
+            " VOResource records."
+        ),
+    )
+
+    path_prefix: str = Field("/discovery", title="URL prefix for the registry")
+
+    rights: str = Field(
+        ...,
+        title="Rights statement for published service records",
+        description=(
+            "Included as <rights> on the relevant VOResource records."
+        ),
+    )
+
+    rights_uri: HttpUrl | None = Field(
+        None,
+        title="URI for the rights statement",
+        description="Included as the rightsURI attribute on <rights>.",
+    )
+
+    repository_name: str = Field(..., title="Name of the repository")
+
+    short_name: str | None = Field(
+        None,
+        title="Short name for the registry",
+        description=(
+            "Included as <shortName> in the registry VOResource record."
+        ),
+    )
 
 
 class SentryConfig(BaseModel):
@@ -153,6 +241,12 @@ class Config(RepertoireSettings):
     name: str = Field("Repertoire", title="Name of application")
 
     path_prefix: str = Field("/repertoire", title="URL prefix for application")
+
+    ivoa_registry: RegistryConfig | None = Field(
+        None,
+        title="Registry configuration",
+        description="Configuration for the registry",
+    )
 
     sentry: SentryConfig | None = Field(None, title="Sentry configuration")
 

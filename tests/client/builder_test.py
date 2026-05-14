@@ -6,6 +6,9 @@ from rubin.repertoire import (
     RepertoireBuilder,
     RepertoireBuilderWithSecrets,
     RepertoireSettings,
+    SiaDatasetRegistryEntry,
+    SodaRegistryEntry,
+    TapRegistryEntry,
 )
 
 from ..support.constants import TEST_BASE_URL
@@ -24,6 +27,29 @@ def test_build_discovery(data: Data) -> None:
     output = RepertoireBuilder(config).build_discovery(base_url)
     for dataset in output.datasets:
         assert "hips" not in output.datasets[dataset].services
+
+
+def test_build_discovery_with_ivoa_registry(data: Data) -> None:
+    config_path = data.path("config/ivoa_rules.yaml")
+    hips_base_url = TEST_BASE_URL.rstrip("/")
+    base_url = hips_base_url + "/repertoire"
+    config = RepertoireSettings.from_file(config_path)
+
+    output = RepertoireBuilder(config).build_discovery(base_url, hips_base_url)
+
+    tap_registry = output.datasets["dp02"].services["tap"].ivoa_registry
+    assert isinstance(tap_registry, TapRegistryEntry)
+    assert str(tap_registry.ivoid) == "ivo://example.com/tap"
+
+    soda_registry = output.datasets["dp02"].services["cutout"].ivoa_registry
+    assert isinstance(soda_registry, SodaRegistryEntry)
+    assert str(soda_registry.ivoid) == "ivo://example.com/cutout"
+
+    sia_registry = output.datasets["dp02"].services["sia"].ivoa_registry
+    assert isinstance(sia_registry, SiaDatasetRegistryEntry)
+    assert str(sia_registry.ivoid) == "ivo://example.com/sia/dp02"
+
+    assert output.datasets["dp03"].services["tap"].ivoa_registry is None
 
 
 def test_build_influxdb(data: Data) -> None:
