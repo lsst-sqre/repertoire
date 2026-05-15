@@ -11,6 +11,17 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.13.0'></a>
+## 0.13.0 (2026-04-15)
+
+### New features
+
+- Add OAI-PMH 2.0 publishing registry endpoint at `/discovery/ivoa`
+- Support TAP, SODA, and SIA capabilities with VOSI sub-capabilities in registry output
+- Add `ivoaRegistry` configuration block (authority IVOID, shortName, rights, creator)
+- Add `ivoa_registry` field to dataset rules (`DatasetRule`, `SiaDatasetRule`) for per-dataset registry metadata (endpoint URLs, standard IDs, access rights)
+- Add registry entry models (`TapRegistryEntry`, `SodaRegistryEntry`, `SiaRegistryEntry`, `SiaDatasetRegistryEntry`) to the client package for use in Phalanx configuration
+
 <a id='changelog-0.12.1'></a>
 ## 0.12.1 (2026-04-09)
 
