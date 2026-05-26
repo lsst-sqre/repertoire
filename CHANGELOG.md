@@ -11,8 +11,15 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-0.13.1'></a>
+## 0.13.1 (2026-05-26)
+
+### Other changes
+
+- Upgrade felis to include version that fixes the schema cross-referencing issue
+
 <a id='changelog-0.13.0'></a>
-## 0.13.0 (2026-04-15)
+## 0.13.0 (2026-05-15)
 
 ### New features
 
