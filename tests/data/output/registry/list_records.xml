@@ -28,7 +28,7 @@
             <description>Example Observatory for testing.</description>
             <referenceURL>https://example.com/</referenceURL>
           </content>
-          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/Registry" xsi:type="vg:Harvest">
+          <capability standardID="ivo://ivoa.net/std/Registry" xsi:type="vg:Harvest">
             <interface role="std" xsi:type="vg:OAIHTTP">
               <accessURL use="base">https://example.com/discovery/ivoa</accessURL>
             </interface>
@@ -74,7 +74,7 @@
         <setSpec>ivo_managed</setSpec>
       </header>
       <metadata>
-        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vr:Organisation">
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vr:Organisation">
           <title>Example Observatory</title>
           <identifier>ivo://example.com/org</identifier>
           <curation>
@@ -102,7 +102,7 @@
         <setSpec>ivo_managed</setSpec>
       </header>
       <metadata>
-        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
           <title>Example SIA Service (DP02)</title>
           <identifier>ivo://example.com/sia/dp02</identifier>
           <curation>
@@ -121,7 +121,7 @@
             <referenceURL>https://example.com/</referenceURL>
           </content>
           <rights>Restricted to authorized data rights holders.</rights>
-          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SIA#query-2.0">
+          <capability standardID="ivo://ivoa.net/std/SIA#query-2.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/sia/dp02/query</accessURL>
             </interface>
@@ -136,7 +136,7 @@
         <setSpec>ivo_managed</setSpec>
       </header>
       <metadata>
-        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
           <title>Example TAP Service</title>
           <identifier>ivo://example.com/tap</identifier>
           <curation>
@@ -168,17 +168,17 @@
             </outputFormat>
             <uploadMethod ivo-id="ivo://ivoa.net/std/DALI#upload"/>
           </capability>
-          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/VOSI#capabilities">
+          <capability standardID="ivo://ivoa.net/std/VOSI#capabilities">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="full">https://data.example.com/api/tap/capabilities</accessURL>
             </interface>
           </capability>
-          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/VOSI#availability">
+          <capability standardID="ivo://ivoa.net/std/VOSI#availability">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="full">https://data.example.com/api/tap/availability</accessURL>
             </interface>
           </capability>
-          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/VOSI#tables">
+          <capability standardID="ivo://ivoa.net/std/VOSI#tables">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/tap/tables</accessURL>
             </interface>
@@ -193,7 +193,7 @@
         <setSpec>ivo_managed</setSpec>
       </header>
       <metadata>
-        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
           <title>Example SODA Cutout Service</title>
           <identifier>ivo://example.com/cutout</identifier>
           <curation>
@@ -212,12 +212,12 @@
             <referenceURL>https://example.com/</referenceURL>
           </content>
           <rights>Restricted to authorized data rights holders.</rights>
-          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SODA#async-1.0">
+          <capability standardID="ivo://ivoa.net/std/SODA#async-1.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/cutout/jobs</accessURL>
             </interface>
           </capability>
-          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SODA#sync-1.0">
+          <capability standardID="ivo://ivoa.net/std/SODA#sync-1.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/cutout/sync</accessURL>
             </interface>
@@ -232,7 +232,7 @@
         <setSpec>ivo_managed</setSpec>
       </header>
       <metadata>
-        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
           <title>Example SIA Service (DP1)</title>
           <identifier>ivo://example.com/sia/dp1</identifier>
           <curation>
@@ -251,7 +251,7 @@
             <referenceURL>https://example.com/</referenceURL>
           </content>
           <rights>Restricted to authorized data rights holders.</rights>
-          <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/SIA#query-2.0">
+          <capability standardID="ivo://ivoa.net/std/SIA#query-2.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/sia/dp1/query</accessURL>
             </interface>
