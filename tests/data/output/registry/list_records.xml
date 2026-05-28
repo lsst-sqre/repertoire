@@ -102,7 +102,7 @@
         <setSpec>ivo_managed</setSpec>
       </header>
       <metadata>
-        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-05-27T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-05-27T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vr:Service">
           <title>Example GMS</title>
           <identifier>ivo://example.com/groups</identifier>
           <curation>

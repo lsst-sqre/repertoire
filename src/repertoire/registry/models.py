@@ -92,6 +92,23 @@ class VOSITables(Capability, tag="capability"):
     type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
 
 
+class PlainService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
+    """Service serialized as ``<ri:Resource xsi:type="vr:Service">``.
+
+    Using a union in ``capability`` causes pydantic-xml to dispatch on the
+    runtime type, preserving subclass elements that would otherwise be dropped
+    when serializing through the base ``Capability`` schema.
+    """
+
+    type: Literal["vr:Service"] = attr(ns="xsi", default="vr:Service")
+    rights: list[Rights] | None = element(
+        tag="rights", ns="", default_factory=list
+    )
+    capability: list[GroupMembershipService | Capability] | None = element(
+        tag="capability", default_factory=list
+    )
+
+
 class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     """Service serialized as ``<ri:Resource xsi:type="vs:CatalogService">``.
 
@@ -109,7 +126,6 @@ class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     capability: (
         list[
             TableAccess
-            | GroupMembershipService
             | SODASync
             | SODAAsync
             | SimpleImageAccess

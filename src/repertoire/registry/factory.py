@@ -35,6 +35,7 @@ from repertoire.registry.constants import (
 )
 from repertoire.registry.models import (
     GroupMembershipService,
+    PlainService,
     RegistryOrganisation,
     SimpleImageAccess,
     SODAAsync,
@@ -263,7 +264,7 @@ class ResourceRecordFactory:
         )
         url = gms_version.url
 
-        return TypedService(
+        return PlainService(
             created=registry.created,
             updated=self._startup_timestamp,
             status="active",
