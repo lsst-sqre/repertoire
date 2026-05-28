@@ -23,6 +23,8 @@ __all__ = [
     "BaseRule",
     "DataServiceRule",
     "DatasetConfig",
+    "DatasetRegistryEntry",
+    "GmsRegistryEntry",
     "HipsConfig",
     "HipsDatasetConfig",
     "HipsLegacyConfig",
@@ -30,6 +32,7 @@ __all__ = [
     "InternalServiceRule",
     "IvoaStandardId",
     "MultiRecordRegistryEntry",
+    "RegistryEntry",
     "RepertoireSettings",
     "Rule",
     "SiaRegistryEntry",
@@ -240,6 +243,7 @@ class IvoaStandardId(StrEnum):
     """Known IVOA standard IDs for service capability registrations."""
 
     DATALINKER = "ivo://ivoa.net/std/DataLink#links-1.1"
+    GMS_SEARCH_1 = "ivo://ivoa.net/std/gms#search-1.0"
     HIPS_LIST = "ivo://ivoa.net/std/hips#hipslist-1.0"
     SIA_QUERY_2 = "ivo://ivoa.net/std/SIA#query-2.0"
     SODA_ASYNC_1 = "ivo://ivoa.net/std/SODA#async-1.0"
@@ -365,6 +369,12 @@ class BaseRegistryEntry(BaseModel):
     ] = None
 
 
+class GmsRegistryEntry(BaseRegistryEntry):
+    """IVOA registry entry for GMS (Group Membership Service)."""
+
+    ivoa_service_type: Literal["gms"]
+
+
 class SodaRegistryEntry(BaseRegistryEntry):
     """IVOA registry entry for a SODA image cutout service."""
 
@@ -394,6 +404,12 @@ class TapRegistryEntry(BaseRegistryEntry):
             description="Whether the TAP service supports table uploads.",
         ),
     ] = True
+
+
+type RegistryEntry = Annotated[
+    TapRegistryEntry | SodaRegistryEntry | SiaRegistryEntry | GmsRegistryEntry,
+    Field(discriminator="ivoa_service_type"),
+]
 
 
 class MultiRecordRegistryEntry(BaseModel):
@@ -432,6 +448,15 @@ class SiaDatasetRegistryEntry(BaseRegistryEntry):
     ivoa_service_type: Literal["sia"]
 
 
+type DatasetRegistryEntry = Annotated[
+    TapRegistryEntry
+    | SodaRegistryEntry
+    | SiaDatasetRegistryEntry
+    | GmsRegistryEntry,
+    Field(discriminator="ivoa_service_type"),
+]
+
+
 class DataServiceRule(VersionedServiceRule):
     """Rule for a Phalanx service associated with a dataset."""
 
@@ -457,14 +482,13 @@ class DataServiceRule(VersionedServiceRule):
     ] = None
 
     ivoa_registry: Annotated[
-        TapRegistryEntry | SodaRegistryEntry | SiaRegistryEntry | None,
+        RegistryEntry | None,
         Field(
             title="IVOA registry entry",
             description=(
                 "IVOA registry entry for this service. The type of entry"
                 " determines the kind of IVOA record produced."
             ),
-            discriminator="ivoa_service_type",
         ),
     ] = None
 

@@ -22,6 +22,16 @@ _RESOURCE_NSMAP = {
 }
 
 
+class GroupMembershipService(Capability, tag="capability"):
+    """Capability for a GMS v1 query endpoint."""
+
+    standard_id: AnyUrl | None = attr(
+        name="standardID",
+        default=IvoaStandardId.GMS_SEARCH_1,
+    )
+    type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
+
+
 class SimpleImageAccess(Capability, tag="capability"):
     """Capability for an SIA v2 query endpoint."""
 
@@ -99,6 +109,7 @@ class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     capability: (
         list[
             TableAccess
+            | GroupMembershipService
             | SODASync
             | SODAAsync
             | SimpleImageAccess
