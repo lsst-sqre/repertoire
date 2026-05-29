@@ -3,6 +3,7 @@
 from safir.testing.data import Data
 
 from rubin.repertoire import (
+    GmsRegistryEntry,
     RepertoireBuilder,
     RepertoireBuilderWithSecrets,
     RepertoireSettings,
@@ -48,6 +49,10 @@ def test_build_discovery_with_ivoa_registry(data: Data) -> None:
     sia_registry = output.datasets["dp02"].services["sia"].ivoa_registry
     assert isinstance(sia_registry, SiaDatasetRegistryEntry)
     assert str(sia_registry.ivoid) == "ivo://example.com/sia/dp02"
+
+    gms_registry = output.datasets["dp02"].services["gms"].ivoa_registry
+    assert isinstance(gms_registry, GmsRegistryEntry)
+    assert str(gms_registry.ivoid) == "ivo://example.com/groups"
 
     assert output.datasets["dp03"].services["tap"].ivoa_registry is None
 

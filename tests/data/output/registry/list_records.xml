@@ -97,6 +97,40 @@
     </record>
     <record>
       <header>
+        <identifier>ivo://example.com/groups</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-05-27T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vr:Service">
+          <title>Example GMS</title>
+          <identifier>ivo://example.com/groups</identifier>
+          <curation>
+            <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
+            <contact>
+              <name>Example Observatory</name>
+              <email>registry@example.com</email>
+            </contact>
+          </curation>
+          <content>
+            <subject>virtual observatory</subject>
+            <description>Group Membership Service for Example Observatory.</description>
+            <referenceURL>https://example.com/</referenceURL>
+          </content>
+          <rights>Restricted to authorized data rights holders.</rights>
+          <capability standardID="ivo://ivoa.net/std/gms#search-1.0">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="base">https://data.example.com/auth/gms</accessURL>
+            </interface>
+          </capability>
+        </ri:Resource>
+      </metadata>
+    </record>
+    <record>
+      <header>
         <identifier>ivo://example.com/sia/dp02</identifier>
         <datestamp>1970-01-01T00:00:00Z</datestamp>
         <setSpec>ivo_managed</setSpec>

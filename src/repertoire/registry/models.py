@@ -22,6 +22,16 @@ _RESOURCE_NSMAP = {
 }
 
 
+class GroupMembershipService(Capability, tag="capability"):
+    """Capability for a GMS v1 query endpoint."""
+
+    standard_id: AnyUrl | None = attr(
+        name="standardID",
+        default=IvoaStandardId.GMS_SEARCH_1,
+    )
+    type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
+
+
 class SimpleImageAccess(Capability, tag="capability"):
     """Capability for an SIA v2 query endpoint."""
 
@@ -80,6 +90,23 @@ class VOSITables(Capability, tag="capability"):
         default=IvoaStandardId.VOSI_TABLES,
     )
     type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
+
+
+class PlainService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
+    """Service serialized as ``<ri:Resource xsi:type="vr:Service">``.
+
+    Using a union in ``capability`` causes pydantic-xml to dispatch on the
+    runtime type, preserving subclass elements that would otherwise be dropped
+    when serializing through the base ``Capability`` schema.
+    """
+
+    type: Literal["vr:Service"] = attr(ns="xsi", default="vr:Service")
+    rights: list[Rights] | None = element(
+        tag="rights", ns="", default_factory=list
+    )
+    capability: list[GroupMembershipService | Capability] | None = element(
+        tag="capability", default_factory=list
+    )
 
 
 class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):

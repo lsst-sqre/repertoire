@@ -8,14 +8,13 @@ from pydantic import HttpUrl, SecretStr
 from ._config import (
     ApiVersionRule,
     DataServiceRule,
+    DatasetRegistryEntry,
     InternalServiceRule,
     IvoaStandardId,
     RepertoireSettings,
     Rule,
     SiaDatasetRegistryEntry,
     SiaRegistryEntry,
-    SodaRegistryEntry,
-    TapRegistryEntry,
     UiServiceRule,
 )
 from ._models import (
@@ -141,7 +140,7 @@ class RepertoireBuilder:
 
     def _build_ivoa_registry_from_rule(
         self, dataset: str, rule: DataServiceRule
-    ) -> TapRegistryEntry | SodaRegistryEntry | SiaDatasetRegistryEntry | None:
+    ) -> DatasetRegistryEntry | None:
         """Build discovered IVOA registry metadata for one data service.
 
         Parameters
@@ -153,9 +152,9 @@ class RepertoireBuilder:
 
         Returns
         -------
-        TapRegistryEntry or SodaRegistryEntry or SiaDatasetRegistryEntry
-            or None. IVOA registry metadata for the service, or `None` if no
-            such metadata is available.
+        DatasetRegistryEntry or None
+            IVOA registry metadata for the service, or `None` if no such
+            metadata is available.
         """
         if rule.ivoa_registry is None:
             return None

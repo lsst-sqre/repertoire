@@ -34,6 +34,8 @@ from repertoire.registry.constants import (
     VO_SUBJECT,
 )
 from repertoire.registry.models import (
+    GroupMembershipService,
+    PlainService,
     RegistryOrganisation,
     SimpleImageAccess,
     SODAAsync,
@@ -47,6 +49,7 @@ from repertoire.registry.store import RecordStore
 from rubin.repertoire import (
     DataService,
     Discovery,
+    GmsRegistryEntry,
     IvoaStandardId,
     SiaDatasetRegistryEntry,
     SodaRegistryEntry,
@@ -232,6 +235,61 @@ class ResourceRecordFactory:
                 description=self._registry_config.organisation.description,
                 reference_url=self._registry_config.organisation.homepage,
             ),
+        )
+
+    def _create_gms(
+        self, service: DataService, registry: GmsRegistryEntry
+    ) -> Service:
+        """Create a GMS record for a Group Membership Service.
+
+        One record is created for the service as a whole.
+
+        Parameters
+        ----------
+        service
+            The discovered service corresponding to this registry record.
+        registry
+            The IVOA registry entry containing the IVOID, title, and
+            datestamps.
+
+        Returns
+        -------
+        Service
+            A Service record for the GMS API.
+        """
+        gms_version = next(
+            v
+            for v in service.versions.values()
+            if v.ivoa_standard_id == IvoaStandardId.GMS_SEARCH_1
+        )
+        url = gms_version.url
+
+        return PlainService(
+            created=registry.created,
+            updated=self._startup_timestamp,
+            status="active",
+            title=registry.title,
+            identifier=registry.ivoid,
+            curation=self._curation,
+            content=Content(
+                subject=VO_SUBJECT,
+                description=registry.description,
+                reference_url=(
+                    registry.docs_url
+                    or self._registry_config.organisation.homepage
+                ),
+            ),
+            rights=[
+                Rights(
+                    value=self._registry_config.rights,
+                    rights_uri=self._registry_config.rights_uri,
+                )
+            ],
+            capability=[
+                GroupMembershipService(
+                    interface=[self._create_interface(url)],
+                )
+            ],
         )
 
     def _create_tap(
@@ -465,17 +523,19 @@ class ResourceRecordFactory:
             )
             return
 
-        if isinstance(registry, TapRegistryEntry):
-            records[ivoid] = self._create_tap(service, registry)
-            kind = "TAP"
-        elif isinstance(registry, SodaRegistryEntry):
-            records[ivoid] = self._create_soda(service, registry)
-            kind = "SODA"
-        elif isinstance(registry, SiaDatasetRegistryEntry):
-            records[ivoid] = self._create_sia(service, registry)
-            kind = "SIA"
-        else:
-            raise TypeError(f"Unsupported registry entry {type(registry)!r}")
+        match registry:
+            case GmsRegistryEntry():
+                records[ivoid] = self._create_gms(service, registry)
+                kind = "GMS"
+            case SiaDatasetRegistryEntry():
+                records[ivoid] = self._create_sia(service, registry)
+                kind = "SIA"
+            case SodaRegistryEntry():
+                records[ivoid] = self._create_soda(service, registry)
+                kind = "SODA"
+            case TapRegistryEntry():
+                records[ivoid] = self._create_tap(service, registry)
+                kind = "TAP"
 
         self._logger.debug(
             f"Created {kind} record for discovered service",
@@ -488,8 +548,7 @@ class ResourceRecordFactory:
         """Create all VOResource records and return them as a RecordStore.
 
         Iterates over discovered dataset services and dispatches to the
-        appropriate record builder based on the ``ivoa_registry``
-        entry.
+        appropriate record builder based on the ``ivoa_registry`` entry.
 
         Returns
         -------
