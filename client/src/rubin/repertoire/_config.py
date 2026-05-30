@@ -325,10 +325,7 @@ class BaseRegistryEntry(BaseModel):
 
     ivoid: Annotated[
         AnyUrl,
-        Field(
-            title="IVOA ID",
-            description="IVOA identifier of the service.",
-        ),
+        Field(title="IVOA ID", description="IVOA identifier of the service"),
     ]
 
     created: Annotated[
@@ -336,8 +333,8 @@ class BaseRegistryEntry(BaseModel):
         Field(
             title="Creation timestamp",
             description=(
-                "Timestamp of when the service was first published, in ISO"
-                " 8601 format. Set once and never changed."
+                "When the service was first published, set once and never"
+                " changed"
             ),
         ),
     ]
@@ -346,7 +343,7 @@ class BaseRegistryEntry(BaseModel):
         str,
         Field(
             title="Description",
-            description="Long description of the service.",
+            description="Long description of the service",
         ),
     ]
 
@@ -354,7 +351,7 @@ class BaseRegistryEntry(BaseModel):
         str,
         Field(
             title="Title",
-            description="Title of the service.",
+            description="Title of the service",
         ),
     ]
 
@@ -363,7 +360,7 @@ class BaseRegistryEntry(BaseModel):
         Field(
             title="Documentation URL",
             description=(
-                "URL of a human-readable page describing the service."
+                "URL of a human-readable page describing the service"
             ),
         ),
     ] = None
@@ -392,7 +389,7 @@ class TapRegistryEntry(BaseRegistryEntry):
             title="ADQL version",
             description=(
                 "Version of ADQL supported by the TAP service, used in TAP"
-                " registry entries."
+                " registry entries"
             ),
         ),
     ] = "2.1"
@@ -401,13 +398,13 @@ class TapRegistryEntry(BaseRegistryEntry):
         bool,
         Field(
             title="Upload support",
-            description="Whether the TAP service supports table uploads.",
+            description="Whether the TAP service supports table uploads",
         ),
     ] = True
 
 
 type RegistryEntry = Annotated[
-    TapRegistryEntry | SodaRegistryEntry | SiaRegistryEntry | GmsRegistryEntry,
+    GmsRegistryEntry | SiaRegistryEntry | SodaRegistryEntry | TapRegistryEntry,
     Field(discriminator="ivoa_service_type"),
 ]
 
@@ -425,7 +422,7 @@ class MultiRecordRegistryEntry(BaseModel):
             title="Per-dataset registry entries",
             description=(
                 "Mapping of dataset names to the IVOA registry entry for"
-                " that dataset."
+                " that dataset"
             ),
         ),
     ]
@@ -436,23 +433,24 @@ class SiaRegistryEntry(MultiRecordRegistryEntry):
 
     One rule covers multiple datasets. Each dataset's IVOID and metadata are
     stored separately in ``records``. The builder will resolve this into a
-    ``SiaDatasetRegistryEntry`` per dataset when building ``Discovery``.
+    `SiaDatasetRegistryEntry` per dataset when building
+    `~rubin.repertoire.Discovery`.
     """
 
     ivoa_service_type: Literal["sia"]
 
 
 class SiaDatasetRegistryEntry(BaseRegistryEntry):
-    """Resolved per-dataset SIA registry entry, stored on ``DataService``."""
+    """Resolved per-dataset SIA registry entry, stored on `DataService`."""
 
     ivoa_service_type: Literal["sia"]
 
 
 type DatasetRegistryEntry = Annotated[
-    TapRegistryEntry
-    | SodaRegistryEntry
+    GmsRegistryEntry
     | SiaDatasetRegistryEntry
-    | GmsRegistryEntry,
+    | SodaRegistryEntry
+    | TapRegistryEntry,
     Field(discriminator="ivoa_service_type"),
 ]
 
@@ -492,42 +490,85 @@ class DataServiceRule(VersionedServiceRule):
         ),
     ] = None
 
-    @model_validator(mode="after")
-    def _validate_ivoa_versions(self) -> Self:
-        if isinstance(self.ivoa_registry, SodaRegistryEntry):
-            soda_ids = {
-                IvoaStandardId.SODA_SYNC_1,
-                IvoaStandardId.SODA_ASYNC_1,
-            }
-            version_ids = {
-                v.ivoa_standard_id
-                for v in self.versions.values()
-                if v.ivoa_standard_id is not None
-            }
-            missing = soda_ids - version_ids
-            if missing:
-                raise ValueError(
-                    f"SODA rule '{self.name}' missing standard IDs: "
-                    f"{', '.join(sorted(missing))}"
-                )
-            unexpected = version_ids - soda_ids
-            if unexpected:
-                raise ValueError(
-                    f"SODA rule '{self.name}' has unexpected standard IDs: "
-                    f"{', '.join(sorted(unexpected))}"
-                )
-        elif isinstance(self.ivoa_registry, SiaRegistryEntry):
-            version_ids = {
-                v.ivoa_standard_id
-                for v in self.versions.values()
-                if v.ivoa_standard_id is not None
-            }
-            if IvoaStandardId.SIA_QUERY_2 not in version_ids:
-                raise ValueError(
-                    f"SIA rule '{self.name}' must have a version with"
-                    f" standard ID '{IvoaStandardId.SIA_QUERY_2}'"
-                )
+    def ivoa_standard_ids(self) -> set[IvoaStandardId]:
+        """IVOA standard IDs for all provided standardized APIs."""
+        return {
+            v.ivoa_standard_id
+            for v in self.versions.values()
+            if v.ivoa_standard_id is not None
+        }
 
+    def version_for_id(
+        self, ivoa_standard_id: IvoaStandardId
+    ) -> ApiVersionRule | None:
+        """Get the API rule for a specific IVOA standards version.
+
+        Parameters
+        ----------
+        ivoa_standards_version
+            IVOA standards version to search for.
+
+        Returns
+        -------
+        ApiVersionRule or None
+            Corresponding `ApiVersionRule`, or `None` if none was found.
+        """
+        # It is safe to return the first matching entry since the model
+        # validator ensures the service doesn't provide the same IVOA standard
+        # ID on multiple endpoints.
+        for rule in self.versions.values():
+            if rule.ivoa_standard_id == ivoa_standard_id:
+                return rule
+        return None
+
+    @model_validator(mode="after")
+    def _validate_ivoa_standard_ids(self) -> Self:
+        # Ensure there are no duplicate IVOA standard IDs. Generating IVOA
+        # registry information requires a unique rule per standards ID.
+        seen = set()
+        for rule in self.versions.values():
+            if rule.ivoa_standard_id is None:
+                continue
+            if rule.ivoa_standard_id in seen:
+                raise ValueError(
+                    f"Rule '{self.name}' has a duplicate standard ID"
+                    f" '{rule.ivoa_standard_id}'"
+                )
+            seen.add(rule.ivoa_standard_id)
+
+        # If generating IVOA registry information, make sure the SODA and SIA
+        # rules, which require specific IVOA standard IDs in their version
+        # entries, are complete.
+        match self.ivoa_registry:
+            case GmsRegistryEntry():
+                if self.version_for_id(IvoaStandardId.GMS_SEARCH_1) is None:
+                    raise ValueError(
+                        f"GMS rule '{self.name}' must have a version with"
+                        f" standard ID '{IvoaStandardId.GMS_SEARCH_1}'"
+                    )
+            case SiaRegistryEntry():
+                if self.version_for_id(IvoaStandardId.SIA_QUERY_2) is None:
+                    raise ValueError(
+                        f"SIA rule '{self.name}' must have a version with"
+                        f" standard ID '{IvoaStandardId.SIA_QUERY_2}'"
+                    )
+            case SodaRegistryEntry():
+                soda_ids = {
+                    IvoaStandardId.SODA_SYNC_1,
+                    IvoaStandardId.SODA_ASYNC_1,
+                }
+                version_ids = self.ivoa_standard_ids()
+                missing = soda_ids - version_ids
+                if missing:
+                    missing_str = ", ".join(sorted(missing))
+                    raise ValueError(
+                        f"SODA rule '{self.name}' missing standard IDs: "
+                        f"{missing_str}"
+                    )
+            case _:
+                pass
+
+        # Validation succeeded.
         return self
 
 

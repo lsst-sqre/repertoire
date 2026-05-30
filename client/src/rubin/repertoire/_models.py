@@ -121,6 +121,29 @@ class DataService(ApiService):
         ),
     ] = None
 
+    def version_for_id(
+        self, ivoa_standard_id: IvoaStandardId
+    ) -> ApiVersion | None:
+        """Get the API rule for a specific IVOA standards version.
+
+        Parameters
+        ----------
+        ivoa_standards_version
+            IVOA standards version to search for.
+
+        Returns
+        -------
+        ApiVersionRule or None
+            Corresponding `ApiVersionRule`, or `None` if none was found.
+        """
+        # It is safe to return the first matching entry since the config
+        # validator ensures the service doesn't provide the same IVOA standard
+        # ID on multiple endpoints.
+        for rule in self.versions.values():
+            if rule.ivoa_standard_id == ivoa_standard_id:
+                return rule
+        return None
+
 
 class InternalService(ApiService):
     """An internal API service not tied to a particular dataset."""
