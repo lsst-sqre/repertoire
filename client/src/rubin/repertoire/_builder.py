@@ -210,7 +210,7 @@ class RepertoireBuilder:
                     versions={
                         _HIPS_LIST_VERSION: ApiVersion(
                             url=hips_url,
-                            ivoa_standard_id=IvoaStandardId.HIPS_LIST,
+                            ivoa_standard_id=IvoaStandardId.HIPS_LIST_1,
                         )
                     },
                 )

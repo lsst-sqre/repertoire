@@ -242,9 +242,9 @@ class InfluxDatabaseConfig(BaseModel):
 class IvoaStandardId(StrEnum):
     """Known IVOA standard IDs for service capability registrations."""
 
-    DATALINKER = "ivo://ivoa.net/std/DataLink#links-1.1"
+    DATALINK_LINKS_1 = "ivo://ivoa.net/std/DataLink#links-1.1"
     GMS_SEARCH_1 = "ivo://ivoa.net/std/gms#search-1.0"
-    HIPS_LIST = "ivo://ivoa.net/std/hips#hipslist-1.0"
+    HIPS_LIST_1 = "ivo://ivoa.net/std/hips#hipslist-1.0"
     SIA_QUERY_2 = "ivo://ivoa.net/std/SIA#query-2.0"
     SODA_ASYNC_1 = "ivo://ivoa.net/std/SODA#async-1.0"
     SODA_SYNC_1 = "ivo://ivoa.net/std/SODA#sync-1.0"
