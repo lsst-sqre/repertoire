@@ -47,6 +47,7 @@ from repertoire.registry.models import (
 )
 from repertoire.registry.store import RecordStore
 from rubin.repertoire import (
+    ApiVersion,
     DataService,
     Discovery,
     GmsRegistryEntry,
@@ -238,7 +239,7 @@ class ResourceRecordFactory:
         )
 
     def _create_gms(
-        self, service: DataService, registry: GmsRegistryEntry
+        self, api_version: ApiVersion, registry: GmsRegistryEntry
     ) -> Service:
         """Create a GMS record for a Group Membership Service.
 
@@ -246,8 +247,8 @@ class ResourceRecordFactory:
 
         Parameters
         ----------
-        service
-            The discovered service corresponding to this registry record.
+        api_version
+            Service discovery information for the GMS IVOA standard ID.
         registry
             The IVOA registry entry containing the IVOID, title, and
             datestamps.
@@ -257,13 +258,7 @@ class ResourceRecordFactory:
         Service
             A Service record for the GMS API.
         """
-        gms_version = next(
-            v
-            for v in service.versions.values()
-            if v.ivoa_standard_id == IvoaStandardId.GMS_SEARCH_1
-        )
-        url = gms_version.url
-
+        interface = self._create_interface(api_version.url)
         return PlainService(
             created=registry.created,
             updated=self._startup_timestamp,
@@ -285,11 +280,7 @@ class ResourceRecordFactory:
                     rights_uri=self._registry_config.rights_uri,
                 )
             ],
-            capability=[
-                GroupMembershipService(
-                    interface=[self._create_interface(url)],
-                )
-            ],
+            capability=[GroupMembershipService(interface=[interface])],
         )
 
     def _create_tap(
@@ -406,22 +397,15 @@ class ResourceRecordFactory:
             A Service record with capabilities for each SODA version.
         """
         capabilities: list[Capability] = []
-        for api_version in service.versions.values():
-            match api_version.ivoa_standard_id:
-                case IvoaStandardId.SODA_SYNC_1:
-                    capabilities.append(
-                        SODASync(
-                            interface=[self._create_interface(api_version.url)]
-                        )
-                    )
-                case IvoaStandardId.SODA_ASYNC_1:
-                    capabilities.append(
-                        SODAAsync(
-                            interface=[self._create_interface(api_version.url)]
-                        )
-                    )
-                case _:
-                    pass
+        async_version = service.version_for_id(IvoaStandardId.SODA_ASYNC_1)
+        if async_version:
+            interface = self._create_interface(async_version.url)
+            capabilities.append(SODAAsync(interface=[interface]))
+        sync_version = service.version_for_id(IvoaStandardId.SODA_SYNC_1)
+        if sync_version:
+            interface = self._create_interface(sync_version.url)
+            capabilities.append(SODASync(interface=[interface]))
+
         return TypedService(
             created=registry.created,
             updated=self._startup_timestamp,
@@ -448,7 +432,7 @@ class ResourceRecordFactory:
 
     def _create_sia(
         self,
-        service: DataService,
+        api_version: ApiVersion,
         registry: SiaDatasetRegistryEntry,
     ) -> Service:
         """Create an SIAv2 service record for a per-collection image access
@@ -456,8 +440,8 @@ class ResourceRecordFactory:
 
         Parameters
         ----------
-        service
-            The discovered service corresponding to this registry record.
+        api_version
+            Service discovery information for the SIAv2 IVOA standard ID.
         registry
             The dataset registry entry for this specific dataset.
 
@@ -466,13 +450,7 @@ class ResourceRecordFactory:
         Service
             A Service record with an SIA capability for this dataset.
         """
-        sia_version = next(
-            v
-            for v in service.versions.values()
-            if v.ivoa_standard_id == IvoaStandardId.SIA_QUERY_2
-        )
-        url = sia_version.url
-
+        interface = self._create_interface(api_version.url)
         return TypedService(
             created=registry.created,
             updated=self._startup_timestamp,
@@ -494,11 +472,7 @@ class ResourceRecordFactory:
                     rights_uri=self._registry_config.rights_uri,
                 )
             ],
-            capability=[
-                SimpleImageAccess(
-                    interface=[self._create_interface(url)],
-                )
-            ],
+            capability=[SimpleImageAccess(interface=[interface])],
         )
 
     def _add_service_record(
@@ -523,13 +497,18 @@ class ResourceRecordFactory:
             )
             return
 
+        kind = None
         match registry:
             case GmsRegistryEntry():
-                records[ivoid] = self._create_gms(service, registry)
-                kind = "GMS"
+                version = service.version_for_id(IvoaStandardId.GMS_SEARCH_1)
+                if version:
+                    records[ivoid] = self._create_gms(version, registry)
+                    kind = "GMS"
             case SiaDatasetRegistryEntry():
-                records[ivoid] = self._create_sia(service, registry)
-                kind = "SIA"
+                version = service.version_for_id(IvoaStandardId.SIA_QUERY_2)
+                if version:
+                    records[ivoid] = self._create_sia(version, registry)
+                    kind = "SIA"
             case SodaRegistryEntry():
                 records[ivoid] = self._create_soda(service, registry)
                 kind = "SODA"
@@ -537,12 +516,13 @@ class ResourceRecordFactory:
                 records[ivoid] = self._create_tap(service, registry)
                 kind = "TAP"
 
-        self._logger.debug(
-            f"Created {kind} record for discovered service",
-            dataset=dataset,
-            service=name,
-            ivoid=ivoid,
-        )
+        if kind:
+            self._logger.debug(
+                f"Created {kind} record for discovered service",
+                dataset=dataset,
+                service=name,
+                ivoid=ivoid,
+            )
 
     def create_all(self) -> RecordStore:
         """Create all VOResource records and return them as a RecordStore.
