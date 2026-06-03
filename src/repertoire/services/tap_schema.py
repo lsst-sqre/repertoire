@@ -300,6 +300,7 @@ class TAPSchemaService:
                 mgr=mgr,
                 db_context=db_ctx,
                 tap_schema_index=i,
+                unique_keys=True,
             )
             loader.load()
 
