@@ -7,7 +7,7 @@
 .. _Nublado: https://nublado.lsst.io/
 .. _nox: https://nox.thea.codes/en/stable/index.html
 .. _Phalanx: https://phalanx.lsst.io/
-.. _pre-commit: https://pre-commit.com
+.. _prek: https://prek.j178.dev/
 .. _pytest: https://docs.pytest.org/en/latest/
 .. _respx: https://lundberg.github.io/respx/guide/
 .. _Sasquatch: https://sasquatch.lsst.io/

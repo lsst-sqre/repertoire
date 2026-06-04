@@ -19,7 +19,6 @@ To get a list of InfluxDB databases for which connection information is availabl
 
    from rubin.repertoire import DiscoveryClient
 
-
    discovery = DiscoveryClient()
    databases = await discovery.influxdb_databases()
 
@@ -33,7 +32,6 @@ To get the connection information for a specific database, use `DiscoveryClient.
 .. code-block:: python
 
    from rubin.repertoire import DiscoveryClient
-
 
    discovery = DiscoveryClient()
    info = await discovery.influxdb_connection_info("some_database")
@@ -66,7 +64,6 @@ Then, call `DiscoveryClient.influxdb_credentials` with the name of the database 
 .. code-block:: python
 
    from rubin.repertoire import DiscoveryClient
-
 
    discovery = DiscoveryClient()
    token = "..."  # obtained from somewhere else

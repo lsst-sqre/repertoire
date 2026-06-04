@@ -12,7 +12,6 @@ To get a list of all Phalanx applications enabled in the local environment, call
 
    from rubin.repertoire import DiscoveryClient
 
-
    discovery = DiscoveryClient()
    applications = await discovery.applications()
 

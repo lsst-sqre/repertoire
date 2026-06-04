@@ -39,11 +39,15 @@ class ApiVersion(BaseModel):
     # about. Represent the field as the proper StrEnum in the configuration
     # but as a str in the client model since equality comparisons still work
     # properly.
+    #
+    # Temporarily exclude this entirely until all clients have been updated to
+    # use a str rather than an enum.
     ivoa_standard_id: Annotated[
         str | None,
         Field(
             title="IVOA standardID",
             description="IVOA standardID used in service registrations",
+            exclude=True,
         ),
     ] = None
 

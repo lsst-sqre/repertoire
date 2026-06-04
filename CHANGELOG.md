@@ -11,23 +11,35 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-1.0.0'></a>
+## 1.0.0 (2026-06-04)
+
+### New features
+
+- Add support for publishing IVOA registry entries for the Group Membership Service v1.0.
+
+### Bug fixes
+
+- Do not include IVOA registry information in the JSON discovery results. Since the IVOA service name is effectively an enum, the client will otherwise reject discovery information that includes services newer than the ones it knew about.
+- When loading TAP schema, tell Felis to use the fully-qualified key name for the `key_id` field. This fixes schema loading when there are overlaps between the foreign key names.
+- Ensure a GMS record includes a URL rule with the correct IVOA standards ID.
+- Ensure each data service registers only one URL for a given IVOA standards ID so that the generated IVOA Registry information is predictable and unambiguous.
+
 <a id='changelog-0.13.1'></a>
 ## 0.13.1 (2026-05-26)
 
-### Other changes
+### Bug fixes
 
-- Upgrade felis to include version that fixes the schema cross-referencing issue
+- Update Felis to add support for TAP schemas that include other TAP schemas with relative URLs. This feature is used by the new DP2 schemas.
 
 <a id='changelog-0.13.0'></a>
 ## 0.13.0 (2026-05-15)
 
 ### New features
 
-- Add OAI-PMH 2.0 publishing registry endpoint at `/discovery/ivoa`
-- Support TAP, SODA, and SIA capabilities with VOSI sub-capabilities in registry output
-- Add `ivoaRegistry` configuration block (authority IVOID, shortName, rights, creator)
-- Add `ivoa_registry` field to dataset rules (`DatasetRule`, `SiaDatasetRule`) for per-dataset registry metadata (endpoint URLs, standard IDs, access rights)
-- Add registry entry models (`TapRegistryEntry`, `SodaRegistryEntry`, `SiaRegistryEntry`, `SiaDatasetRegistryEntry`) to the client package for use in Phalanx configuration
+- Add optional support for serving an IVOA OAI-PMH 2.0 Publishing Registry at the `/discovery/ivoa` endpoint. The initial registry support can publish TAP, SODA, and SIAv2 capabilities with VOSI sub-capabilities.
+- Add an optional `ivoa_registry` field to the dataset rules (`DatasetRule`, `SiaDatasetRule`) for per-dataset registry metadata (endpoint URLs, standard IDs, access rights)
+- Add registry models (`TapRegistryEntry`, `SodaRegistryEntry`, `SiaRegistryEntry`, `SiaDatasetRegistryEntry`) to the client package for use in Phalanx configuration.
 
 <a id='changelog-0.12.1'></a>
 ## 0.12.1 (2026-04-09)

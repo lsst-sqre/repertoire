@@ -38,11 +38,9 @@
           "url": "https://data.example.com/api/cutout",
           "versions": {
             "soda-async-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#async-1.0",
               "url": "https://data.example.com/api/cutout/dp02/jobs"
             },
             "soda-sync-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-1.0",
               "url": "https://data.example.com/api/cutout/dp02/sync"
             }
           }
@@ -51,7 +49,6 @@
           "url": "https://data.example.com/auth/gms",
           "versions": {
             "gms-search-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/gms#search-1.0",
               "url": "https://data.example.com/auth/gms"
             }
           }
@@ -60,7 +57,6 @@
           "url": "https://example.com/api/hips/v2/dp02/list",
           "versions": {
             "hips-list-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/hips#hipslist-1.0",
               "url": "https://example.com/api/hips/v2/dp02/list"
             }
           }
@@ -70,7 +66,6 @@
           "url": "https://data.example.com/api/sia/dp02",
           "versions": {
             "v2": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SIA#query-2.0",
               "url": "https://data.example.com/api/sia/dp02/query"
             }
           }
@@ -89,11 +84,9 @@
           "url": "https://data.example.com/api/cutout",
           "versions": {
             "soda-async-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#async-1.0",
               "url": "https://data.example.com/api/cutout/dp03/jobs"
             },
             "soda-sync-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-1.0",
               "url": "https://data.example.com/api/cutout/dp03/sync"
             }
           }
@@ -102,7 +95,6 @@
           "url": "https://data.example.com/auth/gms",
           "versions": {
             "gms-search-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/gms#search-1.0",
               "url": "https://data.example.com/auth/gms"
             }
           }
@@ -122,11 +114,9 @@
           "url": "https://data.example.com/api/cutout",
           "versions": {
             "soda-async-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#async-1.0",
               "url": "https://data.example.com/api/cutout/dp1/jobs"
             },
             "soda-sync-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-1.0",
               "url": "https://data.example.com/api/cutout/dp1/sync"
             }
           }
@@ -135,7 +125,6 @@
           "url": "https://data.example.com/auth/gms",
           "versions": {
             "gms-search-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/gms#search-1.0",
               "url": "https://data.example.com/auth/gms"
             }
           }
@@ -144,7 +133,6 @@
           "url": "https://example.com/api/hips/v2/dp1/list",
           "versions": {
             "hips-list-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/hips#hipslist-1.0",
               "url": "https://example.com/api/hips/v2/dp1/list"
             }
           }
@@ -154,7 +142,6 @@
           "url": "https://data.example.com/api/sia/dp1",
           "versions": {
             "v2": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SIA#query-2.0",
               "url": "https://data.example.com/api/sia/dp1/query"
             }
           }

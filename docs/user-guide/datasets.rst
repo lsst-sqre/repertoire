@@ -17,7 +17,6 @@ For example:
 
    from rubin.repertoire import DiscoveryClient
 
-
    discovery = DiscoveryClient()
    datasets = await discovery.datasets()
    for dataset in datasets:
