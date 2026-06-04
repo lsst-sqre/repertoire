@@ -41,22 +41,6 @@ async def test_get_discovery(data: Data, client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("app", ["registry"], indirect=True)
-async def test_get_discovery_with_ivoa_registry(client: AsyncClient) -> None:
-    r = await client.get("/repertoire/discovery")
-    assert r.status_code == 200, f"error body: {r.text}"
-
-    data = r.json()
-    tap_registry = data["datasets"]["dp02"]["services"]["tap"]["ivoa_registry"]
-    assert tap_registry["ivoaServiceType"] == "tap"
-    assert tap_registry["ivoid"] == "ivo://example.com/tap"
-
-    sia_registry = data["datasets"]["dp02"]["services"]["sia"]["ivoa_registry"]
-    assert sia_registry["ivoaServiceType"] == "sia"
-    assert sia_registry["ivoid"] == "ivo://example.com/sia/dp02"
-
-
-@pytest.mark.asyncio
 async def test_get_influxdb(data: Data, client: AsyncClient) -> None:
     r = await client.get("/repertoire/discovery")
     assert r.status_code == 200, f"error body: {r.text}"

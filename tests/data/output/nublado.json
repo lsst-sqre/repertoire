@@ -14,6 +14,14 @@
             }
           }
         },
+        "gms": {
+          "url": "https://data.example.com/auth/gms",
+          "versions": {
+            "gms-search-1.0": {
+              "url": "https://data.example.com/auth/gms"
+            }
+          }
+        },
         "hips": {
           "url": "https://example.com/api/hips/v2/dp02/list",
           "versions": {
@@ -23,7 +31,12 @@
           }
         },
         "sia": {
-          "url": "https://data.example.com/api/sia/dp02"
+          "url": "https://data.example.com/api/sia/dp02",
+          "versions": {
+            "v2": {
+              "url": "https://data.example.com/api/sia/dp02/query"
+            }
+          }
         },
         "tap": {
           "url": "https://data.example.com/api/tap"
@@ -40,6 +53,14 @@
             },
             "soda-sync-1.0": {
               "url": "https://data.example.com/api/cutout/dp03/sync"
+            }
+          }
+        },
+        "gms": {
+          "url": "https://data.example.com/auth/gms",
+          "versions": {
+            "gms-search-1.0": {
+              "url": "https://data.example.com/auth/gms"
             }
           }
         },
@@ -62,6 +83,14 @@
             }
           }
         },
+        "gms": {
+          "url": "https://data.example.com/auth/gms",
+          "versions": {
+            "gms-search-1.0": {
+              "url": "https://data.example.com/auth/gms"
+            }
+          }
+        },
         "hips": {
           "url": "https://example.com/api/hips/v2/dp1/list",
           "versions": {
@@ -71,7 +100,12 @@
           }
         },
         "sia": {
-          "url": "https://data.example.com/api/sia/dp1"
+          "url": "https://data.example.com/api/sia/dp1",
+          "versions": {
+            "v2": {
+              "url": "https://data.example.com/api/sia/dp1/query"
+            }
+          }
         },
         "tap": {
           "url": "https://data.example.com/api/tap"

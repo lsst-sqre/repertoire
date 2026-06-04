@@ -35,6 +35,7 @@ class OrgRegistryConfig(BaseModel):
         extra="forbid",
         populate_by_name=True,
     )
+
     created: datetime = Field(..., title="Creation timestamp of the registry")
     description: str = Field(..., title="Description of the registry")
     homepage: HttpUrl = Field(..., title="URL of the registry homepage")
@@ -225,6 +226,12 @@ class TapConfig(BaseModel):
 class Config(RepertoireSettings):
     """Configuration for Repertoire."""
 
+    ivoa_registry: RegistryConfig | None = Field(
+        None,
+        title="Registry configuration",
+        description="Configuration for the registry",
+    )
+
     log_level: LogLevel = Field(
         LogLevel.INFO, title="Log level of the application's logger"
     )
@@ -241,12 +248,6 @@ class Config(RepertoireSettings):
     name: str = Field("Repertoire", title="Name of application")
 
     path_prefix: str = Field("/repertoire", title="URL prefix for application")
-
-    ivoa_registry: RegistryConfig | None = Field(
-        None,
-        title="Registry configuration",
-        description="Configuration for the registry",
-    )
 
     sentry: SentryConfig | None = Field(None, title="Sentry configuration")
 
@@ -265,17 +266,17 @@ class Config(RepertoireSettings):
         ),
     )
 
+    tap: TapConfig = Field(
+        default_factory=TapConfig,
+        title="TAP schema management configuration",
+        description="Configuration for TAP_SCHEMA management",
+    )
+
     token: SecretStr | None = Field(
         None,
         title="Gafaelfawr token",
         description="Gafaelfawr token for HiPS property file retrieval",
         validation_alias=AliasChoices("REPERTOIRE_TOKEN", "token"),
-    )
-
-    tap: TapConfig = Field(
-        default_factory=TapConfig,
-        title="TAP schema management configuration",
-        description="Configuration for TAP_SCHEMA management",
     )
 
     def configure_logging(self) -> None:

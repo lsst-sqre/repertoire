@@ -33,8 +33,14 @@ class ApiVersion(BaseModel):
         ),
     ]
 
+    # This field is really an IvoaStandardId, but we cannot use the enum in
+    # the client-facing model because the client will then reject service
+    # discovery information with new IVOA standard IDs that it doesn't know
+    # about. Represent the field as the proper StrEnum in the configuration
+    # but as a str in the client model since equality comparisons still work
+    # properly.
     ivoa_standard_id: Annotated[
-        IvoaStandardId | None,
+        str | None,
         Field(
             title="IVOA standardID",
             description="IVOA standardID used in service registrations",
@@ -118,6 +124,7 @@ class DataService(ApiService):
                 "IVOA registry metadata for this discovered service, if it"
                 " should be published through the IVOA registry."
             ),
+            exclude=True,
         ),
     ] = None
 
