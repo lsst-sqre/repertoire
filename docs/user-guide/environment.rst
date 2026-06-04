@@ -12,7 +12,6 @@ To get a human-readable name for the local environment, call `DiscoveryClient.en
 
    from rubin.repertoire import DiscoveryClient
 
-
    discovery = DiscoveryClient()
    environment_name = await discovery.environment_name()
 

@@ -37,7 +37,6 @@ When using this dependency in an application that uses structlog_, call `~Discov
    import structlog
    from rubin.repertoire import discovery_dependency
 
-
    # ... initialize logger (probably with configure_logging) ...
    logger = structlog.get_logger("<application>")
    discovery_dependency.initialize(logger)
@@ -74,7 +73,6 @@ Most users of Repertoire can create a client with a simple call to the construct
 
    from rubin.repertoire import DiscoveryClient
 
-
    discovery = DiscoveryClient()
 
 This requires the ``REPERTOIRE_BASE_URL`` environment variable be set to the base URL of the Repertoire service, which is normally arranged via :ref:`Phalanx configuration <client-phalanx>`.
@@ -90,7 +88,6 @@ Users of Repertoire that use structlog_ should provide their configured structlo
 
    from rubin.repertoire import DiscoveryClient
    from structlog.stdlib import get_logger
-
 
    logger = get_logger("service")
    discovery = DiscoveryClient(logger=logger)
@@ -108,7 +105,6 @@ If the client knows the base URL for the Repertoire REST API via some other mech
 
    from rubin.repertoire import DiscoveryClient
 
-
    discovery = DiscoveryClient(base_url="https://example.com/repertoire")
 
 In this case, the environment variable is ignored and may be unset.
@@ -125,7 +121,6 @@ To use an existing HTTPX ``AsyncClient`` for making requests to Repertoire, pass
 
    from httpx import AsyncClient
    from rubin.repertoire import DiscoveryClient
-
 
    client = AsyncClient()
    discovery = DiscoveryClient(client)
