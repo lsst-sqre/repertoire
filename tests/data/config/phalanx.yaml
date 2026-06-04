@@ -1,4 +1,6 @@
-# A typical merged Phalanx configuration for, say, data.example.com.
+# A typical merged Phalanx configuration for, say, data.example.com. This is
+# used to test the client, so it cannot contain any server-only configuration
+# options such as a top-level ivoaRegistry key.
 
 applications:
   - "argocd"
@@ -96,6 +98,19 @@ rules:
       name: "argocd"
       template: "https://{{base_hostname}}/argo-cd"
   gafaelfawr:
+    - type: "data"
+      name: "gms"
+      template: "https://{{base_hostname}}/auth/gms"
+      versions:
+        gms-search-1.0:
+          template: "https://{{base_hostname}}/auth/gms"
+          ivoaStandardId: "ivo://ivoa.net/std/gms#search-1.0"
+      ivoaRegistry:
+        ivoaServiceType: "gms"
+        ivoid: "ivo://example.com/groups"
+        title: "Example GMS"
+        created: '2026-05-27T00:00:00'
+        description: "Group Membership Service for Example Observatory."
     - type: "internal"
       name: "gafaelfawr"
       template: "https://{{base_hostname}}/auth/api"
@@ -136,7 +151,24 @@ rules:
         - "dp02"
         - "dp1"
       template: "https://{{base_hostname}}/api/sia/{{dataset}}"
+      versions:
+        v2:
+          template: "https://{{base_hostname}}/api/sia/{{dataset}}/query"
+          ivoaStandardId: "ivo://ivoa.net/std/SIA#query-2.0"
       openapi: "https://{{base_hostname}}/api/sia/openapi.json"
+      ivoaRegistry:
+        ivoaServiceType: "sia"
+        records:
+          dp02:
+            ivoid: "ivo://example.com/sia/dp02"
+            title: "Example SIA Service (DP02)"
+            created: "2026-04-16T00:00:00"
+            description: "SIA image access service for the DP02 dataset."
+          dp1:
+            ivoid: "ivo://example.com/sia/dp1"
+            title: "Example SIA Service (DP1)"
+            created: "2026-04-16T00:00:00"
+            description: "SIA image access service for the DP1 dataset."
   ssotap:
     - type: "data"
       name: "tap"
@@ -150,6 +182,14 @@ rules:
         - "dp02"
         - "dp1"
       template: "https://{{base_hostname}}/api/tap"
+      ivoaRegistry:
+        ivoaServiceType: "tap"
+        ivoid: "ivo://example.com/tap"
+        title: "Example TAP Service"
+        created: "2026-04-16T00:00:00"
+        description: "TAP service for Example Observatory."
+        adqlVersion: "2.1"
+        uploadSupported: true
   vo-cutouts:
     - type: "data"
       name: "cutout"
@@ -162,6 +202,12 @@ rules:
           template: "https://{{base_hostname}}/api/cutout/{{dataset}}/sync"
           ivoaStandardId: "ivo://ivoa.net/std/SODA#sync-1.0"
       openapi: "https://{{base_hostname}}/api/cutout/openapi.json"
+      ivoaRegistry:
+        ivoaServiceType: "soda"
+        ivoid: "ivo://example.com/cutout"
+        title: "Example SODA Cutout Service"
+        created: "2026-04-16T00:00:00"
+        description: "SODA image cutout service for Example Observatory."
   wobbly:
     - type: "internal"
       name: "wobbly"

@@ -44,15 +44,10 @@
             "soda-sync-1.0": {
               "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-1.0",
               "url": "https://data.example.com/api/cutout/dp02/sync"
-            }
-          }
-        },
-        "gms": {
-          "url": "https://data.example.com/auth/gms",
-          "versions": {
-            "gms-search-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/gms#search-1.0",
-              "url": "https://data.example.com/auth/gms"
+            },
+            "soda-sync-2.0": {
+              "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-2.0",
+              "url": "https://data.example.com/api/cutout/dp02/sync2"
             }
           }
         },
@@ -67,13 +62,7 @@
         },
         "sia": {
           "openapi": "https://data.example.com/api/sia/openapi.json",
-          "url": "https://data.example.com/api/sia/dp02",
-          "versions": {
-            "v2": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SIA#query-2.0",
-              "url": "https://data.example.com/api/sia/dp02/query"
-            }
-          }
+          "url": "https://data.example.com/api/sia/dp02"
         },
         "tap": {
           "url": "https://data.example.com/api/tap"
@@ -98,15 +87,6 @@
             }
           }
         },
-        "gms": {
-          "url": "https://data.example.com/auth/gms",
-          "versions": {
-            "gms-search-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/gms#search-1.0",
-              "url": "https://data.example.com/auth/gms"
-            }
-          }
-        },
         "tap": {
           "url": "https://data.example.com/api/ssotap"
         }
@@ -116,27 +96,21 @@
       "butler_config": "https://data.example.com/api/butler/repo/dp1/butler.yaml",
       "description": "Data Preview 1 contains image and catalog products from the Rubin Science Pipelines v29 processing of observations obtained with the LSST Commissioning Camera of seven ~1 square degree fields, over seven weeks in late 2024.",
       "docs_url": "https://dp1.example.com/",
+      "foo": "bar",
       "services": {
         "cutout": {
           "openapi": "https://data.example.com/api/cutout/openapi.json",
           "url": "https://data.example.com/api/cutout",
+          "foo": "bar",
           "versions": {
             "soda-async-1.0": {
               "ivoa_standard_id": "ivo://ivoa.net/std/SODA#async-1.0",
-              "url": "https://data.example.com/api/cutout/dp1/jobs"
+              "url": "https://data.example.com/api/cutout/dp1/jobs",
+              "foo": "bar"
             },
             "soda-sync-1.0": {
               "ivoa_standard_id": "ivo://ivoa.net/std/SODA#sync-1.0",
               "url": "https://data.example.com/api/cutout/dp1/sync"
-            }
-          }
-        },
-        "gms": {
-          "url": "https://data.example.com/auth/gms",
-          "versions": {
-            "gms-search-1.0": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/gms#search-1.0",
-              "url": "https://data.example.com/auth/gms"
             }
           }
         },
@@ -151,13 +125,7 @@
         },
         "sia": {
           "openapi": "https://data.example.com/api/sia/openapi.json",
-          "url": "https://data.example.com/api/sia/dp1",
-          "versions": {
-            "v2": {
-              "ivoa_standard_id": "ivo://ivoa.net/std/SIA#query-2.0",
-              "url": "https://data.example.com/api/sia/dp1/query"
-            }
-          }
+          "url": "https://data.example.com/api/sia/dp1"
         },
         "tap": {
           "url": "https://data.example.com/api/tap"
@@ -171,7 +139,8 @@
       "credentials_url": "https://example.com/repertoire/discovery/influxdb/idfdev_efd",
       "database": "efd",
       "schema_registry": "http://sasquatch-schema-registry.sasquatch:8081/",
-      "url": "https://data.example.com/influxdb/"
+      "url": "https://data.example.com/influxdb/",
+      "foo": "bar"
     },
     "idfdev_metrics": {
       "credentials_url": "https://example.com/repertoire/discovery/influxdb/idfdev_metrics",
@@ -200,9 +169,11 @@
         "url": "https://data.example.com/noteburst",
         "versions": {
           "v1": {
-            "url": "https://data.example.com/noteburst/v1"
+            "url": "https://data.example.com/noteburst/v1",
+            "foo": "bar"
           }
-        }
+        },
+        "foo": "bar"
       },
       "semaphore": {
         "openapi": "https://data.example.com/semaphore/openapi.json",
@@ -221,8 +192,12 @@
         "url": "https://nb.data.example.com/nb"
       },
       "portal": {
-        "url": "https://data.example.com/portal/app/"
+        "url": "https://data.example.com/portal/app/",
+        "foo": "bar"
       }
     }
+  },
+  "unknown": {
+    "foo": "bar"
   }
 }
