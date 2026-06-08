@@ -1,5 +1,6 @@
 {
   "database": "lsst.square.metrics",
+  "local": true,
   "password": "other-password",
   "schema_registry": "http://sasquatch-schema-registry.sasquatch:8081/",
   "url": "https://data.example.com/influxdb/",

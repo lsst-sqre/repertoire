@@ -24,6 +24,19 @@ To get a list of InfluxDB databases for which connection information is availabl
 
 The resulting names are short, human-readable names that can be passed as the ``database`` parameter to `DiscoveryClient.influxdb_connection_info` or `DiscoveryClient.influxdb_credentials` as described below.
 
+By defult, all InfluxDB databases accessible from the environment whose discovery service is being queried are returned.
+The list of databases can be restricted to only databases hosted in the same environment as the discovery service, or only databases hosted in remote environments, by passing the ``local`` flag.
+For example:
+
+.. code-block:: python
+   :emphasize-lines: 4-5
+
+   from rubin.repertoire import DiscoveryClient
+
+   discovery = DiscoveryClient()
+   local_databases = await discovery.influxdb_databases(local=True)
+   remote_databases = await discovery.influxdb_databases(local=False)
+
 Getting connection information
 ==============================
 

@@ -243,6 +243,7 @@ class DiscoveryClient:
                 url=info.url,
                 database=info.database,
                 schema_registry=info.schema_registry,
+                local=info.local,
             )
         else:
             return None
@@ -280,11 +281,23 @@ class DiscoveryClient:
         else:
             return None
 
-    async def influxdb_databases(self) -> list[str]:
-        """List InfluxDB databases available in the local Phalanx environment.
+    async def influxdb_databases(
+        self, *, local: bool | None = None
+    ) -> list[str]:
+        """List InfluxDB databases available from this Phalanx environment.
 
-        These may or may not be locally hosted, but the credentials and
-        connection information is available to authenticated users.
+        These may or may not be locally hosted (unless ``local`` is set), but
+        the credentials and connection information is available to
+        authenticated users.
+
+        Parameters
+        ----------
+        local
+            If set to `True`, return only InfluxDB databases hosted in the
+            local Phalanx environment (the one whose service discovery service
+            is being queried). If set to `False`, return only InfluxDB
+            databases that are hosted outside this Phalanx environment. The
+            default, `None`, lists all accessible databases, local or not.
 
         Returns
         -------
@@ -299,7 +312,14 @@ class DiscoveryClient:
             Raised on error fetching discovery information from Repertoire.
         """
         discovery = await self._get_discovery()
-        return sorted(discovery.influxdb_databases.keys())
+        if local is None:
+            return sorted(discovery.influxdb_databases.keys())
+        else:
+            databases = discovery.influxdb_databases.items()
+            if local:
+                return sorted(k for k, v in databases if v.local)
+            else:
+                return sorted(k for k, v in databases if not v.local)
 
     async def url_for_data(
         self, service: str, dataset: str, *, version: str | None = None

@@ -238,6 +238,14 @@ class InfluxDatabaseConfig(BaseModel):
         ),
     ]
 
+    local: Annotated[
+        bool,
+        Field(
+            title="Is database local",
+            description="Whether the database is local to this environment",
+        ),
+    ] = False
+
 
 class IvoaStandardId(StrEnum):
     """Known IVOA standard IDs for service capability registrations."""
