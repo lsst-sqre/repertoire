@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
   <responseDate>1970-01-01T00:00:00Z</responseDate>
-  <request verb="Identify">https://example.com/discovery/ivoa</request>
+  <request verb="Identify">https://example.com/api/registry</request>
   <Identify>
     <repositoryName>Example Publishing Registry</repositoryName>
-    <baseURL>https://example.com/discovery/ivoa</baseURL>
+    <baseURL>https://example.com/api/registry</baseURL>
     <protocolVersion>2.0</protocolVersion>
     <adminEmail>registry@example.com</adminEmail>
     <earliestDatestamp>2026-04-16T00:00:00Z</earliestDatestamp>
@@ -31,7 +31,7 @@
         </content>
         <capability standardID="ivo://ivoa.net/std/Registry" xsi:type="vg:Harvest">
           <interface role="std" xsi:type="vg:OAIHTTP">
-            <accessURL use="base">https://example.com/discovery/ivoa</accessURL>
+            <accessURL use="base">https://example.com/api/registry</accessURL>
           </interface>
         </capability>
         <full>false</full>

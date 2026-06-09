@@ -28,7 +28,7 @@ def normalize_oai_xml(xml: str) -> str:
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_identify(data: Data, client: AsyncClient) -> None:
-    r = await client.get("/discovery/ivoa?verb=Identify")
+    r = await client.get("/api/registry?verb=Identify")
     assert r.status_code == 200
     data.assert_text_matches(
         normalize_oai_xml(r.text), "output/registry/identify.xml"
@@ -38,7 +38,7 @@ async def test_identify(data: Data, client: AsyncClient) -> None:
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_list_metadata_formats(data: Data, client: AsyncClient) -> None:
-    r = await client.get("/discovery/ivoa?verb=ListMetadataFormats")
+    r = await client.get("/api/registry?verb=ListMetadataFormats")
     assert r.status_code == 200
     data.assert_text_matches(
         normalize_oai_xml(r.text), "output/registry/list_metadata_formats.xml"
@@ -48,7 +48,7 @@ async def test_list_metadata_formats(data: Data, client: AsyncClient) -> None:
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_list_sets(data: Data, client: AsyncClient) -> None:
-    r = await client.get("/discovery/ivoa?verb=ListSets")
+    r = await client.get("/api/registry?verb=ListSets")
     assert r.status_code == 200
     data.assert_text_matches(
         normalize_oai_xml(r.text), "output/registry/list_sets.xml"
@@ -59,7 +59,7 @@ async def test_list_sets(data: Data, client: AsyncClient) -> None:
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_list_identifiers(data: Data, client: AsyncClient) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=ListIdentifiers&metadataPrefix=ivo_vor"
+        "/api/registry?verb=ListIdentifiers&metadataPrefix=ivo_vor"
     )
     assert r.status_code == 200
     data.assert_text_matches(
@@ -72,8 +72,8 @@ async def test_list_identifiers(data: Data, client: AsyncClient) -> None:
 @pytest.mark.parametrize(
     "url",
     [
-        "/discovery/ivoa?verb=NotAVerb",
-        "/discovery/ivoa",
+        "/api/registry?verb=NotAVerb",
+        "/api/registry",
     ],
 )
 async def test_bad_verb(url: str, data: Data, client: AsyncClient) -> None:
@@ -90,7 +90,7 @@ async def test_cannot_disseminate_format(
     data: Data, client: AsyncClient
 ) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=ListIdentifiers&metadataPrefix=marc21"
+        "/api/registry?verb=ListIdentifiers&metadataPrefix=marc21"
     )
     assert r.status_code == 200
     data.assert_text_matches(
@@ -103,7 +103,7 @@ async def test_cannot_disseminate_format(
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_id_does_not_exist(data: Data, client: AsyncClient) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=GetRecord&metadataPrefix=ivo_vor&identifier=ivo://example.com/nonexistent"
+        "/api/registry?verb=GetRecord&metadataPrefix=ivo_vor&identifier=ivo://example.com/nonexistent"
     )
     assert r.status_code == 200
     data.assert_text_matches(
@@ -115,7 +115,7 @@ async def test_id_does_not_exist(data: Data, client: AsyncClient) -> None:
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_list_records(data: Data, client: AsyncClient) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor"
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor"
     )
     assert r.status_code == 200
     data.assert_text_matches(
@@ -127,7 +127,7 @@ async def test_list_records(data: Data, client: AsyncClient) -> None:
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_get_record(data: Data, client: AsyncClient) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=GetRecord&metadataPrefix=ivo_vor&identifier=ivo://example.com/tap"
+        "/api/registry?verb=GetRecord&metadataPrefix=ivo_vor&identifier=ivo://example.com/tap"
     )
     assert r.status_code == 200
     data.assert_text_matches(
@@ -138,9 +138,7 @@ async def test_get_record(data: Data, client: AsyncClient) -> None:
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_get_record_missing_id(data: Data, client: AsyncClient) -> None:
-    r = await client.get(
-        "/discovery/ivoa?verb=GetRecord&metadataPrefix=ivo_vor"
-    )
+    r = await client.get("/api/registry?verb=GetRecord&metadataPrefix=ivo_vor")
     assert r.status_code == 200
     data.assert_text_matches(
         normalize_oai_xml(r.text), "output/registry/get_record_missing_id.xml"
@@ -153,7 +151,7 @@ async def test_get_record_wrong_prefix(
     data: Data, client: AsyncClient
 ) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=GetRecord&metadataPrefix=not_ivo_vor&identifier"
+        "/api/registry?verb=GetRecord&metadataPrefix=not_ivo_vor&identifier"
         "=ivo://example.com/tap"
     )
     assert r.status_code == 200
@@ -168,10 +166,10 @@ async def test_get_record_wrong_prefix(
 @pytest.mark.parametrize(
     "url",
     [
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor&from=1960-01-01",
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor&from=1960-01-01T00:00:00Z",
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor&until=2026-12-12",
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor&until=2026-12-12T00:00:00Z",
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor&from=1960-01-01",
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor&from=1960-01-01T00:00:00Z",
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor&until=2026-12-12",
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor&until=2026-12-12T00:00:00Z",
     ],
 )
 async def test_list_records_date_filter(
@@ -189,8 +187,8 @@ async def test_list_records_date_filter(
 @pytest.mark.parametrize(
     "url",
     [
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor&from=2026-12-12",
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor&from=1960-01-01&until=1961-01-01",
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor&from=2026-12-12",
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor&from=1960-01-01&until=1961-01-01",
     ],
 )
 async def test_list_records_no_results(
@@ -209,7 +207,7 @@ async def test_list_metadata_formats_bad_identifier(
     data: Data, client: AsyncClient
 ) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=ListMetadataFormats"
+        "/api/registry?verb=ListMetadataFormats"
         "&identifier=ivo://example.com/nonexistent"
     )
     assert r.status_code == 200
@@ -224,7 +222,7 @@ async def test_list_metadata_formats_bad_identifier(
 async def test_bad_argument_duplicate_params(
     data: Data, client: AsyncClient
 ) -> None:
-    r = await client.get("/discovery/ivoa?verb=Identify&verb=Identify")
+    r = await client.get("/api/registry?verb=Identify&verb=Identify")
     assert r.status_code == 200
     data.assert_text_matches(
         normalize_oai_xml(r.text),
@@ -235,9 +233,7 @@ async def test_bad_argument_duplicate_params(
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_bad_argument_forbidden(data: Data, client: AsyncClient) -> None:
-    r = await client.get(
-        "/discovery/ivoa?verb=Identify&metadataPrefix=ivo_vor"
-    )
+    r = await client.get("/api/registry?verb=Identify&metadataPrefix=ivo_vor")
     assert r.status_code == 200
     data.assert_text_matches(
         normalize_oai_xml(r.text),
@@ -251,7 +247,7 @@ async def test_bad_argument_invalid_date(
     data: Data, client: AsyncClient
 ) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor&from=not-a-date"
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor&from=not-a-date"
     )
     assert r.status_code == 200
     data.assert_text_matches(
@@ -266,7 +262,7 @@ async def test_bad_argument_from_after_until(
     data: Data, client: AsyncClient
 ) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor"
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor"
         "&from=2026-01-01&until=2025-01-01"
     )
     assert r.status_code == 200
@@ -282,7 +278,7 @@ async def test_bad_argument_mixed_granularity(
     data: Data, client: AsyncClient
 ) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=ListRecords&metadataPrefix=ivo_vor"
+        "/api/registry?verb=ListRecords&metadataPrefix=ivo_vor"
         "&from=2025-01-01&until=2025-01-01T00:00:00Z"
     )
     assert r.status_code == 200
@@ -295,7 +291,7 @@ async def test_bad_argument_mixed_granularity(
 @pytest.mark.asyncio
 @pytest.mark.parametrize("app", ["registry"], indirect=True)
 async def test_post_identify(data: Data, client: AsyncClient) -> None:
-    r = await client.post("/discovery/ivoa", data={"verb": "Identify"})
+    r = await client.post("/api/registry", data={"verb": "Identify"})
     assert r.status_code == 200
     data.assert_text_matches(
         normalize_oai_xml(r.text), "output/registry/identify.xml"
@@ -308,7 +304,7 @@ async def test_list_identifiers_excludes_unregistered_services(
     client: AsyncClient,
 ) -> None:
     r = await client.get(
-        "/discovery/ivoa?verb=ListIdentifiers&metadataPrefix=ivo_vor"
+        "/api/registry?verb=ListIdentifiers&metadataPrefix=ivo_vor"
     )
     assert r.status_code == 200
     assert "ssotap" not in r.text
