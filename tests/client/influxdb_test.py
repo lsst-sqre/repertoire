@@ -18,6 +18,24 @@ async def test_databases(data: Data, discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_databases_local(data: Data, discovery: DiscoveryClient) -> None:
+    output = data.read_json("output/phalanx")
+    databases = output["influxdb_databases"].items()
+    expected = [k for k, v in databases if v.get("local")]
+    assert await discovery.influxdb_databases(local=True) == expected
+
+
+@pytest.mark.asyncio
+async def test_databases_remote(
+    data: Data, discovery: DiscoveryClient
+) -> None:
+    output = data.read_json("output/phalanx")
+    databases = output["influxdb_databases"].items()
+    expected = [k for k, v in databases if not v.get("local")]
+    assert await discovery.influxdb_databases(local=False) == expected
+
+
+@pytest.mark.asyncio
 async def test_connection_info(data: Data, discovery: DiscoveryClient) -> None:
     for database in ("idfdev_efd", "idfdev_metrics"):
         output = await discovery.influxdb_connection_info(database)

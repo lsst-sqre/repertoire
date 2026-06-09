@@ -268,6 +268,14 @@ class InfluxDatabase(BaseModel):
         ),
     ]
 
+    local: Annotated[
+        bool,
+        Field(
+            title="Is database local",
+            description="Whether the database is local to this environment",
+        ),
+    ] = False
+
 
 class InfluxDatabaseWithCredentials(InfluxDatabase):
     """InfluxDB database connection information with credentials."""

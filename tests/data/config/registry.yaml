@@ -85,12 +85,14 @@ influxdbDatabases:
     username: "efdreader"
     passwordKey: "idfdev_efd-password"
     schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
+    local: false
   idfdev_metrics:
     url: "https://data.example.com/influxdb/"
     database: "lsst.square.metrics"
     username: "efdreader"
     passwordKey: "idfdev_metrics-password"
     schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
+    local: true
 ivoaRegistry:
   adminEmail: "registry@example.com"
   authority: "ivo://example.com"

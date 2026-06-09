@@ -108,6 +108,7 @@ class RepertoireBuilder:
             url=influxdb.url,
             database=influxdb.database,
             schema_registry=influxdb.schema_registry,
+            local=influxdb.local,
         )
 
     def _build_data_service_from_rule(
@@ -248,6 +249,7 @@ class RepertoireBuilder:
                 database=config.database,
                 schema_registry=config.schema_registry,
                 credentials_url=HttpUrl(creds_url),
+                local=config.local,
             )
         return result
 
@@ -413,6 +415,7 @@ class RepertoireBuilderWithSecrets(RepertoireBuilder):
             username=influxdb.username,
             password=SecretStr(password.rstrip("\n")),
             schema_registry=influxdb.schema_registry,
+            local=influxdb.local,
         )
 
     def list_influxdb_with_credentials(

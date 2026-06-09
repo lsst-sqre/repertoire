@@ -92,6 +92,7 @@ influxdbDatabases:
     username: "efdreader"
     passwordKey: "idfdev_metrics-password"
     schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
+    local: true
 rules:
   argocd:
     - type: "ui"
