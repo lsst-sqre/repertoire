@@ -50,7 +50,7 @@ def create_app(
         used by the Helm chart and Docker container.
     """
     path_prefix = "/repertoire"
-    registry_prefix = "/discovery"
+    registry_prefix = "/api"
     if load_config:
         config = config_dependency.config()
         path_prefix = config.path_prefix

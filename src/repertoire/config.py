@@ -86,7 +86,9 @@ class RegistryConfig(BaseModel):
         ),
     )
 
-    path_prefix: str = Field("/discovery", title="URL prefix for the registry")
+    path_prefix: str = Field(
+        "/api", title="URL prefix under which /registry is served"
+    )
 
     rights: str = Field(
         ...,
