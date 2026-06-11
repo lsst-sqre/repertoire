@@ -31,7 +31,7 @@ dependencies = [
     "pydantic-settings>=2",
     "rubin-repertoire",
     "vo-models>=0.5.2",
-    "safir[kafka,db]>=14.3.0",
+    "safir[kafka,db]>=15.1.1",
     "sqlalchemy[asyncio]>=2.0",
     "structlog>=25",
     "testcontainers[postgres]>=4.0.0",

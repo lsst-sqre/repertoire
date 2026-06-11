@@ -11,6 +11,19 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-2.0.0'></a>
+## 2.0.0 (2026-06-11)
+
+### Backwards-incompatible changes
+
+- Replace the Helm configuration parameter `ivoaRegistry.pathPrefix` with `ivoaRegistry.path`, which specifies the full path to the URL at which the registry is served (if enabled). This allows full control of the path in Phalanx configuration, instead of having to change the last component in the Repertoire source.
+
+### New features
+
+- Add a `local` flag to InfluxDB service discovery information, defaulting to false for backward compatibility. This flag indicates whether the InfluxDB database is located in the same Phalanx environment as the Repertoire server being queried.
+- Add an optional `local` parameter to `DiscoveryClient.influxdb_databases` that, if given, restricts the results to only local or non-local databases.
+- Include internal services in the Nublado service discovery information. Users should not use this portion of service discovery, but making it available to notebooks aids in writing test notebooks for internal services such as [Semaphore](https://semaphore.lsst.io/) and [Gafaelfawr](https://gafaelfawr.lsst.io/).
+
 <a id='changelog-1.0.0'></a>
 ## 1.0.0 (2026-06-04)
 

@@ -25,7 +25,7 @@ rst_epilog_file = "_rst_epilog.rst"
 
 [sphinx.intersphinx.projects]
 aioinflux = "https://aioinflux.readthedocs.io/en/stable"
-python = "https://docs.python.org/3.14"
+python = "https://docs.python.org/3"
 safir = "https://safir.lsst.io"
 structlog = "https://www.structlog.org/en/stable"
 
