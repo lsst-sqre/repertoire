@@ -128,5 +128,34 @@
       "schema_registry": "http://sasquatch-schema-registry.sasquatch:8081/",
       "url": "https://data.example.com/influxdb/"
     }
+  },
+  "services": {
+    "internal": {
+      "gafaelfawr": {
+        "url": "https://data.example.com/auth/api",
+        "versions": {
+          "v1": {
+            "url": "https://data.example.com/auth/api/v1"
+          }
+        }
+      },
+      "mobu": {
+        "url": "https://data.example.com/mobu"
+      },
+      "noteburst": {
+        "url": "https://data.example.com/noteburst",
+        "versions": {
+          "v1": {
+            "url": "https://data.example.com/noteburst/v1"
+          }
+        }
+      },
+      "semaphore": {
+        "url": "https://data.example.com/semaphore"
+      },
+      "wobbly": {
+        "url": "https://data.example.com/wobbly"
+      }
+    }
   }
 }

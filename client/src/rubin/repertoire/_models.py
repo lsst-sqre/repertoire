@@ -365,6 +365,22 @@ class Services(BaseModel):
         ),
     ] = {}
 
+    def to_nublado_dict(self) -> dict[str, dict[str, Any]]:
+        """Convert to the reduced format used inside Nublado containers.
+
+        Returns
+        -------
+        dict of dict
+            Restricted subset of dataset discovery, suitable for JSON
+            encoding.
+        """
+        result: dict[str, Any] = {}
+        if self.internal:
+            result["internal"] = {}
+            for service, info in self.internal.items():
+                result["internal"][service] = info.to_nublado_dict()
+        return result
+
 
 class Discovery(BaseModel):
     """Service discovery information."""
@@ -447,5 +463,6 @@ class Discovery(BaseModel):
                 k: v.model_dump(mode="json")
                 for k, v in self.influxdb_databases.items()
             },
+            "services": self.services.to_nublado_dict(),
         }
         return {k: v for k, v in results.items() if v}
