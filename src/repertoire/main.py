@@ -49,13 +49,13 @@ def create_app(
         Overrides the default secrets root of :file:`/etc/repertoire/secrets`
         used by the Helm chart and Docker container.
     """
-    path_prefix = "/repertoire"
-    registry_prefix = "/api"
     if load_config:
         config = config_dependency.config()
         path_prefix = config.path_prefix
         if config.ivoa_registry:
-            registry_prefix = config.ivoa_registry.path_prefix
+            registry_path = config.ivoa_registry.path
+        else:
+            registry_path = "/api/registry"
 
         # Configure Slack alerts.
         if config.slack_alerts and config.slack_webhook:
@@ -64,6 +64,9 @@ def create_app(
                 config.slack_webhook, "Repertoire", logger
             )
             logger.debug("Initialized Slack webhook")
+    else:
+        path_prefix = "/repertoire"
+        registry_path = "/api/registry"
 
     # Initialize Sentry (does nothing if it is not configured).
     initialize_sentry(release=__version__)
@@ -99,7 +102,7 @@ def create_app(
         if config.hips.legacy:
             legacy_path_prefix = config.hips.legacy.path_prefix
             app.include_router(hips_legacy_router, prefix=legacy_path_prefix)
-    app.include_router(registry_router, prefix=registry_prefix)
+    app.include_router(registry_router, prefix=registry_path)
 
     # Add middleware.
     app.add_middleware(XForwardedMiddleware)

@@ -86,8 +86,8 @@ class RegistryConfig(BaseModel):
         ),
     )
 
-    path_prefix: str = Field(
-        "/api", title="URL prefix under which /registry is served"
+    path: str = Field(
+        "/api/registry", title="URL at which to serve the registry"
     )
 
     rights: str = Field(
