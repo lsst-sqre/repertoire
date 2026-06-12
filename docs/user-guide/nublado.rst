@@ -29,8 +29,8 @@ The format parallels the current `Discovery` object with the following changes:
 #. The ``applications`` key is not present.
 #. Only ``butler_config`` is included as data for each dataset in ``datasets``.
    Datasets without a Butler configuration will have an empty object value.
-#. Internal and UI services are omitted.
-#. All data for data services is omitted except for ``url`` at the top level and under any ``versions`` dictionary.
+#. UI services are omitted.
+#. All data for services is omitted except for ``url`` at the top level and under any ``versions`` dictionary.
 
 Any client reading this data should silently ignore any new fields.
 
