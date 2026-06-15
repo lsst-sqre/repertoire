@@ -1,6 +1,6 @@
 """Constants for tests."""
 
-__all__ = ["TEST_BASE_URL"]
+__all__ = ["POSTGRES_IMAGE", "TEST_BASE_URL"]
 
 POSTGRES_IMAGE = "postgres:18"
 """PostgreSQL Docker image to use for testing."""
