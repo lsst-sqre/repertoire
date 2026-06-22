@@ -21,6 +21,7 @@ from vo_models.voresource.models import (
     Content,
     Creator,
     Curation,
+    Relationship,
     Resource,
     ResourceName,
     Rights,
@@ -34,12 +35,14 @@ from repertoire.registry.constants import (
     VO_SUBJECT,
 )
 from repertoire.registry.models import (
+    CatalogResource,
     GroupMembershipService,
     PlainService,
     RegistryOrganisation,
     SimpleImageAccess,
     SODAAsync,
     SODASync,
+    TapAux,
     TypedService,
     VOSIAvailability,
     VOSICapabilities,
@@ -48,6 +51,7 @@ from repertoire.registry.models import (
 from repertoire.registry.store import RecordStore
 from rubin.repertoire import (
     ApiVersion,
+    BaseRegistryEntry,
     DataService,
     Discovery,
     GmsRegistryEntry,
@@ -475,6 +479,63 @@ class ResourceRecordFactory:
             capability=[SimpleImageAccess(interface=[interface])],
         )
 
+    def _create_tap_catalog_resource(
+        self,
+        service: DataService,
+        tap_registry: TapRegistryEntry,
+        entry: BaseRegistryEntry,
+    ) -> CatalogResource:
+        """Create a TAPRegExt catalog resource record for a TAP endpoint.
+
+        Parameters
+        ----------
+        service
+            The discovered service corresponding to this registry record.
+        tap_registry
+            The registry entry containing the TAP-specific fields.
+        entry
+            The base registry entry containing the IVOID, title, datestamps,
+            and description for the catalog resource.
+
+        Returns
+        -------
+        CatalogResource
+            A CatalogResource record.
+        """
+        return CatalogResource(
+            created=entry.created,
+            updated=self._startup_timestamp,
+            status="active",
+            title=entry.title,
+            identifier=entry.ivoid,
+            curation=self._curation,
+            content=Content(
+                subject=VO_SUBJECT,
+                description=entry.description,
+                reference_url=(
+                    entry.docs_url
+                    or self._registry_config.organisation.homepage
+                ),
+                relationship=[
+                    Relationship(
+                        relationship_type="IsServedBy",
+                        related_resource=[
+                            ResourceName(ivo_id=str(tap_registry.ivoid))
+                        ],
+                    )
+                ],
+            ),
+            rights=[
+                Rights(
+                    value=self._registry_config.rights,
+                    rights_uri=self._registry_config.rights_uri,
+                )
+            ],
+            capability=[
+                TapAux(interface=[self._create_interface(service.url)])
+            ],
+        )
+
     def _add_service_record(
         self,
         records: dict[str, Resource],
@@ -524,6 +585,37 @@ class ResourceRecordFactory:
                 ivoid=ivoid,
             )
 
+    def _add_tap_catalog_resource(
+        self,
+        records: dict[str, Resource],
+        dataset: str,
+        service: DataService,
+    ) -> None:
+        """Add a Catalog Resource record for this dataset if the service is
+        TAP.
+        """
+        if not isinstance(service.ivoa_registry, TapRegistryEntry):
+            return
+        entry = service.ivoa_registry.records.get(dataset)
+        if entry is None:
+            return
+        ivoid = str(entry.ivoid)
+        if ivoid in records:
+            self._logger.debug(
+                "Skipping duplicate TAP CatalogResource record",
+                dataset=dataset,
+                ivoid=ivoid,
+            )
+            return
+        records[ivoid] = self._create_tap_catalog_resource(
+            service, service.ivoa_registry, entry
+        )
+        self._logger.debug(
+            "Created TAP CatalogResource record for discovered service",
+            dataset=dataset,
+            ivoid=ivoid,
+        )
+
     def create_all(self) -> RecordStore:
         """Create all VOResource records and return them as a RecordStore.
 
@@ -546,5 +638,6 @@ class ResourceRecordFactory:
         for dataset, dataset_info in self._discovery.datasets.items():
             for name, service in dataset_info.services.items():
                 self._add_service_record(records, dataset, name, service)
+                self._add_tap_catalog_resource(records, dataset, service)
 
         return RecordStore(records=records)

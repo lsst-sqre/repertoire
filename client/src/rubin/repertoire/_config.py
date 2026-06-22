@@ -259,6 +259,7 @@ class IvoaStandardId(StrEnum):
     VOSI_AVAILABILITY = "ivo://ivoa.net/std/VOSI#availability"
     VOSI_CAPABILITIES = "ivo://ivoa.net/std/VOSI#capabilities"
     VOSI_TABLES = "ivo://ivoa.net/std/VOSI#tables"
+    TAP_AUX = "ivo://ivoa.net/std/TAP#aux"
 
 
 class ApiVersionRule(BaseModel):
@@ -409,6 +410,17 @@ class TapRegistryEntry(BaseRegistryEntry):
             description="Whether the TAP service supports table uploads",
         ),
     ] = True
+
+    records: Annotated[
+        dict[str, BaseRegistryEntry],
+        Field(
+            title="Per-dataset registry entries",
+            description=(
+                "Mapping of dataset names to the IVOA registry entry for"
+                " that dataset."
+            ),
+        ),
+    ] = {}
 
 
 type RegistryEntry = Annotated[
