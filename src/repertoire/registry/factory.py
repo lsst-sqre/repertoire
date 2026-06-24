@@ -207,7 +207,7 @@ class ResourceRecordFactory:
             created=self._registry_config.created,
             updated=self._startup_timestamp,
             status="active",
-            title=self._registry_config.repository_name,
+            title=self._registry_config.organisation.title,
             identifier=self._registry_config.authority,
             curation=self._curation,
             content=Content(
