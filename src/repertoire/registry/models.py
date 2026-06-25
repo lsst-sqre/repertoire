@@ -8,6 +8,7 @@ from vo_models.tapregext.models import TableAccess
 from vo_models.voresource.models import (
     Capability,
     Organisation,
+    ResourceName,
     Rights,
     Service,
 )
@@ -111,6 +112,12 @@ class PlainService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     """
 
     type: Literal["vr:Service"] = attr(ns="xsi", default="vr:Service")
+    facility: list[ResourceName] = element(
+        tag="facility", ns="", default_factory=list
+    )
+    instrument: list[ResourceName] = element(
+        tag="instrument", ns="", default_factory=list
+    )
     rights: list[Rights] | None = element(
         tag="rights", ns="", default_factory=list
     )
@@ -129,6 +136,12 @@ class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
 
     type: Literal["vs:CatalogService"] = attr(
         ns="xsi", default="vs:CatalogService"
+    )
+    facility: list[ResourceName] = element(
+        tag="facility", ns="", default_factory=list
+    )
+    instrument: list[ResourceName] = element(
+        tag="instrument", ns="", default_factory=list
     )
     rights: list[Rights] | None = element(
         tag="rights", ns="", default_factory=list
@@ -155,6 +168,12 @@ class CatalogResource(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
 
     type: Literal["vs:CatalogResource"] = attr(
         ns="xsi", default="vs:CatalogResource"
+    )
+    facility: list[ResourceName] = element(
+        tag="facility", ns="", default_factory=list
+    )
+    instrument: list[ResourceName] = element(
+        tag="instrument", ns="", default_factory=list
     )
     rights: list[Rights] | None = element(
         tag="rights", ns="", default_factory=list

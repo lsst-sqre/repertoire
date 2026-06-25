@@ -18,7 +18,6 @@ __all__ = [
     "SUPPORTED_PREFIXES",
     "TAP_OUTPUT_FORMAT_MIME",
     "TAP_UPLOAD_ID",
-    "VO_SUBJECT",
     "XSI_NS",
 ]
 
@@ -54,9 +53,6 @@ TAP_OUTPUT_FORMAT_MIME = "application/x-votable+xml"
 
 # TAP Upload
 TAP_UPLOAD_ID = "ivo://ivoa.net/std/DALI#upload"
-
-# VOResource subject keyword used on all records produced by this registry
-VO_SUBJECT = ["virtual observatory"]
 
 OAI_ERRORS: dict[str, str] = {
     "badArgument": (

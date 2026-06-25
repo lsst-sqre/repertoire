@@ -114,6 +114,25 @@ class RegistryConfig(BaseModel):
         ),
     )
 
+    subjects: list[str] = Field(
+        [],
+        title="Default subject keywords",
+        description=(
+            "Subject keywords applied to all published service records."
+            " Per-record subjects are appended to this list (additive)."
+        ),
+    )
+
+    facility: list[str] = Field(
+        [],
+        title="Default facility names",
+        description=(
+            "Facility names applied to published service records that do not"
+            " specify their own facility. Per-record facility overrides this"
+            " default entirely (not additive)."
+        ),
+    )
+
 
 class SentryConfig(BaseModel):
     """Sentry configuration for Repertoire.
