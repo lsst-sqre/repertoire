@@ -194,6 +194,7 @@
             </contact>
           </curation>
           <content>
+            <subject>photometry</subject>
             <description>TAP service for Example Observatory.</description>
             <referenceURL>https://example.com/</referenceURL>
             <type>Catalog</type>
@@ -210,6 +211,10 @@
             </language>
             <outputFormat>
               <mime>application/x-votable+xml</mime>
+            </outputFormat>
+            <outputFormat>
+              <mime>application/vnd.apache.parquet</mime>
+              <alias>parquet</alias>
             </outputFormat>
             <uploadMethod ivo-id="ivo://ivoa.net/std/DALI#upload"/>
           </capability>
@@ -228,6 +233,7 @@
               <accessURL use="base">https://data.example.com/api/tap/tables</accessURL>
             </interface>
           </capability>
+          <facility>Example:Telescope</facility>
         </ri:Resource>
       </metadata>
     </record>
@@ -323,6 +329,46 @@
               <accessURL use="full">https://data.example.com/api/sia/dp1/query/availability</accessURL>
             </interface>
           </capability>
+        </ri:Resource>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com/catalogs/dp1</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogResource">
+          <title>Example Catalog (DP1)</title>
+          <identifier>ivo://example.com/catalogs/dp1</identifier>
+          <curation>
+            <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
+            <contact>
+              <name>Example Observatory</name>
+              <email>registry@example.com</email>
+            </contact>
+          </curation>
+          <content>
+            <description>DP1 catalog data accessible via the Example TAP service.</description>
+            <referenceURL>https://example.com/</referenceURL>
+            <type>Catalog</type>
+            <contentLevel>Research</contentLevel>
+            <relationship>
+              <relationshipType>IsServedBy</relationshipType>
+              <relatedResource ivo-id="ivo://example.com/tap"/>
+            </relationship>
+          </content>
+          <rights>Restricted to authorized data rights holders.</rights>
+          <capability standardID="ivo://ivoa.net/std/TAP#aux">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="base">https://data.example.com/api/tap</accessURL>
+            </interface>
+          </capability>
+          <instrument>ExampleCam</instrument>
         </ri:Resource>
       </metadata>
     </record>

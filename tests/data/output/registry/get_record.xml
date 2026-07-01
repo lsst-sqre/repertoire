@@ -24,6 +24,7 @@
             </contact>
           </curation>
           <content>
+            <subject>photometry</subject>
             <description>TAP service for Example Observatory.</description>
             <referenceURL>https://example.com/</referenceURL>
             <type>Catalog</type>
@@ -40,6 +41,10 @@
             </language>
             <outputFormat>
               <mime>application/x-votable+xml</mime>
+            </outputFormat>
+            <outputFormat>
+              <mime>application/vnd.apache.parquet</mime>
+              <alias>parquet</alias>
             </outputFormat>
             <uploadMethod ivo-id="ivo://ivoa.net/std/DALI#upload"/>
           </capability>
@@ -58,6 +63,7 @@
               <accessURL use="base">https://data.example.com/api/tap/tables</accessURL>
             </interface>
           </capability>
+          <facility>Example:Telescope</facility>
         </ri:Resource>
       </metadata>
     </record>

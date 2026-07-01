@@ -205,6 +205,22 @@ rules:
         description: "TAP service for Example Observatory."
         adqlVersion: "2.1"
         uploadSupported: true
+        additionalOutputFormats:
+          - mime: "application/vnd.apache.parquet"
+            alias:
+              - "parquet"
+        subjects:
+          - "photometry"
+        facility:
+          - "Example:Telescope"
+        datasets:
+          dp1:
+            ivoid: "ivo://example.com/catalogs/dp1"
+            title: "Example Catalog (DP1)"
+            created: "2026-04-16T00:00:00"
+            description: "DP1 catalog data accessible via the Example TAP service."
+            instrument:
+              - "ExampleCam"
   vo-cutouts:
     - type: "data"
       name: "cutout"
