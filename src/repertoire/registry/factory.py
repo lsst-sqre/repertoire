@@ -21,6 +21,7 @@ from vo_models.voresource.models import (
     Content,
     Creator,
     Curation,
+    Relationship,
     Resource,
     ResourceName,
     Rights,
@@ -28,18 +29,16 @@ from vo_models.voresource.models import (
 )
 
 from repertoire.config import RegistryConfig
-from repertoire.registry.constants import (
-    TAP_OUTPUT_FORMAT_MIME,
-    TAP_UPLOAD_ID,
-    VO_SUBJECT,
-)
+from repertoire.registry.constants import TAP_OUTPUT_FORMAT_MIME, TAP_UPLOAD_ID
 from repertoire.registry.models import (
+    CatalogResource,
     GroupMembershipService,
     PlainService,
     RegistryOrganisation,
     SimpleImageAccess,
     SODAAsync,
     SODASync,
+    TapAux,
     TypedService,
     VOSIAvailability,
     VOSICapabilities,
@@ -51,9 +50,12 @@ from rubin.repertoire import (
     DataService,
     Discovery,
     GmsRegistryEntry,
+    IvoaContentLevel,
+    IvoaContentType,
     IvoaStandardId,
     SiaDatasetRegistryEntry,
     SodaRegistryEntry,
+    TapDatasetEntry,
     TapRegistryEntry,
 )
 
@@ -118,9 +120,10 @@ class ResourceRecordFactory:
             identifier=self._registry_config.ivoid,
             curation=self._curation,
             content=Content(
-                subject=VO_SUBJECT,
+                subject=[IvoaContentType.REGISTRY],
                 description=self._registry_config.organisation.description,
                 reference_url=self._registry_config.organisation.homepage,
+                type=[IvoaContentType.REGISTRY],
             ),
             capability=[
                 Harvest(
@@ -191,6 +194,11 @@ class ResourceRecordFactory:
             role="std",
         )
 
+    @staticmethod
+    def _resource_names(values: list[str]) -> list[ResourceName]:
+        """Convert a list of strings to ResourceName objects."""
+        return [ResourceName(value=v) for v in values]
+
     def _create_authority(self) -> Authority:
         """Create the IVOA authority record for this publishing registry.
 
@@ -203,11 +211,11 @@ class ResourceRecordFactory:
             created=self._registry_config.created,
             updated=self._startup_timestamp,
             status="active",
-            title=self._registry_config.repository_name,
+            title=self._registry_config.organisation.title,
             identifier=self._registry_config.authority,
             curation=self._curation,
             content=Content(
-                subject=VO_SUBJECT,
+                subject=[],
                 description=self._registry_config.organisation.description,
                 reference_url=self._registry_config.organisation.homepage,
             ),
@@ -232,9 +240,10 @@ class ResourceRecordFactory:
             identifier=self._registry_config.organisation.ivoid,
             curation=self._curation,
             content=Content(
-                subject=VO_SUBJECT,
+                subject=[],
                 description=self._registry_config.organisation.description,
                 reference_url=self._registry_config.organisation.homepage,
+                type=[IvoaContentType.ORGANISATION],
             ),
         )
 
@@ -267,12 +276,15 @@ class ResourceRecordFactory:
             identifier=registry.ivoid,
             curation=self._curation,
             content=Content(
-                subject=VO_SUBJECT,
+                subject=self._registry_config.subjects + registry.subjects,
                 description=registry.description,
                 reference_url=(
                     registry.docs_url
                     or self._registry_config.organisation.homepage
                 ),
+            ),
+            facility=self._resource_names(
+                registry.facility or self._registry_config.facility
             ),
             rights=[
                 Rights(
@@ -313,12 +325,17 @@ class ResourceRecordFactory:
             identifier=registry.ivoid,
             curation=self._curation,
             content=Content(
-                subject=VO_SUBJECT,
+                subject=self._registry_config.subjects + registry.subjects,
                 description=registry.description,
                 reference_url=(
                     registry.docs_url
                     or self._registry_config.organisation.homepage
                 ),
+                type=[IvoaContentType.CATALOG],
+                content_level=[IvoaContentLevel.RESEARCH],
+            ),
+            facility=self._resource_names(
+                registry.facility or self._registry_config.facility
             ),
             rights=[
                 Rights(
@@ -336,7 +353,13 @@ class ResourceRecordFactory:
                             language_features=None,
                         )
                     ],
-                    output_format=[OutputFormat(mime=TAP_OUTPUT_FORMAT_MIME)],
+                    output_format=[
+                        OutputFormat(mime=TAP_OUTPUT_FORMAT_MIME),
+                        *(
+                            OutputFormat(mime=f.mime, alias=f.alias)
+                            for f in registry.additional_output_formats
+                        ),
+                    ],
                     upload_method=(
                         [UploadMethod(ivo_id=TAP_UPLOAD_ID)]
                         if registry.upload_supported
@@ -406,6 +429,30 @@ class ResourceRecordFactory:
             interface = self._create_interface(sync_version.url)
             capabilities.append(SODASync(interface=[interface]))
 
+        base = str(service.url).rstrip("/")
+        capabilities += [
+            VOSICapabilities(
+                interface=[
+                    self._create_interface(
+                        TypeAdapter(AnyUrl).validate_python(
+                            f"{base}/capabilities"
+                        ),
+                        use="full",
+                    )
+                ]
+            ),
+            VOSIAvailability(
+                interface=[
+                    self._create_interface(
+                        TypeAdapter(AnyUrl).validate_python(
+                            f"{base}/availability"
+                        ),
+                        use="full",
+                    )
+                ]
+            ),
+        ]
+
         return TypedService(
             created=registry.created,
             updated=self._startup_timestamp,
@@ -414,12 +461,17 @@ class ResourceRecordFactory:
             identifier=registry.ivoid,
             curation=self._curation,
             content=Content(
-                subject=VO_SUBJECT,
+                subject=self._registry_config.subjects + registry.subjects,
                 description=registry.description,
                 reference_url=(
                     registry.docs_url
                     or self._registry_config.organisation.homepage
                 ),
+                type=[IvoaContentType.ARCHIVE],
+                content_level=[IvoaContentLevel.RESEARCH],
+            ),
+            facility=self._resource_names(
+                registry.facility or self._registry_config.facility
             ),
             rights=[
                 Rights(
@@ -451,6 +503,7 @@ class ResourceRecordFactory:
             A Service record with an SIA capability for this dataset.
         """
         interface = self._create_interface(api_version.url)
+        base = str(api_version.url).rstrip("/")
         return TypedService(
             created=registry.created,
             updated=self._startup_timestamp,
@@ -459,12 +512,17 @@ class ResourceRecordFactory:
             identifier=registry.ivoid,
             curation=self._curation,
             content=Content(
-                subject=VO_SUBJECT,
+                subject=self._registry_config.subjects + registry.subjects,
                 description=registry.description,
                 reference_url=(
                     registry.docs_url
                     or self._registry_config.organisation.homepage
                 ),
+                type=[IvoaContentType.SURVEY],
+                content_level=[IvoaContentLevel.RESEARCH],
+            ),
+            facility=self._resource_names(
+                registry.facility or self._registry_config.facility
             ),
             rights=[
                 Rights(
@@ -472,7 +530,92 @@ class ResourceRecordFactory:
                     rights_uri=self._registry_config.rights_uri,
                 )
             ],
-            capability=[SimpleImageAccess(interface=[interface])],
+            capability=[
+                SimpleImageAccess(interface=[interface]),
+                VOSICapabilities(
+                    interface=[
+                        self._create_interface(
+                            TypeAdapter(AnyUrl).validate_python(
+                                f"{base}/capabilities"
+                            ),
+                            use="full",
+                        )
+                    ]
+                ),
+                VOSIAvailability(
+                    interface=[
+                        self._create_interface(
+                            TypeAdapter(AnyUrl).validate_python(
+                                f"{base}/availability"
+                            ),
+                            use="full",
+                        )
+                    ]
+                ),
+            ],
+        )
+
+    def _create_tap_catalog_resource(
+        self,
+        service: DataService,
+        tap_registry: TapRegistryEntry,
+        entry: TapDatasetEntry,
+    ) -> CatalogResource:
+        """Create a TAPRegExt catalog resource record for a TAP endpoint.
+
+        Parameters
+        ----------
+        service
+            The discovered service corresponding to this registry record.
+        tap_registry
+            The registry entry containing the TAP-specific fields.
+        entry
+            The base registry entry containing the IVOID, title, datestamps,
+            and description for the catalog resource.
+
+        Returns
+        -------
+        CatalogResource
+            A CatalogResource record.
+        """
+        return CatalogResource(
+            created=entry.created,
+            updated=self._startup_timestamp,
+            status="active",
+            title=entry.title,
+            identifier=entry.ivoid,
+            curation=self._curation,
+            content=Content(
+                subject=self._registry_config.subjects + entry.subjects,
+                description=entry.description,
+                reference_url=(
+                    entry.docs_url
+                    or self._registry_config.organisation.homepage
+                ),
+                type=[IvoaContentType.CATALOG],
+                content_level=[IvoaContentLevel.RESEARCH],
+                relationship=[
+                    Relationship(
+                        relationship_type="IsServedBy",
+                        related_resource=[
+                            ResourceName(ivo_id=str(tap_registry.ivoid))
+                        ],
+                    )
+                ],
+            ),
+            facility=self._resource_names(
+                entry.facility or self._registry_config.facility
+            ),
+            instrument=self._resource_names(entry.instrument),
+            rights=[
+                Rights(
+                    value=self._registry_config.rights,
+                    rights_uri=self._registry_config.rights_uri,
+                )
+            ],
+            capability=[
+                TapAux(interface=[self._create_interface(service.url)])
+            ],
         )
 
     def _add_service_record(
@@ -524,6 +667,34 @@ class ResourceRecordFactory:
                 ivoid=ivoid,
             )
 
+    def _add_tap_catalog_resource(
+        self,
+        records: dict[str, Resource],
+        dataset: str,
+        service: DataService,
+        tap_registry: TapRegistryEntry,
+    ) -> None:
+        """Add a CatalogResource record for a TAP dataset entry."""
+        entry = tap_registry.datasets.get(dataset)
+        if entry is None:
+            return
+        ivoid = str(entry.ivoid)
+        if ivoid in records:
+            self._logger.debug(
+                "Skipping duplicate TAP CatalogResource record",
+                dataset=dataset,
+                ivoid=ivoid,
+            )
+            return
+        records[ivoid] = self._create_tap_catalog_resource(
+            service, tap_registry, entry
+        )
+        self._logger.debug(
+            "Created TAP CatalogResource record for discovered service",
+            dataset=dataset,
+            ivoid=ivoid,
+        )
+
     def create_all(self) -> RecordStore:
         """Create all VOResource records and return them as a RecordStore.
 
@@ -546,5 +717,9 @@ class ResourceRecordFactory:
         for dataset, dataset_info in self._discovery.datasets.items():
             for name, service in dataset_info.services.items():
                 self._add_service_record(records, dataset, name, service)
+                if isinstance(service.ivoa_registry, TapRegistryEntry):
+                    self._add_tap_catalog_resource(
+                        records, dataset, service, service.ivoa_registry
+                    )
 
         return RecordStore(records=records)

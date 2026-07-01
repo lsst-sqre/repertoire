@@ -8,6 +8,7 @@ from vo_models.tapregext.models import TableAccess
 from vo_models.voresource.models import (
     Capability,
     Organisation,
+    ResourceName,
     Rights,
     Service,
 )
@@ -38,6 +39,16 @@ class SimpleImageAccess(Capability, tag="capability"):
     standard_id: AnyUrl | None = attr(
         name="standardID",
         default=IvoaStandardId.SIA_QUERY_2,
+    )
+    type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
+
+
+class TapAux(Capability, tag="capability"):
+    """Capability for a TAP auxiliary endpoint."""
+
+    standard_id: AnyUrl | None = attr(
+        name="standardID",
+        default=IvoaStandardId.TAP_AUX,
     )
     type: str | None = attr(name="type", default=None, ns="xsi", exclude=True)
 
@@ -101,6 +112,12 @@ class PlainService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     """
 
     type: Literal["vr:Service"] = attr(ns="xsi", default="vr:Service")
+    facility: list[ResourceName] = element(
+        tag="facility", ns="", default_factory=list
+    )
+    instrument: list[ResourceName] = element(
+        tag="instrument", ns="", default_factory=list
+    )
     rights: list[Rights] | None = element(
         tag="rights", ns="", default_factory=list
     )
@@ -120,6 +137,12 @@ class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     type: Literal["vs:CatalogService"] = attr(
         ns="xsi", default="vs:CatalogService"
     )
+    facility: list[ResourceName] = element(
+        tag="facility", ns="", default_factory=list
+    )
+    instrument: list[ResourceName] = element(
+        tag="instrument", ns="", default_factory=list
+    )
     rights: list[Rights] | None = element(
         tag="rights", ns="", default_factory=list
     )
@@ -136,6 +159,28 @@ class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
         ]
         | None
     ) = element(tag="capability", default_factory=list)
+
+
+class CatalogResource(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
+    """Resource serialized as:
+    ``<ri:Resource xsi:type="vs:CatalogResource">``.
+    """
+
+    type: Literal["vs:CatalogResource"] = attr(
+        ns="xsi", default="vs:CatalogResource"
+    )
+    facility: list[ResourceName] = element(
+        tag="facility", ns="", default_factory=list
+    )
+    instrument: list[ResourceName] = element(
+        tag="instrument", ns="", default_factory=list
+    )
+    rights: list[Rights] | None = element(
+        tag="rights", ns="", default_factory=list
+    )
+    capability: list[TapAux | Capability] | None = element(
+        tag="capability", default_factory=list
+    )
 
 
 class RegistryOrganisation(

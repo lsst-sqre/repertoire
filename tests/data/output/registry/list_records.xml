@@ -24,9 +24,10 @@
             </contact>
           </curation>
           <content>
-            <subject>virtual observatory</subject>
+            <subject>Registry</subject>
             <description>Example Observatory for testing.</description>
             <referenceURL>https://example.com/</referenceURL>
+            <type>Registry</type>
           </content>
           <capability standardID="ivo://ivoa.net/std/Registry" xsi:type="vg:Harvest">
             <interface role="std" xsi:type="vg:OAIHTTP">
@@ -46,7 +47,7 @@
       </header>
       <metadata>
         <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vg="http://www.ivoa.net/xml/VORegistry/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vg:Authority">
-          <title>Example Publishing Registry</title>
+          <title>Example Observatory</title>
           <identifier>ivo://example.com</identifier>
           <curation>
             <publisher>Example Observatory</publisher>
@@ -59,7 +60,6 @@
             </contact>
           </curation>
           <content>
-            <subject>virtual observatory</subject>
             <description>Example Observatory for testing.</description>
             <referenceURL>https://example.com/</referenceURL>
           </content>
@@ -88,9 +88,9 @@
             </contact>
           </curation>
           <content>
-            <subject>virtual observatory</subject>
             <description>Example Observatory for testing.</description>
             <referenceURL>https://example.com/</referenceURL>
+            <type>Organisation</type>
           </content>
         </ri:Resource>
       </metadata>
@@ -116,7 +116,6 @@
             </contact>
           </curation>
           <content>
-            <subject>virtual observatory</subject>
             <description>Group Membership Service for Example Observatory.</description>
             <referenceURL>https://example.com/</referenceURL>
           </content>
@@ -150,14 +149,25 @@
             </contact>
           </curation>
           <content>
-            <subject>virtual observatory</subject>
             <description>SIA image access service for the DP02 dataset.</description>
             <referenceURL>https://example.com/</referenceURL>
+            <type>Survey</type>
+            <contentLevel>Research</contentLevel>
           </content>
           <rights>Restricted to authorized data rights holders.</rights>
           <capability standardID="ivo://ivoa.net/std/SIA#query-2.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/sia/dp02/query</accessURL>
+            </interface>
+          </capability>
+          <capability standardID="ivo://ivoa.net/std/VOSI#capabilities">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="full">https://data.example.com/api/sia/dp02/query/capabilities</accessURL>
+            </interface>
+          </capability>
+          <capability standardID="ivo://ivoa.net/std/VOSI#availability">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="full">https://data.example.com/api/sia/dp02/query/availability</accessURL>
             </interface>
           </capability>
         </ri:Resource>
@@ -184,9 +194,11 @@
             </contact>
           </curation>
           <content>
-            <subject>virtual observatory</subject>
+            <subject>photometry</subject>
             <description>TAP service for Example Observatory.</description>
             <referenceURL>https://example.com/</referenceURL>
+            <type>Catalog</type>
+            <contentLevel>Research</contentLevel>
           </content>
           <rights>Restricted to authorized data rights holders.</rights>
           <capability xmlns:vm="http://www.ivoa.net/xml/VOMetadata/v0.1" xmlns:tr="http://www.ivoa.net/xml/TAPRegExt/v1.0" standardID="ivo://ivoa.net/std/TAP" xsi:type="tr:TableAccess">
@@ -199,6 +211,10 @@
             </language>
             <outputFormat>
               <mime>application/x-votable+xml</mime>
+            </outputFormat>
+            <outputFormat>
+              <mime>application/vnd.apache.parquet</mime>
+              <alias>parquet</alias>
             </outputFormat>
             <uploadMethod ivo-id="ivo://ivoa.net/std/DALI#upload"/>
           </capability>
@@ -217,6 +233,7 @@
               <accessURL use="base">https://data.example.com/api/tap/tables</accessURL>
             </interface>
           </capability>
+          <facility>Example:Telescope</facility>
         </ri:Resource>
       </metadata>
     </record>
@@ -241,9 +258,10 @@
             </contact>
           </curation>
           <content>
-            <subject>virtual observatory</subject>
             <description>SODA image cutout service for Example Observatory.</description>
             <referenceURL>https://example.com/</referenceURL>
+            <type>Archive</type>
+            <contentLevel>Research</contentLevel>
           </content>
           <rights>Restricted to authorized data rights holders.</rights>
           <capability standardID="ivo://ivoa.net/std/SODA#async-1.0">
@@ -254,6 +272,16 @@
           <capability standardID="ivo://ivoa.net/std/SODA#sync-1.0">
             <interface role="std" xsi:type="vs:ParamHTTP">
               <accessURL use="base">https://data.example.com/api/cutout/sync</accessURL>
+            </interface>
+          </capability>
+          <capability standardID="ivo://ivoa.net/std/VOSI#capabilities">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="full">https://data.example.com/api/cutout/capabilities</accessURL>
+            </interface>
+          </capability>
+          <capability standardID="ivo://ivoa.net/std/VOSI#availability">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="full">https://data.example.com/api/cutout/availability</accessURL>
             </interface>
           </capability>
         </ri:Resource>
@@ -280,9 +308,10 @@
             </contact>
           </curation>
           <content>
-            <subject>virtual observatory</subject>
             <description>SIA image access service for the DP1 dataset.</description>
             <referenceURL>https://example.com/</referenceURL>
+            <type>Survey</type>
+            <contentLevel>Research</contentLevel>
           </content>
           <rights>Restricted to authorized data rights holders.</rights>
           <capability standardID="ivo://ivoa.net/std/SIA#query-2.0">
@@ -290,6 +319,56 @@
               <accessURL use="base">https://data.example.com/api/sia/dp1/query</accessURL>
             </interface>
           </capability>
+          <capability standardID="ivo://ivoa.net/std/VOSI#capabilities">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="full">https://data.example.com/api/sia/dp1/query/capabilities</accessURL>
+            </interface>
+          </capability>
+          <capability standardID="ivo://ivoa.net/std/VOSI#availability">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="full">https://data.example.com/api/sia/dp1/query/availability</accessURL>
+            </interface>
+          </capability>
+        </ri:Resource>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com/catalogs/dp1</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogResource">
+          <title>Example Catalog (DP1)</title>
+          <identifier>ivo://example.com/catalogs/dp1</identifier>
+          <curation>
+            <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
+            <contact>
+              <name>Example Observatory</name>
+              <email>registry@example.com</email>
+            </contact>
+          </curation>
+          <content>
+            <description>DP1 catalog data accessible via the Example TAP service.</description>
+            <referenceURL>https://example.com/</referenceURL>
+            <type>Catalog</type>
+            <contentLevel>Research</contentLevel>
+            <relationship>
+              <relationshipType>IsServedBy</relationshipType>
+              <relatedResource ivo-id="ivo://example.com/tap"/>
+            </relationship>
+          </content>
+          <rights>Restricted to authorized data rights holders.</rights>
+          <capability standardID="ivo://ivoa.net/std/TAP#aux">
+            <interface role="std" xsi:type="vs:ParamHTTP">
+              <accessURL use="base">https://data.example.com/api/tap</accessURL>
+            </interface>
+          </capability>
+          <instrument>ExampleCam</instrument>
         </ri:Resource>
       </metadata>
     </record>

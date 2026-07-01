@@ -316,5 +316,57 @@ async def test_list_identifiers_excludes_unregistered_services(
         "ivo://example.com/cutout",
         "ivo://example.com/sia/dp02",
         "ivo://example.com/sia/dp1",
+        "ivo://example.com/catalogs/dp1",
     ):
         assert ivoid in r.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app", ["registry"], indirect=True)
+async def test_catalog_resource_record(client: AsyncClient) -> None:
+    r = await client.get(
+        "/api/registry"
+        "?verb=GetRecord"
+        "&metadataPrefix=ivo_vor"
+        "&identifier=ivo://example.com/catalogs/dp1"
+    )
+    assert r.status_code == 200
+    xml = r.text
+    assert 'xsi:type="vs:CatalogResource"' in xml
+    assert "<type>Catalog</type>" in xml
+    assert "<contentLevel>Research</contentLevel>" in xml
+    assert 'standardID="ivo://ivoa.net/std/TAP#aux"' in xml, (
+        "TAP#aux capability must be present"
+    )
+    assert 'ivo-id="ivo://example.com/tap"' in xml, (
+        "IsServedBy relationship to TAP service must be present"
+    )
+    assert "<instrument>ExampleCam</instrument>" in xml
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app", ["registry"], indirect=True)
+async def test_tap_additional_output_formats(client: AsyncClient) -> None:
+    r = await client.get(
+        "/api/registry"
+        "?verb=GetRecord"
+        "&metadataPrefix=ivo_vor"
+        "&identifier=ivo://example.com/tap"
+    )
+    assert r.status_code == 200
+    assert "application/vnd.apache.parquet" in r.text
+    assert "<alias>parquet</alias>" in r.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app", ["registry"], indirect=True)
+async def test_tap_subjects_and_facility(client: AsyncClient) -> None:
+    r = await client.get(
+        "/api/registry"
+        "?verb=GetRecord"
+        "&metadataPrefix=ivo_vor"
+        "&identifier=ivo://example.com/tap"
+    )
+    assert r.status_code == 200
+    assert "<subject>photometry</subject>" in r.text
+    assert "<facility>Example:Telescope</facility>" in r.text
