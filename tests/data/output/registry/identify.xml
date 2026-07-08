@@ -25,9 +25,10 @@
           </contact>
         </curation>
         <content>
-          <subject>virtual observatory</subject>
+          <subject>Registry</subject>
           <description>Example Observatory for testing.</description>
           <referenceURL>https://example.com/</referenceURL>
+          <type>Registry</type>
         </content>
         <capability standardID="ivo://ivoa.net/std/Registry" xsi:type="vg:Harvest">
           <interface role="std" xsi:type="vg:OAIHTTP">

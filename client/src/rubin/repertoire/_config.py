@@ -30,6 +30,8 @@ __all__ = [
     "HipsLegacyConfig",
     "InfluxDatabaseConfig",
     "InternalServiceRule",
+    "IvoaContentLevel",
+    "IvoaContentType",
     "IvoaStandardId",
     "MultiRecordRegistryEntry",
     "RegistryEntry",
@@ -37,6 +39,8 @@ __all__ = [
     "Rule",
     "SiaRegistryEntry",
     "SodaRegistryEntry",
+    "TapDatasetEntry",
+    "TapOutputFormatConfig",
     "TapRegistryEntry",
     "UiServiceRule",
     "VersionedServiceRule",
@@ -259,6 +263,31 @@ class IvoaStandardId(StrEnum):
     VOSI_AVAILABILITY = "ivo://ivoa.net/std/VOSI#availability"
     VOSI_CAPABILITIES = "ivo://ivoa.net/std/VOSI#capabilities"
     VOSI_TABLES = "ivo://ivoa.net/std/VOSI#tables"
+    TAP_AUX = "ivo://ivoa.net/std/TAP#aux"
+
+
+class IvoaContentType(StrEnum):
+    """IVOA controlled vocabulary for the resource content type element.
+
+    Values are from http://www.ivoa.net/rdf/voresource/content_type.
+    """
+
+    ARCHIVE = "Archive"
+    CATALOG = "Catalog"
+    ORGANISATION = "Organisation"
+    REGISTRY = "Registry"
+    SURVEY = "Survey"
+
+
+class IvoaContentLevel(StrEnum):
+    """IVOA controlled vocabulary for the resource content level element.
+
+    Values are from http://www.ivoa.net/rdf/voresource/content_level.
+    """
+
+    AMATEUR = "Amateur"
+    EDUCATION = "Education"
+    RESEARCH = "Research"
 
 
 class ApiVersionRule(BaseModel):
@@ -373,6 +402,36 @@ class BaseRegistryEntry(BaseModel):
         ),
     ] = None
 
+    subjects: Annotated[
+        list[str],
+        Field(
+            title="Subject keywords",
+            description=(
+                "Subject keywords for this record. These are appended to any"
+                " global default subjects configured on the registry."
+            ),
+        ),
+    ] = []
+
+    facilities: Annotated[
+        list[str],
+        Field(
+            title="Facility names",
+            description=(
+                "Observatory or facility names for this record. When set,"
+                " this overrides the global facility default."
+            ),
+        ),
+    ] = []
+
+    instruments: Annotated[
+        list[str],
+        Field(
+            title="Instrument names",
+            description="Instrument names associated with this record.",
+        ),
+    ] = []
+
 
 class GmsRegistryEntry(BaseRegistryEntry):
     """IVOA registry entry for GMS (Group Membership Service)."""
@@ -384,6 +443,32 @@ class SodaRegistryEntry(BaseRegistryEntry):
     """IVOA registry entry for a SODA image cutout service."""
 
     ivoa_service_type: Literal["soda"]
+
+
+class TapOutputFormatConfig(BaseModel):
+    """TAP output format."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    mime: Annotated[str, Field(title="MIME type")]
+
+    alias: Annotated[
+        list[str],
+        Field(
+            title="Aliases",
+            description="Alternative FORMAT values for this MIME type.",
+        ),
+    ] = []
+
+
+class TapDatasetEntry(BaseRegistryEntry):
+    """IVOA registry entry for a dataset published via a TAP service.
+
+    This is used for per-dataset ``vs:CatalogResource`` records that link
+    back to the TAP service that serves it.
+    """
 
 
 class TapRegistryEntry(BaseRegistryEntry):
@@ -409,6 +494,39 @@ class TapRegistryEntry(BaseRegistryEntry):
             description="Whether the TAP service supports table uploads",
         ),
     ] = True
+
+    additional_output_formats: Annotated[
+        list[TapOutputFormatConfig],
+        Field(
+            title="Additional output formats",
+            description=(
+                "Additional output formats supported by this TAP service,"
+                " beyond VOTable XML. Used to advertise formats such as"
+                " VOParquet."
+            ),
+        ),
+    ] = []
+
+    datasets: Annotated[
+        dict[str, TapDatasetEntry],
+        Field(
+            title="Per-dataset registry entries",
+            description=(
+                "Mapping of dataset names to catalog resource entries."
+                " Each entry is published as a vs:CatalogResource record."
+            ),
+        ),
+    ] = {}
+
+    @model_validator(mode="after")
+    def _validate_dataset_ivoids(self) -> Self:
+        for name, entry in self.datasets.items():
+            if entry.ivoid == self.ivoid:
+                raise ValueError(
+                    f"Dataset '{name}' has the same IVOID as the TAP"
+                    f" service itself ({self.ivoid})"
+                )
+        return self
 
 
 type RegistryEntry = Annotated[
