@@ -284,7 +284,7 @@ class ResourceRecordFactory:
                 ),
             ),
             facility=self._resource_names(
-                registry.facility or self._registry_config.facility
+                registry.facilities or self._registry_config.facilities
             ),
             rights=[
                 Rights(
@@ -335,7 +335,7 @@ class ResourceRecordFactory:
                 content_level=[IvoaContentLevel.RESEARCH],
             ),
             facility=self._resource_names(
-                registry.facility or self._registry_config.facility
+                registry.facilities or self._registry_config.facilities
             ),
             rights=[
                 Rights(
@@ -471,7 +471,7 @@ class ResourceRecordFactory:
                 content_level=[IvoaContentLevel.RESEARCH],
             ),
             facility=self._resource_names(
-                registry.facility or self._registry_config.facility
+                registry.facilities or self._registry_config.facilities
             ),
             rights=[
                 Rights(
@@ -522,7 +522,7 @@ class ResourceRecordFactory:
                 content_level=[IvoaContentLevel.RESEARCH],
             ),
             facility=self._resource_names(
-                registry.facility or self._registry_config.facility
+                registry.facilities or self._registry_config.facilities
             ),
             rights=[
                 Rights(
@@ -604,9 +604,9 @@ class ResourceRecordFactory:
                 ],
             ),
             facility=self._resource_names(
-                entry.facility or self._registry_config.facility
+                entry.facilities or self._registry_config.facilities
             ),
-            instrument=self._resource_names(entry.instrument),
+            instrument=self._resource_names(entry.instruments),
             rights=[
                 Rights(
                     value=self._registry_config.rights,

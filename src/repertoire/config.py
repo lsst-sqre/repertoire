@@ -123,12 +123,12 @@ class RegistryConfig(BaseModel):
         ),
     )
 
-    facility: list[str] = Field(
+    facilities: list[str] = Field(
         [],
         title="Default facility names",
         description=(
             "Facility names applied to published service records that do not"
-            " specify their own facility. Per-record facility overrides this"
+            " specify their own facility. Per-record facilities overrides this"
             " default entirely (not additive)."
         ),
     )

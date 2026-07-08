@@ -211,7 +211,7 @@ rules:
               - "parquet"
         subjects:
           - "photometry"
-        facility:
+        facilities:
           - "Example:Telescope"
         datasets:
           dp1:
@@ -219,7 +219,7 @@ rules:
             title: "Example Catalog (DP1)"
             created: "2026-04-16T00:00:00"
             description: "DP1 catalog data accessible via the Example TAP service."
-            instrument:
+            instruments:
               - "ExampleCam"
   vo-cutouts:
     - type: "data"

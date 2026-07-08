@@ -413,7 +413,7 @@ class BaseRegistryEntry(BaseModel):
         ),
     ] = []
 
-    facility: Annotated[
+    facilities: Annotated[
         list[str],
         Field(
             title="Facility names",
@@ -424,7 +424,7 @@ class BaseRegistryEntry(BaseModel):
         ),
     ] = []
 
-    instrument: Annotated[
+    instruments: Annotated[
         list[str],
         Field(
             title="Instrument names",
