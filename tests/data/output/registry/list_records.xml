@@ -244,7 +244,7 @@
         <setSpec>ivo_managed</setSpec>
       </header>
       <metadata>
-        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:CatalogService">
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:DataService">
           <title>Example SODA Cutout Service</title>
           <identifier>ivo://example.com/cutout</identifier>
           <curation>
@@ -369,6 +369,36 @@
             </interface>
           </capability>
           <instrument>ExampleCam</instrument>
+        </ri:Resource>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>ivo://example.com/dp1/datasets</identifier>
+        <datestamp>1970-01-01T00:00:00Z</datestamp>
+        <setSpec>ivo_managed</setSpec>
+      </header>
+      <metadata>
+        <ri:Resource xmlns="" xmlns:vr="http://www.ivoa.net/xml/VOResource/v1.0" xmlns:vs="http://www.ivoa.net/xml/VODataService/v1.1" xmlns:ri="http://www.ivoa.net/xml/RegistryInterface/v1.0" created="2026-04-16T00:00:00.000Z" updated="1970-01-01T00:00:00.000Z" status="active" xsi:type="vs:DataResource">
+          <title>Example Dataset (DP1)</title>
+          <identifier>ivo://example.com/dp1/datasets</identifier>
+          <curation>
+            <publisher>Example Observatory</publisher>
+            <creator>
+              <name>Example Observatory</name>
+            </creator>
+            <contact>
+              <name>Example Observatory</name>
+              <email>registry@example.com</email>
+            </contact>
+          </curation>
+          <content>
+            <description>DP1 dataset collection.</description>
+            <referenceURL>https://example.com/</referenceURL>
+            <type>Archive</type>
+            <contentLevel>Research</contentLevel>
+          </content>
+          <rights>Restricted to authorized data rights holders.</rights>
         </ri:Resource>
       </metadata>
     </record>

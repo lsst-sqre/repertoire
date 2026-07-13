@@ -161,6 +161,27 @@ class TypedService(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     ) = element(tag="capability", default_factory=list)
 
 
+class DataResource(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
+    """Resource serialized as ``<ri:Resource xsi:type="vs:DataResource">``.
+
+    Used for dataset collection records that serve as the resolvable target
+    for per-object IVOIDs (Butler datasets, HiPS surveys).
+    """
+
+    type: Literal["vs:DataResource"] = attr(
+        ns="xsi", default="vs:DataResource"
+    )
+    facility: list[ResourceName] = element(
+        tag="facility", ns="", default_factory=list
+    )
+    instrument: list[ResourceName] = element(
+        tag="instrument", ns="", default_factory=list
+    )
+    rights: list[Rights] | None = element(
+        tag="rights", ns="", default_factory=list
+    )
+
+
 class CatalogResource(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     """Resource serialized as:
     ``<ri:Resource xsi:type="vs:CatalogResource">``.
@@ -181,6 +202,35 @@ class CatalogResource(Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"):
     capability: list[TapAux | Capability] | None = element(
         tag="capability", default_factory=list
     )
+
+
+class TypedDataService(
+    Service, tag="Resource", nsmap=_RESOURCE_NSMAP, ns="ri"
+):
+    """DataService serialized as:
+    ``<ri:Resource xsi:type="vs:DataService">``.
+    """
+
+    type: Literal["vs:DataService"] = attr(ns="xsi", default="vs:DataService")
+    facility: list[ResourceName] = element(
+        tag="facility", ns="", default_factory=list
+    )
+    instrument: list[ResourceName] = element(
+        tag="instrument", ns="", default_factory=list
+    )
+    rights: list[Rights] | None = element(
+        tag="rights", ns="", default_factory=list
+    )
+    capability: (
+        list[
+            SODASync
+            | SODAAsync
+            | VOSICapabilities
+            | VOSIAvailability
+            | Capability
+        ]
+        | None
+    ) = element(tag="capability", default_factory=list)
 
 
 class RegistryOrganisation(

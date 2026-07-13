@@ -22,7 +22,7 @@ from safir.logging import (
 )
 from safir.metrics import MetricsConfiguration, metrics_configuration_factory
 
-from rubin.repertoire import RepertoireSettings
+from rubin.repertoire import BaseRegistryEntry, RepertoireSettings
 
 __all__ = ["Config"]
 
@@ -130,6 +130,17 @@ class RegistryConfig(BaseModel):
             "Facility names applied to published service records that do not"
             " specify their own facility. Per-record facilities overrides this"
             " default entirely (not additive)."
+        ),
+    )
+
+    dataset_records: dict[str, BaseRegistryEntry] = Field(
+        {},
+        title="Dataset collection records",
+        description=(
+            "Mapping of dataset names to ``vs:DataResource`` registry"
+            " records. Each entry is published as a release collection"
+            " record serving as the resolvable target for object-specific"
+            " IVOIDs (Butler datasets, HiPS etc)."
         ),
     )
 
