@@ -51,6 +51,7 @@ from rubin.repertoire import (
     ApiVersion,
     BaseRegistryEntry,
     DataService,
+    DatasetConfig,
     Discovery,
     GmsRegistryEntry,
     IvoaContentLevel,
@@ -94,10 +95,12 @@ class ResourceRecordFactory:
         startup_timestamp: datetime,
         oai_url: str,
         logger: BoundLogger,
+        datasets: dict[str, DatasetConfig] | None = None,
     ) -> None:
         self._registry_config = registry_config
         self._discovery = discovery
         self._startup_timestamp = startup_timestamp
+        self._datasets: dict[str, DatasetConfig] = datasets or {}
         self._oai_url: AnyUrl = TypeAdapter(AnyUrl).validate_python(oai_url)
         self._curation = self._create_curation()
         self._logger = logger
@@ -768,9 +771,12 @@ class ResourceRecordFactory:
                         records, dataset, service, service.ivoa_registry
                     )
 
-        for entry in self._registry_config.dataset_records.values():
-            ivoid = str(entry.ivoid)
-            if ivoid not in records:
-                records[ivoid] = self._create_data_resource(entry)
+        for dataset_config in self._datasets.values():
+            if dataset_config.ivoa_registry is not None:
+                ivoid = str(dataset_config.ivoa_registry.ivoid)
+                if ivoid not in records:
+                    records[ivoid] = self._create_data_resource(
+                        dataset_config.ivoa_registry
+                    )
 
         return RecordStore(records=records)

@@ -57,6 +57,11 @@ datasets:
       Commissioning Camera of seven ~1 square degree fields, over seven weeks
       in late 2024.
     docsUrl: "https://dp1.example.com/"
+    ivoaRegistry:
+      ivoid: "ivo://example.com/dp1/datasets"
+      title: "Example Dataset (DP1)"
+      created: "2026-04-16T00:00:00"
+      description: "DP1 dataset collection."
   other:
     description: >-
       Test dataset not listed in availableDatasets.
@@ -101,12 +106,6 @@ ivoaRegistry:
   ivoid: "ivo://example.com/registry"
   repositoryName: "Example Publishing Registry"
   rights: "Restricted to authorized data rights holders."
-  datasetRecords:
-    dp1:
-      ivoid: "ivo://example.com/dp1/datasets"
-      title: "Example Dataset (DP1)"
-      created: "2026-04-16T00:00:00"
-      description: "DP1 dataset collection."
   organisation:
     created: "2026-04-16T00:00:00Z"
     description: "Example Observatory for testing."
