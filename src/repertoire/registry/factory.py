@@ -32,6 +32,7 @@ from repertoire.config import RegistryConfig
 from repertoire.registry.constants import TAP_OUTPUT_FORMAT_MIME, TAP_UPLOAD_ID
 from repertoire.registry.models import (
     CatalogResource,
+    DataResource,
     GroupMembershipService,
     PlainService,
     RegistryOrganisation,
@@ -39,6 +40,7 @@ from repertoire.registry.models import (
     SODAAsync,
     SODASync,
     TapAux,
+    TypedDataService,
     TypedService,
     VOSIAvailability,
     VOSICapabilities,
@@ -47,7 +49,9 @@ from repertoire.registry.models import (
 from repertoire.registry.store import RecordStore
 from rubin.repertoire import (
     ApiVersion,
+    BaseRegistryEntry,
     DataService,
+    DatasetConfig,
     Discovery,
     GmsRegistryEntry,
     IvoaContentLevel,
@@ -91,10 +95,12 @@ class ResourceRecordFactory:
         startup_timestamp: datetime,
         oai_url: str,
         logger: BoundLogger,
+        datasets: dict[str, DatasetConfig] | None = None,
     ) -> None:
         self._registry_config = registry_config
         self._discovery = discovery
         self._startup_timestamp = startup_timestamp
+        self._datasets: dict[str, DatasetConfig] = datasets or {}
         self._oai_url: AnyUrl = TypeAdapter(AnyUrl).validate_python(oai_url)
         self._curation = self._create_curation()
         self._logger = logger
@@ -453,7 +459,7 @@ class ResourceRecordFactory:
             ),
         ]
 
-        return TypedService(
+        return TypedDataService(
             created=registry.created,
             updated=self._startup_timestamp,
             status="active",
@@ -552,6 +558,49 @@ class ResourceRecordFactory:
                         )
                     ]
                 ),
+            ],
+        )
+
+    def _create_data_resource(self, entry: BaseRegistryEntry) -> DataResource:
+        """Create a DataResource record for a dataset collection.
+
+        Parameters
+        ----------
+        entry
+            Registry entry.
+
+        Returns
+        -------
+        DataResource
+            A ``vs:DataResource`` record with no capabilities, serving as
+            the resolvable target for per-object IVOIDs.
+        """
+        return DataResource(
+            created=entry.created,
+            updated=self._startup_timestamp,
+            status="active",
+            title=entry.title,
+            identifier=entry.ivoid,
+            curation=self._curation,
+            content=Content(
+                subject=self._registry_config.subjects + entry.subjects,
+                description=entry.description,
+                reference_url=(
+                    entry.docs_url
+                    or self._registry_config.organisation.homepage
+                ),
+                type=[IvoaContentType.ARCHIVE],
+                content_level=[IvoaContentLevel.RESEARCH],
+            ),
+            facility=self._resource_names(
+                entry.facilities or self._registry_config.facilities
+            ),
+            instrument=self._resource_names(entry.instruments),
+            rights=[
+                Rights(
+                    value=self._registry_config.rights,
+                    rights_uri=self._registry_config.rights_uri,
+                )
             ],
         )
 
@@ -720,6 +769,14 @@ class ResourceRecordFactory:
                 if isinstance(service.ivoa_registry, TapRegistryEntry):
                     self._add_tap_catalog_resource(
                         records, dataset, service, service.ivoa_registry
+                    )
+
+        for dataset_config in self._datasets.values():
+            if dataset_config.ivoa_registry is not None:
+                ivoid = str(dataset_config.ivoa_registry.ivoid)
+                if ivoid not in records:
+                    records[ivoid] = self._create_data_resource(
+                        dataset_config.ivoa_registry
                     )
 
         return RecordStore(records=records)

@@ -78,6 +78,7 @@ class OaiHandlerDependency:
                 startup_timestamp=self._startup_timestamp,
                 oai_url=oai_url,
                 logger=logger,
+                datasets=config.datasets,
             ).create_all()
 
             # Initialize the handler for the first request and cache it.

@@ -370,3 +370,18 @@ async def test_tap_subjects_and_facility(client: AsyncClient) -> None:
     assert r.status_code == 200
     assert "<subject>photometry</subject>" in r.text
     assert "<facility>Example:Telescope</facility>" in r.text
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app", ["registry"], indirect=True)
+async def test_soda_resource_record(client: AsyncClient) -> None:
+    r = await client.get(
+        "/api/registry"
+        "?verb=GetRecord"
+        "&metadataPrefix=ivo_vor"
+        "&identifier=ivo://example.com/cutout"
+    )
+    assert r.status_code == 200
+    xml = r.text
+    assert 'xsi:type="vs:DataService"' in xml
+    assert "<type>Archive</type>" in xml

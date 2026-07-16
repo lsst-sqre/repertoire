@@ -47,29 +47,6 @@ __all__ = [
 ]
 
 
-class DatasetConfig(BaseModel):
-    """Metadata for an available dataset."""
-
-    model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
-    )
-
-    description: Annotated[
-        str,
-        Field(
-            title="Description", description="Long description of the dataset"
-        ),
-    ]
-
-    docs_url: Annotated[
-        HttpUrl | None,
-        Field(
-            title="Documentation URL",
-            description="URL to more detailed documentation about the dataset",
-        ),
-    ] = None
-
-
 class HipsDatasetConfig(BaseModel):
     """Configuration for a single HiPS dataset."""
 
@@ -431,6 +408,41 @@ class BaseRegistryEntry(BaseModel):
             description="Instrument names associated with this record.",
         ),
     ] = []
+
+
+class DatasetConfig(BaseModel):
+    """Metadata for an available dataset."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    description: Annotated[
+        str,
+        Field(
+            title="Description", description="Long description of the dataset"
+        ),
+    ]
+
+    docs_url: Annotated[
+        HttpUrl | None,
+        Field(
+            title="Documentation URL",
+            description="URL to more detailed documentation about the dataset",
+        ),
+    ] = None
+
+    ivoa_registry: Annotated[
+        BaseRegistryEntry | None,
+        Field(
+            title="IVOA registry entry",
+            description=(
+                "If set, publishes a ``vs:DataResource`` record for this"
+                " dataset, serving as the resolvable registry target for"
+                " Butler datasets and HiPS survey IVOIDs."
+            ),
+        ),
+    ] = None
 
 
 class GmsRegistryEntry(BaseRegistryEntry):
