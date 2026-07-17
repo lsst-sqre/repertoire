@@ -92,7 +92,7 @@ branch = true
 source = ["repertoire"]
 
 [tool.coverage.paths]
-source = ["src", ".tox/*/site-packages"]
+source = ["src"]
 
 [tool.coverage.report]
 show_missing = true
