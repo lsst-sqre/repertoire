@@ -11,6 +11,24 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-2.1.0'></a>
+## 2.1.0 (2026-07-17)
+
+### New features
+
+- Add `vs:DataResource` records to the IVOA publishing registry.
+- Add per-dataset TAP `CatalogResource` records to the IVOA publishing registry.
+- Add configurable facility and subject defaults to IVOA registry records, and per-record instrument support to `CatalogResource` records.
+- Add configurable additional TAP output formats to allow declaring VOParquet support.
+- Add VO-standard `type`, `contentLevel` and `subject` keywords to all publishing registry records.
+- Add VOSI capabilities and availability endpoints to SODA.
+
+### Bug fixes
+
+- Add the column index auto-increment flag to Felis schema creation to preserve column order for IVOA clients such as the Portal Aspect.
+- Change the `Authority` record in the IVOA publishing registry to use `organisation.title` rather than `repository_name`.
+- Change the type of the SODA service to `vs:DataService`.
+
 <a id='changelog-2.0.0'></a>
 ## 2.0.0 (2026-06-11)
 

@@ -4,7 +4,7 @@ env:
   # Current supported uv version. The uv documentation recommends pinning
   # this. The version should match the version used in .pre-commit-config.yaml
   # and frozen in uv.lock. It is updated by make update-deps.
-  UV_VERSION: "0.11.20"
+  UV_VERSION: "0.11.29"
 
 "on":
   merge_group: {}
@@ -122,9 +122,12 @@ jobs:
               && needs.changes.outputs.docs-specific == 'true')
 
   build:
+    concurrency:
+      group: packages
+      queue: max
     needs: [test]
-    uses: lsst-sqre/multiplatform-build-and-push/.github/workflows/build.yaml@v4
     secrets: inherit
+    uses: lsst-sqre/multiplatform-build-and-push/.github/workflows/build.yaml@v4
     with:
       images: ghcr.io/${{ github.repository }}
 
