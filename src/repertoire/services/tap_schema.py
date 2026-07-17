@@ -302,6 +302,7 @@ class TAPSchemaService:
                 db_context=db_ctx,
                 tap_schema_index=i,
                 unique_keys=True,
+                print_sql=True,
             )
             loader.load()
 
