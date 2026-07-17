@@ -292,6 +292,7 @@ class TAPSchemaService:
                 context={
                     "id_generation": True,
                     "force_unbounded_arraysize": True,
+                    "column_ref_index_increment": 10,
                 },
             )
 
