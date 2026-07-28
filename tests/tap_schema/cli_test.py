@@ -8,7 +8,7 @@ from click.testing import CliRunner
 from safir.testing.data import Data
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
-from testcontainers.postgres import PostgresContainer
+from testcontainers.community.postgres import PostgresContainer
 
 from repertoire.cli import main
 

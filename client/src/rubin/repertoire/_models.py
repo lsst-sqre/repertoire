@@ -185,8 +185,10 @@ class Dataset(BaseModel):
             title="Description",
             description="Long description of the dataset",
             examples=[
-                "Data Preview 1 contains the first image data from the"
-                " telescope during commissioning"
+                (
+                    "Data Preview 1 contains the first image data from the"
+                    " telescope during commissioning"
+                )
             ],
         ),
     ] = None
