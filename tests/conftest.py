@@ -16,7 +16,7 @@ from safir.testing.data import Data
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from structlog.stdlib import BoundLogger, get_logger
-from testcontainers.postgres import PostgresContainer
+from testcontainers.community.postgres import PostgresContainer
 
 from repertoire.config import Config
 from repertoire.dependencies.config import config_dependency

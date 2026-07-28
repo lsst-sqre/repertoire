@@ -90,6 +90,7 @@ class ResourceRecordFactory:
 
     def __init__(
         self,
+        *,
         registry_config: RegistryConfig,
         discovery: Discovery,
         startup_timestamp: datetime,
