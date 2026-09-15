@@ -94,6 +94,18 @@ class BaseService(BaseModel):
         ),
     ] = None
 
+    required_scopes: Annotated[
+        list[str],
+        Field(
+            title="Required scopes",
+            description=(
+                "Required scopes to access this service. If more than one is"
+                " listed, all listed scopes are required."
+            ),
+            examples=[["read:image"]],
+        ),
+    ] = []
+
 
 class ApiService(BaseService):
     """Base model for services with an API."""

@@ -56,6 +56,9 @@
         },
         "hips": {
           "docs_url": "https://www.ivoa.net/documents/HiPS/",
+          "required_scopes": [
+            "read:image"
+          ],
           "title": "HiPS (Hierarchical Progressive Survey)",
           "url": "https://example.com/api/hips/v2/dp02/list",
           "versions": {
@@ -67,6 +70,9 @@
         "sia": {
           "docs_url": "https://www.ivoa.net/documents/SIA/",
           "openapi": "https://data.example.com/api/sia/openapi.json",
+          "required_scopes": [
+            "read:image"
+          ],
           "url": "https://data.example.com/api/sia/dp02",
           "versions": {
             "v2": {
@@ -137,6 +143,9 @@
         },
         "hips": {
           "docs_url": "https://www.ivoa.net/documents/HiPS/",
+          "required_scopes": [
+            "read:image"
+          ],
           "title": "HiPS (Hierarchical Progressive Survey)",
           "url": "https://example.com/api/hips/v2/dp1/list",
           "versions": {
@@ -148,6 +157,9 @@
         "sia": {
           "docs_url": "https://www.ivoa.net/documents/SIA/",
           "openapi": "https://data.example.com/api/sia/openapi.json",
+          "required_scopes": [
+            "read:image"
+          ],
           "url": "https://data.example.com/api/sia/dp1",
           "versions": {
             "v2": {
@@ -199,6 +211,9 @@
       },
       "mobu": {
         "openapi": "https://data.example.com/mobu/openapi.json",
+        "required_scopes": [
+          "exec:admin"
+        ],
         "url": "https://data.example.com/mobu"
       },
       "noteburst": {
@@ -230,6 +245,9 @@
       },
       "portal": {
         "docs_url": "https://example.com/docs/portal",
+        "required_scopes": [
+          "exec:portal"
+        ],
         "url": "https://data.example.com/portal/app/"
       }
     }
