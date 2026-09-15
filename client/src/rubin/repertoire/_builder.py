@@ -146,6 +146,7 @@ class RepertoireBuilder:
             url=HttpUrl(Template(rule.template).render(**context)),
             title=rule.title,
             openapi=openapi,
+            docs_url=rule.docs_url,
             versions=self._build_versions_from_rules(rule.versions, dataset),
             ivoa_registry=self._build_ivoa_registry_from_rule(dataset, rule),
         )
@@ -191,6 +192,7 @@ class RepertoireBuilder:
                 services["hips"] = DataService(
                     url=hips_url,
                     title=_HIPS_TITLE,
+                    docs_url=self._config.hips.docs_url,
                     versions={
                         _HIPS_LIST_VERSION: ApiVersion(
                             url=hips_url,
@@ -338,6 +340,7 @@ class RepertoireBuilder:
             url=HttpUrl(Template(rule.template).render(**self._base_context)),
             title=rule.title,
             openapi=openapi,
+            docs_url=rule.docs_url,
             versions=self._build_versions_from_rules(rule.versions),
         )
 
@@ -357,6 +360,7 @@ class RepertoireBuilder:
         return UiService(
             url=HttpUrl(Template(rule.template).render(**self._base_context)),
             title=rule.title,
+            docs_url=rule.docs_url,
         )
 
     def _build_versions_from_rules(

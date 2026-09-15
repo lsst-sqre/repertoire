@@ -85,6 +85,15 @@ class BaseService(BaseModel):
         ),
     ] = None
 
+    docs_url: Annotated[
+        HttpUrl | None,
+        Field(
+            title="Documentation URL",
+            description="URL to service documentation",
+            examples=["https://example.org/docs/cutout"],
+        ),
+    ] = None
+
 
 class ApiService(BaseService):
     """Base model for services with an API."""

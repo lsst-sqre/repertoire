@@ -89,6 +89,7 @@ hips:
     pathPrefix: "/api/hips"
   pathPrefix: "/api/hips/v2"
   sourceTemplate: "https://{{base_hostname}}/api/hips/v2/{{dataset}}"
+  docsUrl: "https://www.ivoa.net/documents/HiPS/"
 influxdbDatabases:
   idfdev_efd:
     url: "https://data.example.com/influxdb/"
@@ -131,6 +132,7 @@ rules:
         v1:
           template: "https://{{base_hostname}}/auth/api/v1"
       openapi: "https://{{base_hostname}}/auth/openapi.json"
+      docsUrl: "https://gafaelfawr.lsst.io/"
   mobu:
     - type: "internal"
       name: "mobu"
@@ -153,6 +155,7 @@ rules:
     - type: "ui"
       name: "portal"
       template: "https://{{base_hostname}}/portal/app/"
+      docsUrl: "https://example.com/docs/portal"
   semaphore:
     - type: "internal"
       name: "semaphore"
@@ -170,6 +173,7 @@ rules:
           template: "https://{{base_hostname}}/api/sia/{{dataset}}/query"
           ivoaStandardId: "ivo://ivoa.net/std/SIA#query-2.0"
       openapi: "https://{{base_hostname}}/api/sia/openapi.json"
+      docsUrl: "https://www.ivoa.net/documents/SIA/"
       ivoaRegistry:
         ivoaServiceType: "sia"
         records:
