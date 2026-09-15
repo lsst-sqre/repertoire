@@ -222,6 +222,15 @@ class HipsConfig(BaseModel):
         ),
     ]
 
+    docs_url: Annotated[
+        HttpUrl | None,
+        Field(
+            title="Documentation URL",
+            description="URL to service documentation for HiPS",
+            examples=["https://example.org/docs/hips"],
+        ),
+    ] = None
+
 
 class InfluxDatabaseConfig(BaseModel):
     """Configuration for an InfluxDB database.
@@ -375,6 +384,15 @@ class BaseRule(BaseModel):
         Field(
             title="Short description",
             description="Short human-readable description of the service",
+        ),
+    ] = None
+
+    docs_url: Annotated[
+        HttpUrl | None,
+        Field(
+            title="Documentation URL",
+            description="URL to service documentation",
+            examples=["https://example.org/docs/cutout"],
         ),
     ] = None
 

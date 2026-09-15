@@ -55,6 +55,7 @@
           }
         },
         "hips": {
+          "docs_url": "https://www.ivoa.net/documents/HiPS/",
           "title": "HiPS (Hierarchical Progressive Survey)",
           "url": "https://example.com/api/hips/v2/dp02/list",
           "versions": {
@@ -64,6 +65,7 @@
           }
         },
         "sia": {
+          "docs_url": "https://www.ivoa.net/documents/SIA/",
           "openapi": "https://data.example.com/api/sia/openapi.json",
           "url": "https://data.example.com/api/sia/dp02",
           "versions": {
@@ -134,6 +136,7 @@
           }
         },
         "hips": {
+          "docs_url": "https://www.ivoa.net/documents/HiPS/",
           "title": "HiPS (Hierarchical Progressive Survey)",
           "url": "https://example.com/api/hips/v2/dp1/list",
           "versions": {
@@ -143,6 +146,7 @@
           }
         },
         "sia": {
+          "docs_url": "https://www.ivoa.net/documents/SIA/",
           "openapi": "https://data.example.com/api/sia/openapi.json",
           "url": "https://data.example.com/api/sia/dp1",
           "versions": {
@@ -184,6 +188,7 @@
   "services": {
     "internal": {
       "gafaelfawr": {
+        "docs_url": "https://gafaelfawr.lsst.io/",
         "openapi": "https://data.example.com/auth/openapi.json",
         "url": "https://data.example.com/auth/api",
         "versions": {
@@ -224,6 +229,7 @@
         "url": "https://nb.data.example.com/nb"
       },
       "portal": {
+        "docs_url": "https://example.com/docs/portal",
         "url": "https://data.example.com/portal/app/"
       }
     }
