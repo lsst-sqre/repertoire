@@ -22,6 +22,7 @@ from ._models import (
     DataService,
     Dataset,
     Discovery,
+    Environment,
     InfluxDatabase,
     InfluxDatabaseWithCredentials,
     InfluxDatabaseWithPointer,
@@ -75,11 +76,17 @@ class RepertoireBuilder:
         Discovery
             Service discovery information.
         """
+        environment = self._build_environment()
+        if environment:
+            environment_name: str | None = environment.name
+        else:
+            environment_name = self._config.environment_name
         return Discovery(
             applications=sorted(self._config.applications),
             datasets=self._build_datasets(hips_base_url),
+            environment=environment,
+            environment_name=environment_name,
             influxdb_databases=self._build_influxdb_databases(base_url),
-            environment_name=self._config.environment_name,
             services=self._build_services(),
         )
 
@@ -138,35 +145,6 @@ class RepertoireBuilder:
             versions=self._build_versions_from_rules(rule.versions, dataset),
             ivoa_registry=self._build_ivoa_registry_from_rule(dataset, rule),
         )
-
-    def _build_ivoa_registry_from_rule(
-        self, dataset: str, rule: DataServiceRule
-    ) -> DatasetRegistryEntry | None:
-        """Build discovered IVOA registry metadata for one data service.
-
-        Parameters
-        ----------
-        dataset
-            Name of the dataset.
-        rule
-            Generation rule for the service information.
-
-        Returns
-        -------
-        DatasetRegistryEntry or None
-            IVOA registry metadata for the service, or `None` if no such
-            metadata is available.
-        """
-        if rule.ivoa_registry is None:
-            return None
-        if isinstance(rule.ivoa_registry, SiaRegistryEntry):
-            entry = rule.ivoa_registry.records.get(dataset)
-            if entry is None:
-                return None
-            return SiaDatasetRegistryEntry.model_validate(
-                {**entry.model_dump(mode="python"), "ivoa_service_type": "sia"}
-            )
-        return rule.ivoa_registry
 
     def _build_data_services(
         self, dataset: str, hips_base_url: str | None
@@ -237,6 +215,19 @@ class RepertoireBuilder:
             )
         return results
 
+    def _build_environment(self) -> Environment | None:
+        """Construct the environment metadata."""
+        if not self._config.environment:
+            return None
+        return Environment(
+            name=self._config.environment.name,
+            label=self._config.environment.label,
+            title=self._config.environment.title,
+            title_long=self._config.environment.title_long,
+            description=self._config.environment.description,
+            docs_url=self._config.environment.docs_url,
+        )
+
     def _build_influxdb_databases(
         self, base_url: str
     ) -> dict[str, InfluxDatabaseWithPointer]:
@@ -252,6 +243,35 @@ class RepertoireBuilder:
                 local=config.local,
             )
         return result
+
+    def _build_ivoa_registry_from_rule(
+        self, dataset: str, rule: DataServiceRule
+    ) -> DatasetRegistryEntry | None:
+        """Build discovered IVOA registry metadata for one data service.
+
+        Parameters
+        ----------
+        dataset
+            Name of the dataset.
+        rule
+            Generation rule for the service information.
+
+        Returns
+        -------
+        DatasetRegistryEntry or None
+            IVOA registry metadata for the service, or `None` if no such
+            metadata is available.
+        """
+        if rule.ivoa_registry is None:
+            return None
+        if isinstance(rule.ivoa_registry, SiaRegistryEntry):
+            entry = rule.ivoa_registry.records.get(dataset)
+            if entry is None:
+                return None
+            return SiaDatasetRegistryEntry.model_validate(
+                {**entry.model_dump(mode="python"), "ivoa_service_type": "sia"}
+            )
+        return rule.ivoa_registry
 
     def _build_services(self) -> Services:
         """Construct the service URLs for an environment."""

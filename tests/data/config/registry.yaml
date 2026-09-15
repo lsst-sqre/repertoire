@@ -1,5 +1,5 @@
-# Configuration for testing the OAI-PMH publishing registry.
-# Based on phalanx.yaml with registry config and registry entries added to rules.
+# Configuration for testing the OAI-PMH publishing registry. Based on
+# phalanx.yaml with registry config and registry entries added to rules.
 
 applications:
   - "argocd"

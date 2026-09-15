@@ -47,6 +47,69 @@ __all__ = [
 ]
 
 
+class EnvironmentConfig(BaseModel):
+    """General information about the local Phalanx environment."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    name: Annotated[
+        str,
+        Field(
+            title="Name of environment",
+            description=(
+                "Human-readable name of the environment, intended for use"
+                " in status or error reporting. This may be a hostname if"
+                " that is the most descriptive name, but should not be"
+                " assumed to be a hostname or used to construct any URLs."
+            ),
+        ),
+    ]
+
+    label: Annotated[
+        str,
+        Field(
+            title="Phalanx label",
+            description="Phalanx environment name for this environment",
+        ),
+    ]
+
+    title: Annotated[
+        str,
+        Field(
+            title="Short title",
+            description="Short human-readable title of the environment",
+        ),
+    ]
+
+    title_long: Annotated[
+        str,
+        Field(
+            title="Long title",
+            description="Full human-readable title of the environment",
+        ),
+    ]
+
+    description: Annotated[
+        str,
+        Field(
+            title="Description",
+            description="Human-readable description of the environment",
+        ),
+    ]
+
+    docs_url: Annotated[
+        HttpUrl,
+        Field(
+            title="Documentation URL",
+            description=(
+                "URL to additional documentation about the environment"
+            ),
+        ),
+    ]
+
+
 class HipsDatasetConfig(BaseModel):
     """Configuration for a single HiPS dataset."""
 
@@ -793,6 +856,14 @@ class RepertoireSettings(BaseSettings):
         ),
     ] = {}
 
+    environment: Annotated[
+        EnvironmentConfig | None,
+        Field(
+            title="Enviroment metadata",
+            description="Metadata about the local environment",
+        ),
+    ] = None
+
     environment_name: Annotated[
         str | None,
         Field(
@@ -802,6 +873,8 @@ class RepertoireSettings(BaseSettings):
                 " in status or error reporting. This may be a hostname if"
                 " that is the most descriptive name, but should not be"
                 " assumed to be a hostname or used to construct any URLs."
+                " Deprecated in favor of environment.name, but used if that"
+                " setting doesn't exist."
             ),
         ),
     ] = None

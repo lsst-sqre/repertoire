@@ -13,6 +13,7 @@ __all__ = [
     "DataService",
     "Dataset",
     "Discovery",
+    "Environment",
     "InfluxDatabase",
     "InfluxDatabaseWithCredentials",
     "InternalService",
@@ -240,6 +241,71 @@ class Dataset(BaseModel):
         return result
 
 
+class Environment(BaseModel):
+    """General information about the local Phalanx environment."""
+
+    name: Annotated[
+        str,
+        Field(
+            title="Name of environment",
+            description=(
+                "Human-readable name of the environment, intended for use"
+                " in status or error reporting. This may be a hostname if"
+                " that is the most descriptive name, but should not be"
+                " assumed to be a hostname or used to construct any URLs."
+            ),
+            examples=["data.example.com"],
+        ),
+    ]
+
+    label: Annotated[
+        str,
+        Field(
+            title="Phalanx label",
+            description="Phalanx environment name for this environment",
+            examples=["summit"],
+        ),
+    ]
+
+    title: Annotated[
+        str,
+        Field(
+            title="Short title",
+            description="Short human-readable title of the environment",
+            examples=["Rubin Summit"],
+        ),
+    ]
+
+    title_long: Annotated[
+        str,
+        Field(
+            title="Long title",
+            description="Full human-readable title of the environment",
+            examples=["Rubin Summit Data Facility"],
+        ),
+    ]
+
+    description: Annotated[
+        str,
+        Field(
+            title="Description",
+            description="Human-readable description of the environment",
+            examples=["The Rubin Science Platform at the Rubin summit."],
+        ),
+    ]
+
+    docs_url: Annotated[
+        HttpUrl,
+        Field(
+            title="Documentation URL",
+            description=(
+                "URL to additional documentation about the environment"
+            ),
+            examples=["https://phalanx.example.com/environments/idfprod/"],
+        ),
+    ]
+
+
 class InfluxDatabase(BaseModel):
     """Connection information for an InfluxDB database."""
 
@@ -409,6 +475,14 @@ class Discovery(BaseModel):
         ),
     ] = {}
 
+    environment: Annotated[
+        Environment | None,
+        Field(
+            title="Enviroment metadata",
+            description="Metadata about the local environment",
+        ),
+    ] = None
+
     environment_name: Annotated[
         str | None,
         Field(
@@ -418,6 +492,8 @@ class Discovery(BaseModel):
                 " in status or error reporting. This may be a hostname if"
                 " that is the most descriptive name, but should not be"
                 " assumed to be a hostname or used to construct any URLs."
+                " Deprecated in favor of environment.name, but used if that"
+                " setting doesn't exist."
             ),
         ),
     ] = None
