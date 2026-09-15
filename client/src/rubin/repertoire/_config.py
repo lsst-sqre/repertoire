@@ -370,6 +370,14 @@ class BaseRule(BaseModel):
         ),
     ]
 
+    title: Annotated[
+        str | None,
+        Field(
+            title="Short description",
+            description="Short human-readable description of the service",
+        ),
+    ] = None
+
     template: Annotated[
         str,
         Field(

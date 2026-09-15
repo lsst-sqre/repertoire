@@ -34,6 +34,9 @@ from ._models import (
 _HIPS_LIST_VERSION = "hips-list-1.0"
 """Version to use for HiPS service pointing to the HiPS list."""
 
+_HIPS_TITLE = "HiPS (Hierarchical Progressive Survey)"
+"""Title to use for the synthesized HiPS service."""
+
 __all__ = [
     "RepertoireBuilder",
     "RepertoireBuilderWithSecrets",
@@ -141,6 +144,7 @@ class RepertoireBuilder:
             openapi = HttpUrl(Template(rule.openapi).render(**context))
         return DataService(
             url=HttpUrl(Template(rule.template).render(**context)),
+            title=rule.title,
             openapi=openapi,
             versions=self._build_versions_from_rules(rule.versions, dataset),
             ivoa_registry=self._build_ivoa_registry_from_rule(dataset, rule),
@@ -186,6 +190,7 @@ class RepertoireBuilder:
                 hips_url = HttpUrl(hips_base_url + f"/{dataset}/list")
                 services["hips"] = DataService(
                     url=hips_url,
+                    title=_HIPS_TITLE,
                     versions={
                         _HIPS_LIST_VERSION: ApiVersion(
                             url=hips_url,
@@ -331,6 +336,7 @@ class RepertoireBuilder:
             openapi = HttpUrl(openapi_str)
         return InternalService(
             url=HttpUrl(Template(rule.template).render(**self._base_context)),
+            title=rule.title,
             openapi=openapi,
             versions=self._build_versions_from_rules(rule.versions),
         )
@@ -349,7 +355,8 @@ class RepertoireBuilder:
             Constructed service information.
         """
         return UiService(
-            url=HttpUrl(Template(rule.template).render(**self._base_context))
+            url=HttpUrl(Template(rule.template).render(**self._base_context)),
+            title=rule.title,
         )
 
     def _build_versions_from_rules(

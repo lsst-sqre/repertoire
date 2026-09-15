@@ -76,6 +76,15 @@ class BaseService(BaseModel):
         ),
     ]
 
+    title: Annotated[
+        str | None,
+        Field(
+            title="Short description",
+            description="Short human-readable description of the service",
+            examples=["SODA image cutouts"],
+        ),
+    ] = None
+
 
 class ApiService(BaseService):
     """Base model for services with an API."""
