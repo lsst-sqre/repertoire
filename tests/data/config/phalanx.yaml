@@ -107,10 +107,12 @@ rules:
   argocd:
     - type: "ui"
       name: "argocd"
+      title: "Argo CD"
       template: "https://{{base_hostname}}/argo-cd"
   gafaelfawr:
     - type: "data"
       name: "gms"
+      title: "Group Membership Service (GMS)"
       template: "https://{{base_hostname}}/auth/gms"
       versions:
         gms-search-1.0:
@@ -137,6 +139,7 @@ rules:
   noteburst:
     - type: "internal"
       name: "noteburst"
+      title: "Noteburst notebook execution"
       template: "https://{{base_hostname}}/noteburst"
       versions:
         v1:

@@ -46,6 +46,7 @@
           }
         },
         "gms": {
+          "title": "Group Membership Service (GMS)",
           "url": "https://data.example.com/auth/gms",
           "versions": {
             "gms-search-1.0": {
@@ -54,6 +55,7 @@
           }
         },
         "hips": {
+          "title": "HiPS (Hierarchical Progressive Survey)",
           "url": "https://example.com/api/hips/v2/dp02/list",
           "versions": {
             "hips-list-1.0": {
@@ -92,6 +94,7 @@
           }
         },
         "gms": {
+          "title": "Group Membership Service (GMS)",
           "url": "https://data.example.com/auth/gms",
           "versions": {
             "gms-search-1.0": {
@@ -122,6 +125,7 @@
           }
         },
         "gms": {
+          "title": "Group Membership Service (GMS)",
           "url": "https://data.example.com/auth/gms",
           "versions": {
             "gms-search-1.0": {
@@ -130,6 +134,7 @@
           }
         },
         "hips": {
+          "title": "HiPS (Hierarchical Progressive Survey)",
           "url": "https://example.com/api/hips/v2/dp1/list",
           "versions": {
             "hips-list-1.0": {
@@ -193,6 +198,7 @@
       },
       "noteburst": {
         "openapi": "https://data.example.com/noteburst/openapi.json",
+        "title": "Noteburst notebook execution",
         "url": "https://data.example.com/noteburst",
         "versions": {
           "v1": {
@@ -211,6 +217,7 @@
     },
     "ui": {
       "argocd": {
+        "title": "Argo CD",
         "url": "https://data.example.com/argo-cd"
       },
       "nublado": {
