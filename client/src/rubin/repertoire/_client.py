@@ -13,7 +13,12 @@ from ._exceptions import (
     RepertoireValidationError,
     RepertoireWebError,
 )
-from ._models import Discovery, InfluxDatabase, InfluxDatabaseWithCredentials
+from ._models import (
+    Discovery,
+    Environment,
+    InfluxDatabase,
+    InfluxDatabaseWithCredentials,
+)
 
 __all__ = ["DiscoveryClient"]
 
@@ -188,8 +193,28 @@ class DiscoveryClient:
         discovery = await self._get_discovery()
         return sorted(discovery.datasets.keys())
 
+    async def environment(self) -> Environment | None:
+        """Get information about the local environment.
+
+        Returns
+        -------
+        Environment or None
+            General information about the environment if available, or `None`
+            if none was configured.
+
+        Raises
+        ------
+        RepertoireError
+            Raised on error fetching discovery information from Repertoire.
+        """
+        discovery = await self._get_discovery()
+        return discovery.environment
+
     async def environment_name(self) -> str | None:
         """Get the name of the local Phalanx environment.
+
+        This API is deprecated. Use `environment` and the ``name`` attribute
+        of the resulting object instead.
 
         If pressent, this will be a short, human-readable name for the local
         Phalanx environment, intended for use in status reporting or other

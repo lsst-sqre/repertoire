@@ -51,7 +51,24 @@ async def test_butler_repositories(
 
 
 @pytest.mark.asyncio
+async def test_environment(data: Data, discovery: DiscoveryClient) -> None:
+    output = data.read_json("output/phalanx")
+    environment = await discovery.environment()
+    assert environment
+    assert environment.model_dump(mode="json") == output["environment"]
+
+
+@pytest.mark.asyncio
 async def test_environment_name(
+    data: Data, discovery: DiscoveryClient
+) -> None:
+    output = data.read_json("output/phalanx")
+    assert await discovery.environment_name() == output["environment_name"]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app", ["registry"], indirect=True)
+async def test_environment_name_fallback(
     data: Data, discovery: DiscoveryClient
 ) -> None:
     output = data.read_json("output/phalanx")
@@ -130,6 +147,22 @@ async def test_default_client(data: Data, respx_mock: respx.Router) -> None:
     discovery = DiscoveryClient(base_url=base_url + "/")
     assert await discovery.applications() == output["applications"]
     await discovery.aclose()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("app", ["minimal"], indirect=True)
+async def test_minimal(data: Data, discovery: DiscoveryClient) -> None:
+    assert await discovery.applications() == []
+    assert await discovery.butler_config_for("dp1") is None
+    assert await discovery.butler_repositories() == {}
+    assert await discovery.datasets() == []
+    assert await discovery.environment() is None
+    assert await discovery.environment_name() is None
+    assert await discovery.influxdb_connection_info("idfdev_efd") is None
+    assert await discovery.influxdb_databases() == []
+    assert await discovery.url_for_data("sia", "dp1") is None
+    assert await discovery.url_for_internal("gafaelfawr") is None
+    assert await discovery.url_for_ui("portal") is None
 
 
 @pytest.mark.asyncio
