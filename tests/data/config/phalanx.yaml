@@ -90,6 +90,8 @@ hips:
   pathPrefix: "/api/hips/v2"
   sourceTemplate: "https://{{base_hostname}}/api/hips/v2/{{dataset}}"
   docsUrl: "https://www.ivoa.net/documents/HiPS/"
+  requiredScopes:
+    - "read:image"
 influxdbDatabases:
   idfdev_efd:
     url: "https://data.example.com/influxdb/"
@@ -138,6 +140,8 @@ rules:
       name: "mobu"
       template: "https://{{base_hostname}}/mobu"
       openapi: "https://{{base_hostname}}/mobu/openapi.json"
+      requiredScopes:
+        - "exec:admin"
   noteburst:
     - type: "internal"
       name: "noteburst"
@@ -156,6 +160,8 @@ rules:
       name: "portal"
       template: "https://{{base_hostname}}/portal/app/"
       docsUrl: "https://example.com/docs/portal"
+      requiredScopes:
+        - "exec:portal"
   semaphore:
     - type: "internal"
       name: "semaphore"
@@ -174,6 +180,8 @@ rules:
           ivoaStandardId: "ivo://ivoa.net/std/SIA#query-2.0"
       openapi: "https://{{base_hostname}}/api/sia/openapi.json"
       docsUrl: "https://www.ivoa.net/documents/SIA/"
+      requiredScopes:
+        - "read:image"
       ivoaRegistry:
         ivoaServiceType: "sia"
         records:

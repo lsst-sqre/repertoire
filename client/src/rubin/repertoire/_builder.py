@@ -147,6 +147,7 @@ class RepertoireBuilder:
             title=rule.title,
             openapi=openapi,
             docs_url=rule.docs_url,
+            required_scopes=rule.required_scopes,
             versions=self._build_versions_from_rules(rule.versions, dataset),
             ivoa_registry=self._build_ivoa_registry_from_rule(dataset, rule),
         )
@@ -193,6 +194,7 @@ class RepertoireBuilder:
                     url=hips_url,
                     title=_HIPS_TITLE,
                     docs_url=self._config.hips.docs_url,
+                    required_scopes=self._config.hips.required_scopes,
                     versions={
                         _HIPS_LIST_VERSION: ApiVersion(
                             url=hips_url,
@@ -341,6 +343,7 @@ class RepertoireBuilder:
             title=rule.title,
             openapi=openapi,
             docs_url=rule.docs_url,
+            required_scopes=rule.required_scopes,
             versions=self._build_versions_from_rules(rule.versions),
         )
 
@@ -361,6 +364,7 @@ class RepertoireBuilder:
             url=HttpUrl(Template(rule.template).render(**self._base_context)),
             title=rule.title,
             docs_url=rule.docs_url,
+            required_scopes=rule.required_scopes,
         )
 
     def _build_versions_from_rules(

@@ -231,6 +231,17 @@ class HipsConfig(BaseModel):
         ),
     ] = None
 
+    required_scopes: Annotated[
+        list[str],
+        Field(
+            title="Required scopes",
+            description=(
+                "Required scopes to access HiPS. If more than one is listed,"
+                " all listed scopes are required."
+            ),
+        ),
+    ] = []
+
 
 class InfluxDatabaseConfig(BaseModel):
     """Configuration for an InfluxDB database.
@@ -402,6 +413,17 @@ class BaseRule(BaseModel):
             title="Template", description="Jinja template to generate the URL"
         ),
     ]
+
+    required_scopes: Annotated[
+        list[str],
+        Field(
+            title="Required scopes",
+            description=(
+                "Required scopes to access this service. If more than one is"
+                " listed, all listed scopes are required."
+            ),
+        ),
+    ] = []
 
 
 class VersionedServiceRule(BaseRule):
