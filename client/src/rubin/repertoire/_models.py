@@ -301,7 +301,10 @@ class Environment(BaseModel):
         str,
         Field(
             title="Short title",
-            description="Short human-readable title of the environment",
+            description=(
+                "Short human-readable title of the environment. This may be"
+                " the same as name if there is no distinct title set."
+            ),
             examples=["Rubin Summit"],
         ),
     ]
@@ -310,19 +313,23 @@ class Environment(BaseModel):
         str,
         Field(
             title="Long title",
-            description="Full human-readable title of the environment",
+            description=(
+                "Full human-readable title of the environment. This may be"
+                " the same as title or name if there is no distinct longer"
+                " title."
+            ),
             examples=["Rubin Summit Data Facility"],
         ),
     ]
 
     description: Annotated[
-        str,
+        str | None,
         Field(
             title="Description",
             description="Human-readable description of the environment",
             examples=["The Rubin Science Platform at the Rubin summit."],
         ),
-    ]
+    ] = None
 
     docs_url: Annotated[
         HttpUrl,

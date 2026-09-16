@@ -1,0 +1,7 @@
+# Configuration with minimal environment metadata.
+
+baseHostname: "data.example.com"
+environment:
+  name: "data.example.com"
+  label: "idfprod"
+  docsUrl: "https://phalanx.example.com/environments/idfprod"

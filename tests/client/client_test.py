@@ -59,6 +59,16 @@ async def test_environment(data: Data, discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("app", ["environment-minimal"], indirect=True)
+async def test_environment_minimal(
+    data: Data, discovery: DiscoveryClient
+) -> None:
+    environment = await discovery.environment()
+    assert environment
+    data.assert_pydantic_matches(environment, "output/environment-minimal")
+
+
+@pytest.mark.asyncio
 async def test_environment_name(
     data: Data, discovery: DiscoveryClient
 ) -> None:

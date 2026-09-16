@@ -76,28 +76,34 @@ class EnvironmentConfig(BaseModel):
     ]
 
     title: Annotated[
-        str,
+        str | None,
         Field(
             title="Short title",
-            description="Short human-readable title of the environment",
+            description=(
+                "Short human-readable title of the environment. If not set,"
+                " name is used instead."
+            ),
         ),
-    ]
+    ] = None
 
     title_long: Annotated[
-        str,
+        str | None,
         Field(
             title="Long title",
-            description="Full human-readable title of the environment",
+            description=(
+                "Full human-readable title of the environment. If not set,"
+                " title is used instead, or name if title is not set."
+            ),
         ),
-    ]
+    ] = None
 
     description: Annotated[
-        str,
+        str | None,
         Field(
             title="Description",
             description="Human-readable description of the environment",
         ),
-    ]
+    ] = None
 
     docs_url: Annotated[
         HttpUrl,
@@ -548,9 +554,9 @@ class DatasetConfig(BaseModel):
         Field(
             title="IVOA registry entry",
             description=(
-                "If set, publishes a ``vs:DataResource`` record for this"
-                " dataset, serving as the resolvable registry target for"
-                " Butler datasets and HiPS survey IVOIDs."
+                "If set, publishes a vs:DataResource record for this dataset,"
+                " serving as the resolvable registry target for Butler"
+                " datasets and HiPS survey IVOIDs."
             ),
         ),
     ] = None
