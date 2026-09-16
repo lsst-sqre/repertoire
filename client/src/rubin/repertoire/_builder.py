@@ -226,15 +226,17 @@ class RepertoireBuilder:
 
     def _build_environment(self) -> Environment | None:
         """Construct the environment metadata."""
-        if not self._config.environment:
+        environment = self._config.environment
+        if not environment:
             return None
+        title = environment.title or environment.name
         return Environment(
-            name=self._config.environment.name,
-            label=self._config.environment.label,
-            title=self._config.environment.title,
-            title_long=self._config.environment.title_long,
-            description=self._config.environment.description,
-            docs_url=self._config.environment.docs_url,
+            name=environment.name,
+            label=environment.label,
+            title=title,
+            title_long=environment.title_long or title,
+            description=environment.description,
+            docs_url=environment.docs_url,
         )
 
     def _build_influxdb_databases(
