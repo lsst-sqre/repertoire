@@ -89,6 +89,7 @@ hips:
     pathPrefix: "/api/hips"
   pathPrefix: "/api/hips/v2"
   sourceTemplate: "https://{{base_hostname}}/api/hips/v2/{{dataset}}"
+  title: "HiPS (Hierarchical Progressive Survey)"
   docsUrl: "https://www.ivoa.net/documents/HiPS/"
   requiredScopes:
     - "read:image"

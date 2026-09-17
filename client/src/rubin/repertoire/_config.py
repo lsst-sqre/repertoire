@@ -228,6 +228,15 @@ class HipsConfig(BaseModel):
         ),
     ]
 
+    title: Annotated[
+        str | None,
+        Field(
+            title="HiPS service title",
+            description="Short description to use for the HiPS service",
+            examples=["HiPS (Hierarchical Progressive Survey)"],
+        ),
+    ] = None
+
     docs_url: Annotated[
         HttpUrl | None,
         Field(

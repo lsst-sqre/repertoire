@@ -34,9 +34,6 @@ from ._models import (
 _HIPS_LIST_VERSION = "hips-list-1.0"
 """Version to use for HiPS service pointing to the HiPS list."""
 
-_HIPS_TITLE = "HiPS (Hierarchical Progressive Survey)"
-"""Title to use for the synthesized HiPS service."""
-
 __all__ = [
     "RepertoireBuilder",
     "RepertoireBuilderWithSecrets",
@@ -192,7 +189,7 @@ class RepertoireBuilder:
                 hips_url = HttpUrl(hips_base_url + f"/{dataset}/list")
                 services["hips"] = DataService(
                     url=hips_url,
-                    title=_HIPS_TITLE,
+                    title=self._config.hips.title,
                     docs_url=self._config.hips.docs_url,
                     required_scopes=self._config.hips.required_scopes,
                     versions={
