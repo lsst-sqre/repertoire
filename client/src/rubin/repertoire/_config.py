@@ -35,6 +35,7 @@ __all__ = [
     "IvoaContentType",
     "IvoaStandardId",
     "MultiRecordRegistryEntry",
+    "QuotaLabelConfig",
     "RegistryEntry",
     "RepertoireSettings",
     "ServiceRules",
@@ -389,6 +390,12 @@ class ApiVersionRule(BaseModel):
     ] = None
 
 
+class QuotaLabelConfig(BaseModel):
+    """Configuration for a quota label."""
+
+    title: Annotated[str, Field(title="Short description")]
+
+
 class BaseServiceRule(BaseModel):
     """Base class for rules for deriving URLs."""
 
@@ -430,6 +437,16 @@ class BaseServiceRule(BaseModel):
             ),
         ),
     ] = []
+
+    quota_labels: Annotated[
+        dict[str, QuotaLabelConfig],
+        Field(
+            title="Quota labels",
+            description=(
+                "Gafaelfawr API quota labels that apply to this service"
+            ),
+        ),
+    ] = {}
 
 
 class VersionedServiceRule(BaseServiceRule):

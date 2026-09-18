@@ -220,6 +220,9 @@ rules:
   vo-cutouts:
     data:
       cutout:
+        quotaLabels:
+          vo-cutouts:
+            title: "Cutout API requests"
         template: "https://{{base_hostname}}/api/cutout"
         versions:
           soda-async-1.0:
