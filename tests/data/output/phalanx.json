@@ -61,6 +61,11 @@
         },
         "hips": {
           "docs_url": "https://www.ivoa.net/documents/HiPS/",
+          "quota_labels": {
+            "hips": {
+              "title": "HiPS requests"
+            }
+          },
           "required_scopes": [
             "read:image"
           ],
@@ -158,6 +163,11 @@
         },
         "hips": {
           "docs_url": "https://www.ivoa.net/documents/HiPS/",
+          "quota_labels": {
+            "hips": {
+              "title": "HiPS requests"
+            }
+          },
           "required_scopes": [
             "read:image"
           ],

@@ -172,6 +172,12 @@ class HipsLegacyConfig(BaseModel):
     ]
 
 
+class QuotaLabelConfig(BaseModel):
+    """Configuration for a quota label."""
+
+    title: Annotated[str, Field(title="Short description")]
+
+
 class HipsConfig(BaseModel):
     """Configuration for HiPS datasets.
 
@@ -258,6 +264,16 @@ class HipsConfig(BaseModel):
             ),
         ),
     ] = []
+
+    quota_labels: Annotated[
+        dict[str, QuotaLabelConfig],
+        Field(
+            title="Quota labels",
+            description=(
+                "Gafaelfawr API quota labels that apply to the HiPS service"
+            ),
+        ),
+    ] = {}
 
 
 class InfluxDatabaseConfig(BaseModel):
@@ -388,12 +404,6 @@ class ApiVersionRule(BaseModel):
             description="IVOA standardID used in service registrations",
         ),
     ] = None
-
-
-class QuotaLabelConfig(BaseModel):
-    """Configuration for a quota label."""
-
-    title: Annotated[str, Field(title="Short description")]
 
 
 class BaseServiceRule(BaseModel):

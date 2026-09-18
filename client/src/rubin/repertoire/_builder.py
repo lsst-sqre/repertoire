@@ -196,6 +196,10 @@ class RepertoireBuilder:
                     title=self._config.hips.title,
                     docs_url=self._config.hips.docs_url,
                     required_scopes=self._config.hips.required_scopes,
+                    quota_labels={
+                        k: QuotaLabel(title=v.title)
+                        for k, v in self._config.hips.quota_labels.items()
+                    },
                     versions={
                         _HIPS_LIST_VERSION: ApiVersion(
                             url=hips_url,
