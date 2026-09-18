@@ -93,6 +93,9 @@ hips:
   docsUrl: "https://www.ivoa.net/documents/HiPS/"
   requiredScopes:
     - "read:image"
+  quotaLabels:
+    hips:
+      title: "HiPS requests"
 influxdbDatabases:
   idfdev_efd:
     url: "https://data.example.com/influxdb/"
