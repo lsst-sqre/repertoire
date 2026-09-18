@@ -109,141 +109,141 @@ influxdbDatabases:
     local: true
 rules:
   argocd:
-    argocd:
-      type: "ui"
-      title: "Argo CD"
-      template: "https://{{base_hostname}}/argo-cd"
+    ui:
+      argocd:
+        title: "Argo CD"
+        template: "https://{{base_hostname}}/argo-cd"
   gafaelfawr:
-    gms:
-      type: "data"
-      title: "Group Membership Service (GMS)"
-      template: "https://{{base_hostname}}/auth/gms"
-      versions:
-        gms-search-1.0:
-          template: "https://{{base_hostname}}/auth/gms"
-          ivoaStandardId: "ivo://ivoa.net/std/gms#search-1.0"
-      ivoaRegistry:
-        ivoaServiceType: "gms"
-        ivoid: "ivo://example.com/groups"
-        title: "Example GMS"
-        created: '2026-05-27T00:00:00'
-        description: "Group Membership Service for Example Observatory."
-    gafaelfawr:
-      type: "internal"
-      template: "https://{{base_hostname}}/auth/api"
-      versions:
-        v1:
-          template: "https://{{base_hostname}}/auth/api/v1"
-      openapi: "https://{{base_hostname}}/auth/openapi.json"
-      docsUrl: "https://gafaelfawr.lsst.io/"
+    data:
+      gms:
+        title: "Group Membership Service (GMS)"
+        template: "https://{{base_hostname}}/auth/gms"
+        versions:
+          gms-search-1.0:
+            template: "https://{{base_hostname}}/auth/gms"
+            ivoaStandardId: "ivo://ivoa.net/std/gms#search-1.0"
+        ivoaRegistry:
+          ivoaServiceType: "gms"
+          ivoid: "ivo://example.com/groups"
+          title: "Example GMS"
+          created: '2026-05-27T00:00:00'
+          description: "Group Membership Service for Example Observatory."
+    internal:
+      gafaelfawr:
+        template: "https://{{base_hostname}}/auth/api"
+        versions:
+          v1:
+            template: "https://{{base_hostname}}/auth/api/v1"
+        openapi: "https://{{base_hostname}}/auth/openapi.json"
+        docsUrl: "https://gafaelfawr.lsst.io/"
   mobu:
-    mobu:
-      type: "internal"
-      template: "https://{{base_hostname}}/mobu"
-      openapi: "https://{{base_hostname}}/mobu/openapi.json"
-      requiredScopes:
-        - "exec:admin"
+    internal:
+      mobu:
+        template: "https://{{base_hostname}}/mobu"
+        openapi: "https://{{base_hostname}}/mobu/openapi.json"
+        requiredScopes:
+          - "exec:admin"
   noteburst:
-    noteburst:
-      type: "internal"
-      title: "Noteburst notebook execution"
-      template: "https://{{base_hostname}}/noteburst"
-      versions:
-        v1:
-          template: "https://{{base_hostname}}/noteburst/v1"
-      openapi: "https://{{base_hostname}}/noteburst/openapi.json"
+    internal:
+      noteburst:
+        title: "Noteburst notebook execution"
+        template: "https://{{base_hostname}}/noteburst"
+        versions:
+          v1:
+            template: "https://{{base_hostname}}/noteburst/v1"
+        openapi: "https://{{base_hostname}}/noteburst/openapi.json"
   nublado:
-    nublado:
-      type: "ui"
-      template: "https://{{base_hostname}}/nb"
+    ui:
+      nublado:
+        template: "https://{{base_hostname}}/nb"
   portal:
-    portal:
-      type: "ui"
-      template: "https://{{base_hostname}}/portal/app/"
-      docsUrl: "https://example.com/docs/portal"
-      requiredScopes:
-        - "exec:portal"
+    ui:
+      portal:
+        template: "https://{{base_hostname}}/portal/app/"
+        docsUrl: "https://example.com/docs/portal"
+        requiredScopes:
+          - "exec:portal"
   semaphore:
-    semaphore:
-      type: "internal"
-      template: "https://{{base_hostname}}/semaphore"
-      openapi: "https://{{base_hostname}}/semaphore/openapi.json"
+    internal:
+      semaphore:
+        template: "https://{{base_hostname}}/semaphore"
+        openapi: "https://{{base_hostname}}/semaphore/openapi.json"
   sia:
-    sia:
-      type: "data"
-      datasets:
-        - "dp02"
-        - "dp1"
-      template: "https://{{base_hostname}}/api/sia/{{dataset}}"
-      versions:
-        v2:
-          template: "https://{{base_hostname}}/api/sia/{{dataset}}/query"
-          ivoaStandardId: "ivo://ivoa.net/std/SIA#query-2.0"
-      openapi: "https://{{base_hostname}}/api/sia/openapi.json"
-      docsUrl: "https://www.ivoa.net/documents/SIA/"
-      requiredScopes:
-        - "read:image"
-      ivoaRegistry:
-        ivoaServiceType: "sia"
-        records:
-          dp02:
-            ivoid: "ivo://example.com/sia/dp02"
-            title: "Example SIA Service (DP02)"
-            created: "2026-04-16T00:00:00"
-            description: "SIA image access service for the DP02 dataset."
-          dp1:
-            ivoid: "ivo://example.com/sia/dp1"
-            title: "Example SIA Service (DP1)"
-            created: "2026-04-16T00:00:00"
-            description: "SIA image access service for the DP1 dataset."
+    data:
+      sia:
+        datasets:
+          - "dp02"
+          - "dp1"
+        template: "https://{{base_hostname}}/api/sia/{{dataset}}"
+        versions:
+          v2:
+            template: "https://{{base_hostname}}/api/sia/{{dataset}}/query"
+            ivoaStandardId: "ivo://ivoa.net/std/SIA#query-2.0"
+        openapi: "https://{{base_hostname}}/api/sia/openapi.json"
+        docsUrl: "https://www.ivoa.net/documents/SIA/"
+        requiredScopes:
+          - "read:image"
+        ivoaRegistry:
+          ivoaServiceType: "sia"
+          records:
+            dp02:
+              ivoid: "ivo://example.com/sia/dp02"
+              title: "Example SIA Service (DP02)"
+              created: "2026-04-16T00:00:00"
+              description: "SIA image access service for the DP02 dataset."
+            dp1:
+              ivoid: "ivo://example.com/sia/dp1"
+              title: "Example SIA Service (DP1)"
+              created: "2026-04-16T00:00:00"
+              description: "SIA image access service for the DP1 dataset."
   ssotap:
-    tap:
-      type: "data"
-      datasets:
-        - "dp03"
-      template: "https://{{base_hostname}}/api/ssotap"
+    data:
+      tap:
+        datasets:
+          - "dp03"
+        template: "https://{{base_hostname}}/api/ssotap"
   tap:
-    tap:
-      type: "data"
-      datasets:
-        - "dp02"
-        - "dp1"
-      template: "https://{{base_hostname}}/api/tap"
-      ivoaRegistry:
-        ivoaServiceType: "tap"
-        ivoid: "ivo://example.com/tap"
-        title: "Example TAP Service"
-        created: "2026-04-16T00:00:00"
-        description: "TAP service for Example Observatory."
-        adqlVersion: "2.1"
-        uploadSupported: true
+    data:
+      tap:
+        datasets:
+          - "dp02"
+          - "dp1"
+        template: "https://{{base_hostname}}/api/tap"
+        ivoaRegistry:
+          ivoaServiceType: "tap"
+          ivoid: "ivo://example.com/tap"
+          title: "Example TAP Service"
+          created: "2026-04-16T00:00:00"
+          description: "TAP service for Example Observatory."
+          adqlVersion: "2.1"
+          uploadSupported: true
   vo-cutouts:
-    cutout:
-      type: "data"
-      template: "https://{{base_hostname}}/api/cutout"
-      versions:
-        soda-async-1.0:
-          template: "https://{{base_hostname}}/api/cutout/{{dataset}}/jobs"
-          ivoaStandardId: "ivo://ivoa.net/std/SODA#async-1.0"
-        soda-sync-1.0:
-          template: "https://{{base_hostname}}/api/cutout/{{dataset}}/sync"
-          ivoaStandardId: "ivo://ivoa.net/std/SODA#sync-1.0"
-      openapi: "https://{{base_hostname}}/api/cutout/openapi.json"
-      ivoaRegistry:
-        ivoaServiceType: "soda"
-        ivoid: "ivo://example.com/cutout"
-        title: "Example SODA Cutout Service"
-        created: "2026-04-16T00:00:00"
-        description: "SODA image cutout service for Example Observatory."
+    data:
+      cutout:
+        template: "https://{{base_hostname}}/api/cutout"
+        versions:
+          soda-async-1.0:
+            template: "https://{{base_hostname}}/api/cutout/{{dataset}}/jobs"
+            ivoaStandardId: "ivo://ivoa.net/std/SODA#async-1.0"
+          soda-sync-1.0:
+            template: "https://{{base_hostname}}/api/cutout/{{dataset}}/sync"
+            ivoaStandardId: "ivo://ivoa.net/std/SODA#sync-1.0"
+        openapi: "https://{{base_hostname}}/api/cutout/openapi.json"
+        ivoaRegistry:
+          ivoaServiceType: "soda"
+          ivoid: "ivo://example.com/cutout"
+          title: "Example SODA Cutout Service"
+          created: "2026-04-16T00:00:00"
+          description: "SODA image cutout service for Example Observatory."
   wobbly:
-    wobbly:
-      type: "internal"
-      template: "https://{{base_hostname}}/wobbly"
-      openapi: "https://{{base_hostname}}/wobbly/openapi.json"
+    internal:
+      wobbly:
+        template: "https://{{base_hostname}}/wobbly"
+        openapi: "https://{{base_hostname}}/wobbly/openapi.json"
 subdomainRules:
   nublado:
-    nublado:
-      type: "ui"
-      template: "https://nb.{{base_hostname}}/nb"
+    ui:
+      nublado:
+        template: "https://nb.{{base_hostname}}/nb"
 useSubdomains:
   - "nublado"

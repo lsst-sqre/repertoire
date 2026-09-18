@@ -20,10 +20,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 __all__ = [
     "ApiVersionRule",
     "BaseRegistryEntry",
-    "BaseRule",
+    "BaseServiceRule",
     "DataServiceRule",
     "DatasetConfig",
     "DatasetRegistryEntry",
+    "EnvironmentConfig",
     "GmsRegistryEntry",
     "HipsConfig",
     "HipsDatasetConfig",
@@ -36,7 +37,7 @@ __all__ = [
     "MultiRecordRegistryEntry",
     "RegistryEntry",
     "RepertoireSettings",
-    "Rule",
+    "ServiceRules",
     "SiaRegistryEntry",
     "SodaRegistryEntry",
     "TapDatasetEntry",
@@ -388,14 +389,12 @@ class ApiVersionRule(BaseModel):
     ] = None
 
 
-class BaseRule(BaseModel):
+class BaseServiceRule(BaseModel):
     """Base class for rules for deriving URLs."""
 
     model_config = ConfigDict(
         alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
-
-    type: Annotated[str, Field(title="Type of service")]
 
     title: Annotated[
         str | None,
@@ -433,7 +432,7 @@ class BaseRule(BaseModel):
     ] = []
 
 
-class VersionedServiceRule(BaseRule):
+class VersionedServiceRule(BaseServiceRule):
     """Base class for services that can have multiple API versions."""
 
     versions: Annotated[
@@ -714,8 +713,6 @@ type DatasetRegistryEntry = Annotated[
 class DataServiceRule(VersionedServiceRule):
     """Rule for a Phalanx service associated with a dataset."""
 
-    type: Annotated[Literal["data"], Field(title="Type of service")]
-
     datasets: Annotated[
         list[str] | None,
         Field(
@@ -827,8 +824,6 @@ class DataServiceRule(VersionedServiceRule):
 class InternalServiceRule(VersionedServiceRule):
     """Rule for an internal Phalanx service not associated with a dataset."""
 
-    type: Annotated[Literal["internal"], Field(title="Type of service")]
-
     openapi: Annotated[
         str | None,
         Field(
@@ -838,16 +833,22 @@ class InternalServiceRule(VersionedServiceRule):
     ] = None
 
 
-class UiServiceRule(BaseRule):
+class UiServiceRule(BaseServiceRule):
     """Rule for a UI Phalanx service accessed via a web browser."""
 
-    type: Annotated[Literal["ui"], Field(title="Type of service")]
 
+class ServiceRules(BaseSettings):
+    """Rules for services registered with service discovery."""
 
-type Rule = Annotated[
-    DataServiceRule | InternalServiceRule | UiServiceRule,
-    Field(discriminator="type"),
-]
+    data: Annotated[
+        dict[str, DataServiceRule], Field(title="Data services")
+    ] = {}
+
+    internal: Annotated[
+        dict[str, InternalServiceRule], Field(title="Internal services")
+    ] = {}
+
+    ui: Annotated[dict[str, UiServiceRule], Field(title="UI services")] = {}
 
 
 class RepertoireSettings(BaseSettings):
@@ -951,11 +952,11 @@ class RepertoireSettings(BaseSettings):
     ] = {}
 
     rules: Annotated[
-        dict[str, dict[str, Rule]],
+        dict[str, ServiceRules],
         Field(
             title="Phalanx service rules",
             description=(
-                "Rules mapping Phalanx application names to service names to"
+                "Rules mapping Phalanx application names to services and"
                 " instructions for what to include in service discovery for"
                 " that service. These rules are used if the service is not"
                 " running on a subdomain."
@@ -964,13 +965,14 @@ class RepertoireSettings(BaseSettings):
     ] = {}
 
     subdomain_rules: Annotated[
-        dict[str, dict[str, Rule]],
+        dict[str, ServiceRules],
         Field(
             title="Phalanx subdomain service rules",
             description=(
-                "Rules mapping Phalanx service names to instructions for what"
-                " to include in service discovery for that service. These"
-                " rules are used if the service is running on a subdomain."
+                "Rules mapping Phalanx application names to services and"
+                " instructions for what to include in service discovery for"
+                " that service. These rules are used if the service is"
+                " running on a subdomain."
             ),
         ),
     ] = {}

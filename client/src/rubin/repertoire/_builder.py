@@ -12,7 +12,6 @@ from ._config import (
     InternalServiceRule,
     IvoaStandardId,
     RepertoireSettings,
-    Rule,
     SiaDatasetRegistryEntry,
     SiaRegistryEntry,
     UiServiceRule,
@@ -169,12 +168,12 @@ class RepertoireBuilder:
         services = {}
         for application in sorted(self._config.applications):
             if application in self._config.use_subdomains:
-                rules = self._config.subdomain_rules.get(application, {})
+                rules = self._config.subdomain_rules.get(application)
             else:
-                rules = self._config.rules.get(application, {})
-            for name, rule in rules.items():
-                if not isinstance(rule, DataServiceRule):
-                    continue
+                rules = self._config.rules.get(application)
+            if not rules or not rules.data:
+                continue
+            for name, rule in rules.data.items():
                 allowed = rule.datasets or self._config.available_datasets
                 if dataset not in allowed:
                     continue
@@ -286,35 +285,17 @@ class RepertoireBuilder:
         services = Services()
         for application in sorted(self._config.applications):
             if application in self._config.use_subdomains:
-                rules = self._config.subdomain_rules.get(application, {})
+                rules = self._config.subdomain_rules.get(application)
             else:
-                rules = self._config.rules.get(application, {})
-            for name, rule in rules.items():
-                self._build_service_from_rule(name, rule, services)
+                rules = self._config.rules.get(application)
+            if not rules:
+                continue
+            for name, int_rule in rules.internal.items():
+                service = self._build_internal_service_from_rule(int_rule)
+                services.internal[name] = service
+            for name, ui_rule in rules.ui.items():
+                services.ui[name] = self._build_ui_service_from_rule(ui_rule)
         return services
-
-    def _build_service_from_rule(
-        self, name: str, rule: Rule, services: Services
-    ) -> None:
-        """Generate and store service information based on a rule.
-
-        Parameters
-        ----------
-        name
-            Name of the application.
-        rule
-            Generation rule for the service information.
-        services
-            Collected service information into which to insert the result.
-        """
-        match rule:
-            case DataServiceRule():
-                pass
-            case InternalServiceRule():
-                internal_service = self._build_internal_service_from_rule(rule)
-                services.internal[name] = internal_service
-            case UiServiceRule():
-                services.ui[name] = self._build_ui_service_from_rule(rule)
 
     def _build_internal_service_from_rule(
         self, rule: InternalServiceRule
