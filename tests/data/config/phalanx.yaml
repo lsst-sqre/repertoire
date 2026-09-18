@@ -13,6 +13,7 @@ applications:
   - "hips"
   - "ingress-nginx"
   - "mobu"
+  - "muster"
   - "noteburst"
   - "nublado"
   - "portal"
@@ -146,6 +147,15 @@ rules:
         openapi: "https://{{base_hostname}}/mobu/openapi.json"
         requiredScopes:
           - "exec:admin"
+  muster:
+    internal:
+      muster:
+        quotaLabels:
+          muster-quota:
+            title: "Quota testing"
+            internal: true
+        template: "https://{{base_hostname}}/muster"
+        openapi: "https://{{base_hostname}}/muster/openapi.json"
   noteburst:
     internal:
       noteburst:

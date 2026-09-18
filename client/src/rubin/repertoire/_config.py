@@ -38,6 +38,7 @@ __all__ = [
     "QuotaLabelConfig",
     "RegistryEntry",
     "RepertoireSettings",
+    "ServiceConfig",
     "ServiceRules",
     "SiaRegistryEntry",
     "SodaRegistryEntry",
@@ -175,10 +176,70 @@ class HipsLegacyConfig(BaseModel):
 class QuotaLabelConfig(BaseModel):
     """Configuration for a quota label."""
 
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
     title: Annotated[str, Field(title="Short description")]
 
+    internal: Annotated[
+        bool,
+        Field(
+            title="Whether quota is internal",
+            description=(
+                "If true, the quota rule should be hidden from user-facing"
+                " quota summaries"
+            ),
+        ),
+    ] = False
 
-class HipsConfig(BaseModel):
+
+class ServiceConfig(BaseModel):
+    """Base configuration for any service."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    title: Annotated[
+        str | None,
+        Field(
+            title="Short description",
+            description="Short human-readable description of the service",
+        ),
+    ] = None
+
+    docs_url: Annotated[
+        HttpUrl | None,
+        Field(
+            title="Documentation URL",
+            description="URL to service documentation",
+        ),
+    ] = None
+
+    required_scopes: Annotated[
+        list[str],
+        Field(
+            title="Required scopes",
+            description=(
+                "Required scopes to access this service. If more than one is"
+                " listed, all listed scopes are required."
+            ),
+        ),
+    ] = []
+
+    quota_labels: Annotated[
+        dict[str, QuotaLabelConfig],
+        Field(
+            title="Quota labels",
+            description=(
+                "Gafaelfawr API quota labels that apply to this service"
+            ),
+        ),
+    ] = {}
+
+
+class HipsConfig(ServiceConfig):
     """Configuration for HiPS datasets.
 
     This is used to generate service discovery information for HiPS datasets
@@ -186,10 +247,6 @@ class HipsConfig(BaseModel):
     files built from the properties files of the datasets for the individual
     bands.
     """
-
-    model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
-    )
 
     datasets: Annotated[
         dict[str, HipsDatasetConfig],
@@ -235,45 +292,6 @@ class HipsConfig(BaseModel):
             ),
         ),
     ]
-
-    title: Annotated[
-        str | None,
-        Field(
-            title="HiPS service title",
-            description="Short description to use for the HiPS service",
-            examples=["HiPS (Hierarchical Progressive Survey)"],
-        ),
-    ] = None
-
-    docs_url: Annotated[
-        HttpUrl | None,
-        Field(
-            title="Documentation URL",
-            description="URL to service documentation for HiPS",
-            examples=["https://example.org/docs/hips"],
-        ),
-    ] = None
-
-    required_scopes: Annotated[
-        list[str],
-        Field(
-            title="Required scopes",
-            description=(
-                "Required scopes to access HiPS. If more than one is listed,"
-                " all listed scopes are required."
-            ),
-        ),
-    ] = []
-
-    quota_labels: Annotated[
-        dict[str, QuotaLabelConfig],
-        Field(
-            title="Quota labels",
-            description=(
-                "Gafaelfawr API quota labels that apply to the HiPS service"
-            ),
-        ),
-    ] = {}
 
 
 class InfluxDatabaseConfig(BaseModel):
@@ -406,29 +424,12 @@ class ApiVersionRule(BaseModel):
     ] = None
 
 
-class BaseServiceRule(BaseModel):
+class BaseServiceRule(ServiceConfig):
     """Base class for rules for deriving URLs."""
 
     model_config = ConfigDict(
         alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
-
-    title: Annotated[
-        str | None,
-        Field(
-            title="Short description",
-            description="Short human-readable description of the service",
-        ),
-    ] = None
-
-    docs_url: Annotated[
-        HttpUrl | None,
-        Field(
-            title="Documentation URL",
-            description="URL to service documentation",
-            examples=["https://example.org/docs/cutout"],
-        ),
-    ] = None
 
     template: Annotated[
         str,
@@ -436,27 +437,6 @@ class BaseServiceRule(BaseModel):
             title="Template", description="Jinja template to generate the URL"
         ),
     ]
-
-    required_scopes: Annotated[
-        list[str],
-        Field(
-            title="Required scopes",
-            description=(
-                "Required scopes to access this service. If more than one is"
-                " listed, all listed scopes are required."
-            ),
-        ),
-    ] = []
-
-    quota_labels: Annotated[
-        dict[str, QuotaLabelConfig],
-        Field(
-            title="Quota labels",
-            description=(
-                "Gafaelfawr API quota labels that apply to this service"
-            ),
-        ),
-    ] = {}
 
 
 class VersionedServiceRule(BaseServiceRule):

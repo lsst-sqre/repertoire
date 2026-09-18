@@ -142,6 +142,9 @@
       "mobu": {
         "url": "https://data.example.com/mobu"
       },
+      "muster": {
+        "url": "https://data.example.com/muster"
+      },
       "noteburst": {
         "url": "https://data.example.com/noteburst",
         "versions": {
