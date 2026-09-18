@@ -135,6 +135,7 @@
       "butler_config": "https://data.example.com/api/butler/repo/dp1/butler.yaml",
       "description": "Data Preview 1 contains image and catalog products from the Rubin Science Pipelines v29 processing of observations obtained with the LSST Commissioning Camera of seven ~1 square degree fields, over seven weeks in late 2024.",
       "docs_url": "https://dp1.example.com/",
+      "obscore_config": "https://example.com/obscore/dp1.yaml",
       "services": {
         "cutout": {
           "openapi": "https://data.example.com/api/cutout/openapi.json",

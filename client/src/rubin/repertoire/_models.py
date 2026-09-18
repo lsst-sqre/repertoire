@@ -269,6 +269,19 @@ class Dataset(BaseModel):
         ),
     ] = None
 
+    obscore_config: Annotated[
+        HttpUrl | None,
+        Field(
+            title="ObsCore exporter config URL",
+            description=(
+                "URL to the configuration used by the SIAv2 service to convert"
+                " Butler records to ObsCore, if it is available for this"
+                " dataset"
+            ),
+            examples=["https://example.com/obscore/dp2.yaml"],
+        ),
+    ] = None
+
     services: Annotated[
         dict[str, DataService],
         Field(
