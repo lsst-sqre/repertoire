@@ -169,17 +169,17 @@ class RepertoireBuilder:
         services = {}
         for application in sorted(self._config.applications):
             if application in self._config.use_subdomains:
-                rules = self._config.subdomain_rules.get(application, [])
+                rules = self._config.subdomain_rules.get(application, {})
             else:
-                rules = self._config.rules.get(application, [])
-            for rule in rules:
+                rules = self._config.rules.get(application, {})
+            for name, rule in rules.items():
                 if not isinstance(rule, DataServiceRule):
                     continue
                 allowed = rule.datasets or self._config.available_datasets
                 if dataset not in allowed:
                     continue
                 service = self._build_data_service_from_rule(dataset, rule)
-                services[rule.name] = service
+                services[name] = service
 
         # Add the HiPS service if configured.
         if hips_base_url and self._config.hips:
@@ -286,11 +286,11 @@ class RepertoireBuilder:
         services = Services()
         for application in sorted(self._config.applications):
             if application in self._config.use_subdomains:
-                rules = self._config.subdomain_rules.get(application, [])
+                rules = self._config.subdomain_rules.get(application, {})
             else:
-                rules = self._config.rules.get(application, [])
-            for rule in rules:
-                self._build_service_from_rule(application, rule, services)
+                rules = self._config.rules.get(application, {})
+            for name, rule in rules.items():
+                self._build_service_from_rule(name, rule, services)
         return services
 
     def _build_service_from_rule(
@@ -307,8 +307,6 @@ class RepertoireBuilder:
         services
             Collected service information into which to insert the result.
         """
-        if rule.name:
-            name = rule.name
         match rule:
             case DataServiceRule():
                 pass

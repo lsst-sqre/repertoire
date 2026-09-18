@@ -397,14 +397,6 @@ class BaseRule(BaseModel):
 
     type: Annotated[str, Field(title="Type of service")]
 
-    name: Annotated[
-        str,
-        Field(
-            title="Service name",
-            description="Name of service discovery service",
-        ),
-    ]
-
     title: Annotated[
         str | None,
         Field(
@@ -794,10 +786,8 @@ class DataServiceRule(VersionedServiceRule):
             if rule.ivoa_standard_id is None:
                 continue
             if rule.ivoa_standard_id in seen:
-                raise ValueError(
-                    f"Rule '{self.name}' has a duplicate standard ID"
-                    f" '{rule.ivoa_standard_id}'"
-                )
+                msg = f"duplicate standard ID '{rule.ivoa_standard_id}'"
+                raise ValueError(msg)
             seen.add(rule.ivoa_standard_id)
 
         # If generating IVOA registry information, make sure the SODA and SIA
@@ -807,14 +797,14 @@ class DataServiceRule(VersionedServiceRule):
             case GmsRegistryEntry():
                 if self.version_for_id(IvoaStandardId.GMS_SEARCH_1) is None:
                     raise ValueError(
-                        f"GMS rule '{self.name}' must have a version with"
-                        f" standard ID '{IvoaStandardId.GMS_SEARCH_1}'"
+                        "GMS rule must have a version with standard ID"
+                        f" '{IvoaStandardId.GMS_SEARCH_1}'"
                     )
             case SiaRegistryEntry():
                 if self.version_for_id(IvoaStandardId.SIA_QUERY_2) is None:
                     raise ValueError(
-                        f"SIA rule '{self.name}' must have a version with"
-                        f" standard ID '{IvoaStandardId.SIA_QUERY_2}'"
+                        "SIA rule must have a version with standard ID"
+                        f" '{IvoaStandardId.SIA_QUERY_2}'"
                     )
             case SodaRegistryEntry():
                 soda_ids = {
@@ -825,10 +815,8 @@ class DataServiceRule(VersionedServiceRule):
                 missing = soda_ids - version_ids
                 if missing:
                     missing_str = ", ".join(sorted(missing))
-                    raise ValueError(
-                        f"SODA rule '{self.name}' missing standard IDs: "
-                        f"{missing_str}"
-                    )
+                    msg = f"SODA rule missing standard IDs: {missing_str}"
+                    raise ValueError(msg)
             case _:
                 pass
 
@@ -963,19 +951,20 @@ class RepertoireSettings(BaseSettings):
     ] = {}
 
     rules: Annotated[
-        dict[str, list[Rule]],
+        dict[str, dict[str, Rule]],
         Field(
             title="Phalanx service rules",
             description=(
-                "Rules mapping Phalanx service names to instructions for what"
-                " to include in service discovery for that service. These"
-                " rules are used if the service is not running on a subdomain."
+                "Rules mapping Phalanx application names to service names to"
+                " instructions for what to include in service discovery for"
+                " that service. These rules are used if the service is not"
+                " running on a subdomain."
             ),
         ),
     ] = {}
 
     subdomain_rules: Annotated[
-        dict[str, list[Rule]],
+        dict[str, dict[str, Rule]],
         Field(
             title="Phalanx subdomain service rules",
             description=(

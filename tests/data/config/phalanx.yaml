@@ -109,13 +109,13 @@ influxdbDatabases:
     local: true
 rules:
   argocd:
-    - type: "ui"
-      name: "argocd"
+    argocd:
+      type: "ui"
       title: "Argo CD"
       template: "https://{{base_hostname}}/argo-cd"
   gafaelfawr:
-    - type: "data"
-      name: "gms"
+    gms:
+      type: "data"
       title: "Group Membership Service (GMS)"
       template: "https://{{base_hostname}}/auth/gms"
       versions:
@@ -128,8 +128,8 @@ rules:
         title: "Example GMS"
         created: '2026-05-27T00:00:00'
         description: "Group Membership Service for Example Observatory."
-    - type: "internal"
-      name: "gafaelfawr"
+    gafaelfawr:
+      type: "internal"
       template: "https://{{base_hostname}}/auth/api"
       versions:
         v1:
@@ -137,15 +137,15 @@ rules:
       openapi: "https://{{base_hostname}}/auth/openapi.json"
       docsUrl: "https://gafaelfawr.lsst.io/"
   mobu:
-    - type: "internal"
-      name: "mobu"
+    mobu:
+      type: "internal"
       template: "https://{{base_hostname}}/mobu"
       openapi: "https://{{base_hostname}}/mobu/openapi.json"
       requiredScopes:
         - "exec:admin"
   noteburst:
-    - type: "internal"
-      name: "noteburst"
+    noteburst:
+      type: "internal"
       title: "Noteburst notebook execution"
       template: "https://{{base_hostname}}/noteburst"
       versions:
@@ -153,24 +153,24 @@ rules:
           template: "https://{{base_hostname}}/noteburst/v1"
       openapi: "https://{{base_hostname}}/noteburst/openapi.json"
   nublado:
-    - type: "ui"
-      name: "nublado"
+    nublado:
+      type: "ui"
       template: "https://{{base_hostname}}/nb"
   portal:
-    - type: "ui"
-      name: "portal"
+    portal:
+      type: "ui"
       template: "https://{{base_hostname}}/portal/app/"
       docsUrl: "https://example.com/docs/portal"
       requiredScopes:
         - "exec:portal"
   semaphore:
-    - type: "internal"
-      name: "semaphore"
+    semaphore:
+      type: "internal"
       template: "https://{{base_hostname}}/semaphore"
       openapi: "https://{{base_hostname}}/semaphore/openapi.json"
   sia:
-    - type: "data"
-      name: "sia"
+    sia:
+      type: "data"
       datasets:
         - "dp02"
         - "dp1"
@@ -197,14 +197,14 @@ rules:
             created: "2026-04-16T00:00:00"
             description: "SIA image access service for the DP1 dataset."
   ssotap:
-    - type: "data"
-      name: "tap"
+    tap:
+      type: "data"
       datasets:
         - "dp03"
       template: "https://{{base_hostname}}/api/ssotap"
   tap:
-    - type: "data"
-      name: "tap"
+    tap:
+      type: "data"
       datasets:
         - "dp02"
         - "dp1"
@@ -218,8 +218,8 @@ rules:
         adqlVersion: "2.1"
         uploadSupported: true
   vo-cutouts:
-    - type: "data"
-      name: "cutout"
+    cutout:
+      type: "data"
       template: "https://{{base_hostname}}/api/cutout"
       versions:
         soda-async-1.0:
@@ -236,14 +236,14 @@ rules:
         created: "2026-04-16T00:00:00"
         description: "SODA image cutout service for Example Observatory."
   wobbly:
-    - type: "internal"
-      name: "wobbly"
+    wobbly:
+      type: "internal"
       template: "https://{{base_hostname}}/wobbly"
       openapi: "https://{{base_hostname}}/wobbly/openapi.json"
 subdomainRules:
   nublado:
-    - type: "ui"
-      name: "nublado"
+    nublado:
+      type: "ui"
       template: "https://nb.{{base_hostname}}/nb"
 useSubdomains:
   - "nublado"
