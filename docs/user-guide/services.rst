@@ -72,6 +72,13 @@ This URL, in turn, can be used to the ``Butler`` constructor.
 Clients that need to handle all available datasets and create a Butler on the fly for each request should call `DiscoveryClient.butler_repositories` and pass the result into the constructor of ``LabeledButlerFactory``.
 The resulting factory can then be used to create Butler instances for labels as needed.
 
+ObsCore exporter configuration
+==============================
+
+Clients that need the ObsCore exporter configuration for a specific dataset should call `DiscoveryClient.obscore_config_for` and pass in the name of a dataset.
+The return value will be a URL to the ObsCore exporter configuration for that dataset, or `None` if no ObsCore exporter configuration for that dataset is available.
+This is primarily used by the SIAv2 service.
+
 Next steps
 ==========
 

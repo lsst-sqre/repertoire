@@ -86,6 +86,17 @@ async def test_environment_name_fallback(
 
 
 @pytest.mark.asyncio
+async def test_obscore_config_for(
+    data: Data, discovery: DiscoveryClient
+) -> None:
+    output = data.read_json("output/phalanx")
+    for dataset in output["datasets"]:
+        result = await discovery.obscore_config_for(dataset)
+        assert result == output["datasets"][dataset].get("obscore_config")
+    assert await discovery.obscore_config_for("unknown") is None
+
+
+@pytest.mark.asyncio
 async def test_url_for(data: Data, discovery: DiscoveryClient) -> None:
     output = data.read_json("output/phalanx")
     services = output["services"]

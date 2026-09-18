@@ -111,6 +111,9 @@ influxdbDatabases:
     passwordKey: "idfdev_metrics-password"
     schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
     local: true
+obscoreConfigs:
+  dp1: "https://example.com/obscore/dp1.yaml"
+  dp2: "https://example.com/obscore/dp2.yaml"
 rules:
   argocd:
     ui:

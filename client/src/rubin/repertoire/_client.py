@@ -346,6 +346,30 @@ class DiscoveryClient:
             else:
                 return sorted(k for k, v in databases if not v.local)
 
+    async def obscore_config_for(self, dataset: str) -> str | None:
+        """Return the ObsCore exporter configuration URL for a given dataset.
+
+        Parameters
+        ----------
+        dataset
+            Short name of a dataset, chosen from the results of `datasets`.
+
+        Returns
+        -------
+        str or None
+            URL to the ObsCore exporter configuration, or `None` if that
+            dataset is not recognized or does not have a configuration.
+
+        Raises
+        ------
+        RepertoireError
+            Raised on error fetching discovery information from Repertoire.
+        """
+        discovery = await self._get_discovery()
+        if info := discovery.datasets.get(dataset):
+            return str(info.obscore_config) if info.obscore_config else None
+        return None
+
     async def url_for_data(
         self, service: str, dataset: str, *, version: str | None = None
     ) -> str | None:

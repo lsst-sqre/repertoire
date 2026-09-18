@@ -958,6 +958,19 @@ class RepertoireSettings(BaseSettings):
         ),
     ] = {}
 
+    obscore_configs: Annotated[
+        dict[str, HttpUrl],
+        Field(
+            title="ObsCore exporter config URLs",
+            description=(
+                "URLs to the configuration used by the SIAv2 service to"
+                " convert Butler records to ObsCore, if it is available for"
+                " this dataset"
+            ),
+            examples=[{"dp2": "https://example.com/obscore/dp2.yaml"}],
+        ),
+    ] = {}
+
     rules: Annotated[
         dict[str, ServiceRules],
         Field(
