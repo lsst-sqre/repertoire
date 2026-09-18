@@ -10,6 +10,7 @@
     "hips",
     "ingress-nginx",
     "mobu",
+    "muster",
     "noteburst",
     "nublado",
     "portal",
@@ -240,6 +241,15 @@
           "exec:admin"
         ],
         "url": "https://data.example.com/mobu"
+      },
+      "muster": {
+        "openapi": "https://data.example.com/muster/openapi.json",
+        "quota_labels": {
+          "muster-quota": {
+            "title": "Quota testing"
+          }
+        },
+        "url": "https://data.example.com/muster"
       },
       "noteburst": {
         "openapi": "https://data.example.com/noteburst/openapi.json",

@@ -78,6 +78,17 @@ class QuotaLabel(BaseModel):
 
     title: Annotated[str, Field(title="Short description")]
 
+    internal: Annotated[
+        bool,
+        Field(
+            title="Whether quota is internal",
+            description=(
+                "If true, the quota rule should be hidden from user-facing"
+                " quota summaries"
+            ),
+        ),
+    ] = False
+
 
 class BaseService(BaseModel):
     """Base model for services."""
