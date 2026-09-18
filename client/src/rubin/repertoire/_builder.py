@@ -26,6 +26,7 @@ from ._models import (
     InfluxDatabaseWithCredentials,
     InfluxDatabaseWithPointer,
     InternalService,
+    QuotaLabel,
     Services,
     UiService,
 )
@@ -144,6 +145,10 @@ class RepertoireBuilder:
             openapi=openapi,
             docs_url=rule.docs_url,
             required_scopes=rule.required_scopes,
+            quota_labels={
+                k: QuotaLabel(title=v.title)
+                for k, v in rule.quota_labels.items()
+            },
             versions=self._build_versions_from_rules(rule.versions, dataset),
             ivoa_registry=self._build_ivoa_registry_from_rule(dataset, rule),
         )
@@ -322,6 +327,10 @@ class RepertoireBuilder:
             openapi=openapi,
             docs_url=rule.docs_url,
             required_scopes=rule.required_scopes,
+            quota_labels={
+                k: QuotaLabel(title=v.title)
+                for k, v in rule.quota_labels.items()
+            },
             versions=self._build_versions_from_rules(rule.versions),
         )
 

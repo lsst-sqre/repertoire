@@ -17,6 +17,7 @@ __all__ = [
     "InfluxDatabase",
     "InfluxDatabaseWithCredentials",
     "InternalService",
+    "QuotaLabel",
     "Services",
     "UiService",
 ]
@@ -62,6 +63,20 @@ class ApiVersion(BaseModel):
             encoding.
         """
         return {"url": str(self.url)}
+
+
+class QuotaLabel(BaseModel):
+    """Details of a quota label that applies to a service.
+
+    Gafaelfawr tracks quotas by labels, which correspond to Gafaelfawr service
+    names in a ``GafaelfawrIngress`` resource. These in turn are based on
+    Phalanx application names and may have no connection to service names.
+    This class represents a quota label with a description that is relevant to
+    a particular service. Consumers of service discovery can then use the
+    mapping from services to quota labels to find relevant quotas.
+    """
+
+    title: Annotated[str, Field(title="Short description")]
 
 
 class BaseService(BaseModel):
@@ -120,6 +135,16 @@ class ApiService(BaseService):
             examples=["https://example.org/api/cutout/openapi.json"],
         ),
     ] = None
+
+    quota_labels: Annotated[
+        dict[str, QuotaLabel],
+        Field(
+            title="Quota labels",
+            description=(
+                "Gafaelfawr API quota labels that apply to this service"
+            ),
+        ),
+    ] = {}
 
     versions: Annotated[
         dict[str, ApiVersion],

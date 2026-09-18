@@ -35,6 +35,11 @@
       "services": {
         "cutout": {
           "openapi": "https://data.example.com/api/cutout/openapi.json",
+          "quota_labels": {
+            "vo-cutouts": {
+              "title": "Cutout API requests"
+            }
+          },
           "url": "https://data.example.com/api/cutout",
           "versions": {
             "soda-async-1.0": {
@@ -91,6 +96,11 @@
       "services": {
         "cutout": {
           "openapi": "https://data.example.com/api/cutout/openapi.json",
+          "quota_labels": {
+            "vo-cutouts": {
+              "title": "Cutout API requests"
+            }
+          },
           "url": "https://data.example.com/api/cutout",
           "versions": {
             "soda-async-1.0": {
@@ -122,6 +132,11 @@
       "services": {
         "cutout": {
           "openapi": "https://data.example.com/api/cutout/openapi.json",
+          "quota_labels": {
+            "vo-cutouts": {
+              "title": "Cutout API requests"
+            }
+          },
           "url": "https://data.example.com/api/cutout",
           "versions": {
             "soda-async-1.0": {
