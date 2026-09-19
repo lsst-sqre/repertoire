@@ -221,11 +221,15 @@ class RepertoireBuilder:
         for dataset, value in self._config.datasets.items():
             if dataset not in self._config.available_datasets:
                 continue
+            if obscore_config_url := self._config.obscore_configs.get(dataset):
+                obscore_config = str(obscore_config_url)
+            else:
+                obscore_config = None
             results[dataset] = Dataset(
                 butler_config=self._config.butler_configs.get(dataset),
                 description=value.description,
                 docs_url=value.docs_url,
-                obscore_config=self._config.obscore_configs.get(dataset),
+                obscore_config=obscore_config,
                 services=self._build_data_services(dataset, hips_base_url),
             )
         return results

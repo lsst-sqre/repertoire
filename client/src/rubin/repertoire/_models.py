@@ -269,8 +269,12 @@ class Dataset(BaseModel):
         ),
     ] = None
 
+    # Use str as the datatype here instead of HttpUrl because SIAv2 tests want
+    # to pass in a path to a local test file instead of a URL. The Repertoire
+    # server will always return a URL because the input configuration
+    # validates this field as an HttpUrl.
     obscore_config: Annotated[
-        HttpUrl | None,
+        str | None,
         Field(
             title="ObsCore exporter config URL",
             description=(
