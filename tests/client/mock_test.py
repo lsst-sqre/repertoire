@@ -45,12 +45,11 @@ async def test_register_json(data: Data, respx_mock: respx.Router) -> None:
 @pytest.mark.asyncio
 async def test_register_path(data: Data, respx_mock: respx.Router) -> None:
     results_path = data.path("output/phalanx.json")
-    results = data.read_json("output/phalanx")
     base_url = "https://example.com/repertoire"
     register_mock_discovery(respx_mock, results_path, base_url)
     async with AsyncClient() as client:
         r = await client.get(base_url + "/discovery")
-        assert r.json() == results
+        data.assert_json_matches(r.json(), "output/phalanx")
 
 
 @pytest.mark.asyncio
