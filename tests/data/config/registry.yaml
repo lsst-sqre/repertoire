@@ -252,7 +252,7 @@ rules:
       wobbly:
         template: "https://{{base_hostname}}/wobbly"
         openapi: "https://{{base_hostname}}/wobbly/openapi.json"
-subdomainRules:
+subdomainOverrides:
   nublado:
     ui:
       nublado:

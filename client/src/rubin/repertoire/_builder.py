@@ -6,18 +6,22 @@ from jinja2 import Template
 from pydantic import HttpUrl, SecretStr
 
 from ._config import (
+    ApiServiceOverride,
     ApiVersionRule,
     DataServiceRule,
     DatasetRegistryEntry,
     InternalServiceRule,
     IvoaStandardId,
     RepertoireSettings,
+    ServiceOverride,
     SiaDatasetRegistryEntry,
     SiaRegistryEntry,
     UiServiceRule,
 )
 from ._models import (
+    ApiService,
     ApiVersion,
+    BaseService,
     DataService,
     Dataset,
     Discovery,
@@ -118,6 +122,61 @@ class RepertoireBuilder:
             local=influxdb.local,
         )
 
+    def _apply_override(
+        self,
+        service: BaseService,
+        override: ServiceOverride,
+        dataset: str | None = None,
+    ) -> None:
+        """Modify the service URL according to an override.
+
+        Parameters
+        ----------
+        service
+            Constructed service with possibly incorrect URLs.
+        override
+            URL overrides to apply.
+        dataset
+            If given, dataset parameter for resolving URL templates.
+        """
+        if dataset:
+            context = self._build_dataset_context(dataset)
+        else:
+            context = self._base_context
+        service.url = HttpUrl(Template(override.template).render(**context))
+
+    def _apply_api_override(
+        self,
+        service: ApiService,
+        override: ApiServiceOverride,
+        dataset: str | None = None,
+    ) -> None:
+        """Modify the service URLs of an API service according to an override.
+
+        Parameters
+        ----------
+        service
+            Constructed service with possibly incorrect URLs.
+        override
+            URL overrides to apply.
+        dataset
+            If given, dataset parameter for resolving URL templates.
+        """
+        self._apply_override(service, override, dataset)
+        if dataset:
+            context = self._build_dataset_context(dataset)
+        else:
+            context = self._base_context
+        if override.openapi:
+            openapi = HttpUrl(Template(override.openapi).render(**context))
+            service.openapi = openapi
+        for version, api in service.versions.items():
+            api_override = override.versions.get(version)
+            if not api_override:
+                continue
+            url = HttpUrl(Template(api_override.template).render(**context))
+            api.url = url
+
     def _build_data_service_from_rule(
         self, dataset: str, rule: DataServiceRule
     ) -> DataService:
@@ -172,17 +231,20 @@ class RepertoireBuilder:
         """
         services = {}
         for application in sorted(self._config.applications):
-            if application in self._config.use_subdomains:
-                rules = self._config.subdomain_rules.get(application)
-            else:
-                rules = self._config.rules.get(application)
+            rules = self._config.rules.get(application)
             if not rules or not rules.data:
                 continue
+            overrides = None
+            if application in self._config.use_subdomains:
+                overrides = self._config.subdomain_overrides.get(application)
             for name, rule in rules.data.items():
+                override = overrides.data.get(name) if overrides else None
                 allowed = rule.datasets or self._config.available_datasets
                 if dataset not in allowed:
                     continue
                 service = self._build_data_service_from_rule(dataset, rule)
+                if override:
+                    self._apply_api_override(service, override, dataset)
                 services[name] = service
 
         # Add the HiPS service if configured.
@@ -298,17 +360,24 @@ class RepertoireBuilder:
         """Construct the service URLs for an environment."""
         services = Services()
         for application in sorted(self._config.applications):
-            if application in self._config.use_subdomains:
-                rules = self._config.subdomain_rules.get(application)
-            else:
-                rules = self._config.rules.get(application)
+            rules = self._config.rules.get(application)
             if not rules:
                 continue
+            overrides = None
+            if application in self._config.use_subdomains:
+                overrides = self._config.subdomain_overrides.get(application)
             for name, int_rule in rules.internal.items():
+                override = overrides.internal.get(name) if overrides else None
                 service = self._build_internal_service_from_rule(int_rule)
+                if override:
+                    self._apply_api_override(service, override)
                 services.internal[name] = service
             for name, ui_rule in rules.ui.items():
-                services.ui[name] = self._build_ui_service_from_rule(ui_rule)
+                ui_override = overrides.ui.get(name) if overrides else None
+                ui_service = self._build_ui_service_from_rule(ui_rule)
+                if ui_override:
+                    self._apply_override(ui_service, ui_override)
+                services.ui[name] = ui_service
         return services
 
     def _build_internal_service_from_rule(

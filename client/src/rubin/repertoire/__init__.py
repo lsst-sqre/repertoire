@@ -3,6 +3,9 @@
 from ._builder import RepertoireBuilder, RepertoireBuilderWithSecrets
 from ._client import DiscoveryClient
 from ._config import (
+    ApiServiceOverride,
+    ApiServiceRule,
+    ApiVersionOverride,
     ApiVersionRule,
     BaseRegistryEntry,
     BaseServiceRule,
@@ -24,6 +27,8 @@ from ._config import (
     RegistryEntry,
     RepertoireSettings,
     ServiceConfig,
+    ServiceOverride,
+    ServiceOverrides,
     ServiceRules,
     SiaDatasetRegistryEntry,
     SiaRegistryEntry,
@@ -32,7 +37,6 @@ from ._config import (
     TapOutputFormatConfig,
     TapRegistryEntry,
     UiServiceRule,
-    VersionedServiceRule,
 )
 from ._dependencies import DiscoveryDependency, discovery_dependency
 from ._exceptions import (
@@ -60,7 +64,10 @@ from ._models import (
 
 __all__ = [
     "ApiService",
+    "ApiServiceOverride",
+    "ApiServiceRule",
     "ApiVersion",
+    "ApiVersionOverride",
     "ApiVersionRule",
     "BaseRegistryEntry",
     "BaseService",
@@ -99,6 +106,8 @@ __all__ = [
     "RepertoireValidationError",
     "RepertoireWebError",
     "ServiceConfig",
+    "ServiceOverride",
+    "ServiceOverrides",
     "ServiceRules",
     "Services",
     "SiaDatasetRegistryEntry",
@@ -109,7 +118,6 @@ __all__ = [
     "TapRegistryEntry",
     "UiService",
     "UiServiceRule",
-    "VersionedServiceRule",
     "discovery_dependency",
     "register_mock_discovery",
 ]

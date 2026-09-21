@@ -18,6 +18,8 @@ from pydantic.alias_generators import to_camel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 __all__ = [
+    "ApiServiceOverride",
+    "ApiServiceRule",
     "ApiVersionRule",
     "BaseRegistryEntry",
     "BaseServiceRule",
@@ -39,6 +41,8 @@ __all__ = [
     "RegistryEntry",
     "RepertoireSettings",
     "ServiceConfig",
+    "ServiceOverride",
+    "ServiceOverrides",
     "ServiceRules",
     "SiaRegistryEntry",
     "SodaRegistryEntry",
@@ -46,7 +50,6 @@ __all__ = [
     "TapOutputFormatConfig",
     "TapRegistryEntry",
     "UiServiceRule",
-    "VersionedServiceRule",
 ]
 
 
@@ -439,8 +442,16 @@ class BaseServiceRule(ServiceConfig):
     ]
 
 
-class VersionedServiceRule(BaseServiceRule):
+class ApiServiceRule(BaseServiceRule):
     """Base class for services that can have multiple API versions."""
+
+    openapi: Annotated[
+        str | None,
+        Field(
+            title="OpenAPI schema template",
+            description="Template to generate the OpenAPI schema URL",
+        ),
+    ] = None
 
     versions: Annotated[
         dict[str, ApiVersionRule],
@@ -717,7 +728,7 @@ type DatasetRegistryEntry = Annotated[
 ]
 
 
-class DataServiceRule(VersionedServiceRule):
+class DataServiceRule(ApiServiceRule):
     """Rule for a Phalanx service associated with a dataset."""
 
     datasets: Annotated[
@@ -728,14 +739,6 @@ class DataServiceRule(VersionedServiceRule):
                 "Datasets served by this service. If not given, defaults to"
                 " all available datasets."
             ),
-        ),
-    ] = None
-
-    openapi: Annotated[
-        str | None,
-        Field(
-            title="OpenAPI schema template",
-            description="Template to generate the OpenAPI schema URL",
         ),
     ] = None
 
@@ -828,16 +831,8 @@ class DataServiceRule(VersionedServiceRule):
         return self
 
 
-class InternalServiceRule(VersionedServiceRule):
+class InternalServiceRule(ApiServiceRule):
     """Rule for an internal Phalanx service not associated with a dataset."""
-
-    openapi: Annotated[
-        str | None,
-        Field(
-            title="OpenAPI schema template",
-            description="Template to generate the OpenAPI schema URL",
-        ),
-    ] = None
 
 
 class UiServiceRule(BaseServiceRule):
@@ -856,6 +851,72 @@ class ServiceRules(BaseSettings):
     ] = {}
 
     ui: Annotated[dict[str, UiServiceRule], Field(title="UI services")] = {}
+
+
+class ServiceOverride(BaseModel):
+    """Override to apply atop another rule, changing only the URLs."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    template: Annotated[
+        str,
+        Field(
+            title="Template", description="Jinja template to generate the URL"
+        ),
+    ]
+
+
+class ApiVersionOverride(BaseModel):
+    """URL override for one API version."""
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
+
+    template: Annotated[
+        str,
+        Field(
+            title="Template", description="Jinja template to generate the URL"
+        ),
+    ]
+
+
+class ApiServiceOverride(ServiceOverride):
+    """Overrides for URLs for specific API versions."""
+
+    openapi: Annotated[
+        str | None,
+        Field(
+            title="OpenAPI schema template",
+            description="Template to generate the OpenAPI schema URL",
+        ),
+    ] = None
+
+    versions: Annotated[
+        dict[str, ApiVersionOverride],
+        Field(
+            title="API versions",
+            description=(
+                "Mapping of API version names to URLs for that API version"
+            ),
+        ),
+    ] = {}
+
+
+class ServiceOverrides(BaseSettings):
+    """URL overrides for services registered with service discovery."""
+
+    data: Annotated[
+        dict[str, ApiServiceOverride], Field(title="Data services")
+    ] = {}
+
+    internal: Annotated[
+        dict[str, ApiServiceOverride], Field(title="Internal services")
+    ] = {}
+
+    ui: Annotated[dict[str, ServiceOverride], Field(title="UI services")] = {}
 
 
 class RepertoireSettings(BaseSettings):
@@ -984,15 +1045,13 @@ class RepertoireSettings(BaseSettings):
         ),
     ] = {}
 
-    subdomain_rules: Annotated[
-        dict[str, ServiceRules],
+    subdomain_overrides: Annotated[
+        dict[str, ServiceOverrides],
         Field(
-            title="Phalanx subdomain service rules",
+            title="Phalanx subdomain URL overrides",
             description=(
-                "Rules mapping Phalanx application names to services and"
-                " instructions for what to include in service discovery for"
-                " that service. These rules are used if the service is"
-                " running on a subdomain."
+                "Mapping of Phalanx application names to URL overrides that"
+                " should be applied if this service is running on a subdomain"
             ),
         ),
     ] = {}

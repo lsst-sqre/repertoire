@@ -15,10 +15,10 @@
           }
         },
         "gms": {
-          "url": "https://data.example.com/auth/gms",
+          "url": "https://auth.data.example.com/gms",
           "versions": {
             "gms-search-1.0": {
-              "url": "https://data.example.com/auth/gms"
+              "url": "https://auth.data.example.com/gms"
             }
           }
         },
@@ -57,10 +57,10 @@
           }
         },
         "gms": {
-          "url": "https://data.example.com/auth/gms",
+          "url": "https://auth.data.example.com/gms",
           "versions": {
             "gms-search-1.0": {
-              "url": "https://data.example.com/auth/gms"
+              "url": "https://auth.data.example.com/gms"
             }
           }
         },
@@ -84,10 +84,10 @@
           }
         },
         "gms": {
-          "url": "https://data.example.com/auth/gms",
+          "url": "https://auth.data.example.com/gms",
           "versions": {
             "gms-search-1.0": {
-              "url": "https://data.example.com/auth/gms"
+              "url": "https://auth.data.example.com/gms"
             }
           }
         },
@@ -132,7 +132,7 @@
   "services": {
     "internal": {
       "gafaelfawr": {
-        "url": "https://data.example.com/auth/api",
+        "url": "https://auth.data.example.com/api",
         "versions": {
           "v1": {
             "url": "https://data.example.com/auth/api/v1"
