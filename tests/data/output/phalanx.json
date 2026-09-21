@@ -53,10 +53,10 @@
         },
         "gms": {
           "title": "Group Membership Service (GMS)",
-          "url": "https://data.example.com/auth/gms",
+          "url": "https://auth.data.example.com/gms",
           "versions": {
             "gms-search-1.0": {
-              "url": "https://data.example.com/auth/gms"
+              "url": "https://auth.data.example.com/gms"
             }
           }
         },
@@ -119,10 +119,10 @@
         },
         "gms": {
           "title": "Group Membership Service (GMS)",
-          "url": "https://data.example.com/auth/gms",
+          "url": "https://auth.data.example.com/gms",
           "versions": {
             "gms-search-1.0": {
-              "url": "https://data.example.com/auth/gms"
+              "url": "https://auth.data.example.com/gms"
             }
           }
         },
@@ -156,10 +156,10 @@
         },
         "gms": {
           "title": "Group Membership Service (GMS)",
-          "url": "https://data.example.com/auth/gms",
+          "url": "https://auth.data.example.com/gms",
           "versions": {
             "gms-search-1.0": {
-              "url": "https://data.example.com/auth/gms"
+              "url": "https://auth.data.example.com/gms"
             }
           }
         },
@@ -228,8 +228,8 @@
     "internal": {
       "gafaelfawr": {
         "docs_url": "https://gafaelfawr.lsst.io/",
-        "openapi": "https://data.example.com/auth/openapi.json",
-        "url": "https://data.example.com/auth/api",
+        "openapi": "https://auth.data.example.com/openapi.json",
+        "url": "https://auth.data.example.com/api",
         "versions": {
           "v1": {
             "url": "https://data.example.com/auth/api/v1"

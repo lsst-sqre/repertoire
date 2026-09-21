@@ -259,10 +259,26 @@ rules:
       wobbly:
         template: "https://{{base_hostname}}/wobbly"
         openapi: "https://{{base_hostname}}/wobbly/openapi.json"
-subdomainRules:
+subdomainOverrides:
+  gafaelfawr:
+    data:
+      gms:
+        template: "https://auth.{{base_hostname}}/gms"
+        versions:
+          gms-search-1.0:
+            template: "https://auth.{{base_hostname}}/gms"
+    internal:
+      gafaelfawr:
+        template: "https://auth.{{base_hostname}}/api"
+        openapi: "https://auth.{{base_hostname}}/openapi.json"
   nublado:
     ui:
       nublado:
         template: "https://nb.{{base_hostname}}/nb"
+  wobbly:
+    internal:
+      wobbly:
+        template: "https://bogus.{{base_hostname}}/wobbly"
 useSubdomains:
+  - "gafaelfawr"
   - "nublado"
