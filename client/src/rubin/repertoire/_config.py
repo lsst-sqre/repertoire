@@ -930,8 +930,13 @@ class RepertoireSettings(BaseSettings):
     server can inherit from it.
     """
 
+    # Do not forbid extra attributes so that this class can be used to parse
+    # the Repertoire configuration directly from its Phalanx Helm values file,
+    # which contains additional settings for the Repertoire server that should
+    # be ignored. The Repertoire server configuration based on this class
+    # should set extra="forbid" to catch configuration errors.
     model_config = SettingsConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=to_camel, validate_by_name=True
     )
 
     applications: Annotated[
