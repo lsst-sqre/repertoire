@@ -11,6 +11,25 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-3.0.0'></a>
+## 3.0.0 (2026-09-22)
+
+### Backwards-incompatible changes
+
+- Change service rules to be mappings of service type to service name to rule instead of lists of rules with service type and service name as an attribute. This allows selective additions and overrides of service rules in per-environment values files, since Helm deals with dictionaries much more smoothly than lists.
+- Change `subdomainRules` to `subdomainOverrides` in the configuration and include only the URL templates that may need to change based on whether the service is running in a subdomain. This removes the need to duplicate all of the other service discovery information.
+- Do not forbid extra attributes when validating the `RepertoireSettings` module. This allows it to be used to parse the Phalanx Repertoire values file without removing the attributes used to configure the service but irrelevant to the builder.
+
+### New features
+
+- Add additional information about the local Phalanx environment to the Repertoire configuration and service discovery output as the new top-level ``environment`` key. Add a new `environment` method to `DiscoveryClient` that returns that information if it is available. The `environmentName` configuration option and `environment_name` method are now deprecated in favor of `environment`.
+- Add an optional `title` attribute, holding a short human-readable service description, to service rules and service discovery information. Add a corresponding optional `hips.title` configuration setting for the synthesized HiPS service.
+- Add an optional `docsUrl` setting for service rules and for HiPS, and a correponding optional `docsUrl` field for services in the service discovery information. This field points to the documentation for the service.
+- Add an optional `requiredScopes` setting for service rules and for HiPS, and a corresponding optional `requiredScopes` field for services in the service discovery information. This field lists the scopes required to access the service. All listed scopes must be satisfied.
+- Add an optional `quota_labels` key to services in service discovery and a corresponding `quotaLabels` config option for service rules and HiPS configuration. This holds a mapping of Gafaelfawr quota label names for that service to metadata about what that quota label is used for. The initial metadata is only a `title` attribute with a short description and an optional `internal` flag. This allows consumers such as Squareone to map services to quota labels and show users their quota limits in context.
+- Add an optional `obscore_config` attribute to the dataset records in service discovery and a corresponding `obscore_configs` configuration setting. If set, this is a URL to the ObsCore exporter configuration for that dataset.
+- Add an `obscore_config_for` method to `DiscoveryClient` to get the URL to the ObsCore exporter configuration for a given dataset.
+
 <a id='changelog-2.1.0'></a>
 ## 2.1.0 (2026-07-17)
 

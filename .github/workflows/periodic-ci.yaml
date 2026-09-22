@@ -8,7 +8,7 @@ env:
   # Current supported uv version. The uv documentation recommends pinning
   # this. The version should match the version used in .pre-commit-config.yaml
   # and frozen in uv.lock. It is updated by make update-deps.
-  UV_VERSION: "0.11.32"
+  UV_VERSION: "0.12.17"
 
 "on":
   schedule:
@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0 # full history for setuptools_scm
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: ${{ matrix.python }}
           version: ${{ env.UV_VERSION }}
@@ -64,7 +64,7 @@ jobs:
           fetch-depth: 0 # full history for Sphinx
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.2.0
         with:
           python-version: ${{ matrix.python }}
           version: ${{ env.UV_VERSION }}
@@ -101,7 +101,7 @@ jobs:
           fetch-depth: 0 # full history for setuptools_scm
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.2.0
         with:
           version: ${{ env.UV_VERSION }}
 
