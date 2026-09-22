@@ -14,6 +14,7 @@ from pydantic import (
     model_validator,
 )
 from pydantic.alias_generators import to_camel
+from pydantic_settings import SettingsConfigDict
 from safir.logging import (
     LogLevel,
     Profile,
@@ -31,9 +32,7 @@ class OrgRegistryConfig(BaseModel):
     """Configuration for the organisation registry."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel,
-        extra="forbid",
-        populate_by_name=True,
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
 
     created: datetime = Field(..., title="Creation timestamp of the registry")
@@ -47,9 +46,7 @@ class RegistryConfig(BaseModel):
     """Configuration for the registry."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel,
-        extra="forbid",
-        populate_by_name=True,
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
 
     admin_email: str = Field(
@@ -138,10 +135,14 @@ class SentryConfig(BaseModel):
     """Sentry configuration for Repertoire.
 
     This configuration is not used internally, but has to be present in the
-    model so that we can forbid unknown configuration settings. Otherwise,
-    Phalanx wouldn't be able to use the full ``config`` key of the Helm values
-    as the configuration file.
+    model to accept the settings from Phalanx. Otherwise, Phalanx wouldn't be
+    able to use the full ``config`` key of the Helm values as the
+    configuration file if unknown attributes are forbidden (which they are).
     """
+
+    model_config = ConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
 
     enabled: bool = Field(False, title="Whether to send exceptions to Sentry")
 
@@ -150,9 +151,7 @@ class TapServerConfig(BaseModel):
     """Configuration for a TAP server."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel,
-        extra="forbid",
-        populate_by_name=True,
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
 
     enabled: bool = Field(
@@ -204,9 +203,7 @@ class TapConfig(BaseModel):
     """Configuration for TAP schema management."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel,
-        extra="forbid",
-        populate_by_name=True,
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
     )
 
     schema_version: str | None = Field(
@@ -246,6 +243,10 @@ class TapConfig(BaseModel):
 
 class Config(RepertoireSettings):
     """Configuration for Repertoire."""
+
+    model_config = SettingsConfigDict(
+        alias_generator=to_camel, extra="forbid", validate_by_name=True
+    )
 
     ivoa_registry: RegistryConfig | None = Field(
         None,
