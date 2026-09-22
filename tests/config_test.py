@@ -5,7 +5,7 @@ from safir.testing.data import Data
 from repertoire.config import Config
 
 
-def test_config_sentry(data: Data) -> None:
+def test_sentry(data: Data) -> None:
     config = Config.from_file(data.path("config/phalanx.yaml"))
     assert not config.sentry
     config = Config.from_file(data.path("config/sentry.yaml"))
