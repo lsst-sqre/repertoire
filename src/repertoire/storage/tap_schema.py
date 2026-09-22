@@ -6,7 +6,7 @@ sources (GCS, HTTP/HTTPS) and extracting them to a working directory.
 
 import tarfile
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlsplit
 
 import httpx
 from google.cloud import storage
@@ -81,7 +81,7 @@ class TAPSchemaStorage:
         schema_dir.mkdir(parents=True, exist_ok=True)
 
         url = source_url_template.format(version=schema_version)
-        parsed = urlparse(url)
+        parsed = urlsplit(url)
         archive_path = schema_dir / "schemas.tar.gz"
 
         if parsed.scheme == "gs":
@@ -129,7 +129,7 @@ class TAPSchemaStorage:
         blob_path = ""
 
         try:
-            parsed = urlparse(url)
+            parsed = urlsplit(url)
             bucket_name = parsed.netloc
             blob_path = parsed.path.lstrip("/")
 
