@@ -1,5 +1,6 @@
 """Tests for the discovery data builder."""
 
+import yaml
 from safir.testing.data import Data
 
 from rubin.repertoire import (
@@ -19,7 +20,8 @@ def test_build_discovery(data: Data) -> None:
     config_path = data.path("config/phalanx.yaml")
     hips_base_url = TEST_BASE_URL.rstrip("/")
     base_url = hips_base_url + "/repertoire"
-    config = RepertoireSettings.from_file(config_path)
+    with config_path.open("r") as fh:
+        config = RepertoireSettings.model_validate(yaml.safe_load(fh))
 
     output = RepertoireBuilder(config).build_discovery(base_url, hips_base_url)
     output_json = output.model_dump(mode="json", exclude_defaults=True)
@@ -50,7 +52,8 @@ def test_build_discovery(data: Data) -> None:
 
 def test_build_influxdb(data: Data) -> None:
     config_path = data.path("config/phalanx.yaml")
-    config = RepertoireSettings.from_file(config_path)
+    with config_path.open("r") as fh:
+        config = RepertoireSettings.model_validate(yaml.safe_load(fh))
 
     # Check the output.
     output = RepertoireBuilder(config).build_influxdb("idfdev_efd")
@@ -63,7 +66,8 @@ def test_build_influxdb(data: Data) -> None:
 def test_build_influxdb_creds(data: Data) -> None:
     config_path = data.path("config/phalanx.yaml")
     secrets_path = data.path("secrets")
-    config = RepertoireSettings.from_file(config_path)
+    with config_path.open("r") as fh:
+        config = RepertoireSettings.model_validate(yaml.safe_load(fh))
 
     # First test with a Path parameter to RepertoireBuilderWithSecrets and a
     # secret file ending in a newline.
@@ -89,7 +93,8 @@ def test_build_influxdb_creds(data: Data) -> None:
 def test_list_influxdb_creds(data: Data) -> None:
     config_path = data.path("config/phalanx.yaml")
     secrets_path = data.path("secrets")
-    config = RepertoireSettings.from_file(config_path)
+    with config_path.open("r") as fh:
+        config = RepertoireSettings.model_validate(yaml.safe_load(fh))
 
     builder = RepertoireBuilderWithSecrets(config, secrets_path)
     output = builder.list_influxdb_with_credentials()
