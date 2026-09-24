@@ -2,10 +2,8 @@
 
 from datetime import datetime
 from enum import StrEnum
-from pathlib import Path
 from typing import Annotated, Literal, Self
 
-import yaml
 from pydantic import (
     AnyUrl,
     BaseModel,
@@ -1072,20 +1070,3 @@ class RepertoireSettings(BaseSettings):
             ),
         ),
     ] = set()
-
-    @classmethod
-    def from_file(cls, path: Path) -> Self:
-        """Construct the configuration from a YAML file.
-
-        Parameters
-        ----------
-        path
-            Path to the configuration file in YAML.
-
-        Returns
-        -------
-        RepertoireSettings
-            The corresponding configuration.
-        """
-        with path.open("r") as f:
-            return cls.model_validate(yaml.safe_load(f))

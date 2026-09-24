@@ -1,8 +1,10 @@
 """Configuration definition."""
 
 from datetime import datetime
+from pathlib import Path
 from typing import Self
 
+import yaml
 from pydantic import (
     AliasChoices,
     AnyUrl,
@@ -388,3 +390,20 @@ class Config(RepertoireSettings):
                 )
 
         return self
+
+    @classmethod
+    def from_file(cls, path: Path) -> Self:
+        """Construct the configuration from a YAML file.
+
+        Parameters
+        ----------
+        path
+            Path to the configuration file in YAML.
+
+        Returns
+        -------
+        RepertoireSettings
+            The corresponding configuration.
+        """
+        with path.open("r") as f:
+            return cls.model_validate(yaml.safe_load(f))
