@@ -14,6 +14,7 @@ This library is available from PyPI and can be declared as a dependency or insta
 Consumers in other languages, such as JavaScript, can use the Repertoire server API directly.
 
 .. toctree::
+   :maxdepth: 1
    :caption: Python client
 
    initialization
