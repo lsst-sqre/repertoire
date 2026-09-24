@@ -5,10 +5,10 @@
    :hidden:
 
    User guide <user-guide/index>
-   Administrators <admin/index>
    API <api>
+   Operations <operations/index>
    Change log <changelog>
-   Contributing <dev/index>
+   Development <dev/index>
 
 ##########
 Repertoire
@@ -24,7 +24,7 @@ Repertoire is developed on GitHub at https://github.com/lsst-sqre/repertoire.
 
 .. grid:: 2
 
-   .. grid-item-card:: User Guide
+   .. grid-item-card:: User guide
       :link: user-guide/index
       :link-type: doc
 
@@ -36,8 +36,10 @@ Repertoire is developed on GitHub at https://github.com/lsst-sqre/repertoire.
 
       See the full API documentation for the Repertoire client.
 
-   .. grid-item-card:: Administrators
-      :link: admin/index
+.. grid:: 2
+
+   .. grid-item-card:: Operations
+      :link: operations/index
       :link-type: doc
 
       Learn how to configure and administer the Repertoire server.
