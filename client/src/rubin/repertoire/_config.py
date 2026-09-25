@@ -229,16 +229,6 @@ class ServiceConfig(BaseModel):
         ),
     ] = []
 
-    quota_labels: Annotated[
-        dict[str, QuotaLabelConfig],
-        Field(
-            title="Quota labels",
-            description=(
-                "Gafaelfawr API quota labels that apply to this service"
-            ),
-        ),
-    ] = {}
-
 
 class HipsConfig(ServiceConfig):
     """Configuration for HiPS datasets.
@@ -293,6 +283,16 @@ class HipsConfig(ServiceConfig):
             ),
         ),
     ]
+
+    quota_labels: Annotated[
+        dict[str, QuotaLabelConfig],
+        Field(
+            title="Quota labels",
+            description=(
+                "Gafaelfawr API quota labels that apply to the HiPS service"
+            ),
+        ),
+    ] = {}
 
 
 class InfluxDatabaseConfig(BaseModel):
@@ -450,6 +450,16 @@ class ApiServiceRule(BaseServiceRule):
             description="Template to generate the OpenAPI schema URL",
         ),
     ] = None
+
+    quota_labels: Annotated[
+        dict[str, QuotaLabelConfig],
+        Field(
+            title="Quota labels",
+            description=(
+                "Gafaelfawr API quota labels that apply to this service"
+            ),
+        ),
+    ] = {}
 
     versions: Annotated[
         dict[str, ApiVersionRule],
