@@ -61,3 +61,11 @@ However, you can instead pass the base URL to `register_mock_discovery` as its t
 This fixture returns the `Discovery` model.
 This allows tests to explicitly depend on the fixture and reference that model for expected URLs that show up in test results
 This can avoid accidental mismatches test URLs between the mock service discovery results and the tests.
+
+Testing InfluxDB credentials
+============================
+
+Testing the `DiscoveryClient` methods to retrieve InfluxDB database credentials is not currently supported.
+For the time being, the `DiscoveryClient.influxdb_credentials` method has to be mocked in tests.
+
+The `DiscoveryClient.influxdb_databases` and `DiscoveryClient.influxdb_connection_info` methods are served from normal discovery data and therefore can be mocked using the instructions above.

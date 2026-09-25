@@ -146,4 +146,6 @@ Next steps
 
 - Query for service URLs: :doc:`services`
 - Query for datasets: :doc:`datasets`
-- Query for Phalanx applications: :doc:`applications`
+- Query for InfluxDB databases: :doc:`influxdb`
+- Query for Phalanx details: :doc:`environment`
+- Testing: :doc:`testing`
