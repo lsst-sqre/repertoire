@@ -30,4 +30,5 @@ Next steps
 ==========
 
 - Query for service URLs: :doc:`services`
-- Query for Phalanx applications: :doc:`applications`
+- Query for InfluxDB databases: :doc:`influxdb`
+- Testing: :doc:`testing`

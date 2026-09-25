@@ -89,3 +89,10 @@ The resulting object has the same fields as that retured by `DiscoveryClient.inf
 
 ``password``
     Password with which to authenticate.
+
+Next steps
+==========
+
+- Query for service URLs: :doc:`services`
+- Query for datasets: :doc:`datasets`
+- Testing: :doc:`testing`

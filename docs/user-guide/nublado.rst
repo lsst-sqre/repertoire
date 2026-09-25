@@ -27,8 +27,7 @@ Discovery information is written in JSON format to a file inside the container n
 The format parallels the current `Discovery` object with the following changes:
 
 #. The ``applications`` key is not present.
-#. Only ``butler_config`` is included as data for each dataset in ``datasets``.
-   Datasets without a Butler configuration will have an empty object value.
+#. Only ``butler_config`` and ``services`` are included as data for each dataset in ``datasets``.
 #. UI services are omitted.
 #. All data for services is omitted except for ``url`` at the top level and under any ``versions`` dictionary.
 
