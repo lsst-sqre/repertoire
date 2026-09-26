@@ -2,6 +2,7 @@
 .. _Click: https://click.palletsprojects.com/
 .. _Gafaelfawr: https://gafaelfawr.lsst.io/
 .. _HTTPX: https://www.python-httpx.org/
+.. _Jinja: https://jinja.palletsprojects.com/en/stable/
 .. _lsst-efd-client: https://efd-client.lsst.io/
 .. _mypy: https://www.mypy-lang.org
 .. _Nublado: https://nublado.lsst.io/
@@ -14,5 +15,6 @@
 .. _scriv: https://scriv.readthedocs.io/en/stable/
 .. _semver: https://semver.org/
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
+.. _Squareone: https://squareone.lsst.io/
 .. _structlog: https://www.structlog.org/en/stable/index.html
 .. _uv: https://docs.astral.sh/uv/
