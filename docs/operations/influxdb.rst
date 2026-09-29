@@ -78,3 +78,11 @@ Here is an example entry corresponding to the above example configuration:
 
 Then, populate that secret using the normal Phalanx mechanisms for the environment.
 Ensure the name of the secret matches the ``passwordKey`` field of the corresponding ``config.influxdbDatabases`` entry.
+
+Next steps
+==========
+
+- Services: :doc:`services`
+- Data collections: :doc:`datasets`
+- HiPS service: :doc:`hips`
+- TAP schema: :doc:`tap-schema`

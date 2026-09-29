@@ -303,3 +303,11 @@ To update TAP_SCHEMA metadata for a containerized deployment:
 #. Sync the TAP application via Argo CD.
 
 For information on setting up TAP database infrastructure, see the `Phalanx TAP database configuration guide <https://phalanx.lsst.io/applications/tap/databases.html>`__.
+
+Next steps
+==========
+
+- Services: :doc:`services`
+- Data collections: :doc:`datasets`
+- HiPS service: :doc:`hips`
+- InfluxDB databases: :doc:`influxdb`

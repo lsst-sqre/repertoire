@@ -118,3 +118,11 @@ Similar to other data services, the following keys can be set under ``config.hip
     A mapping of Gafaelfawr service names that may be used for quota restrictions to information about how that quota label is used.
 
 See the more complete documentation of all of these keys in :doc:`services` for more details about their values.
+
+Next steps
+==========
+
+- Services: :doc:`services`
+- Data collections: :doc:`datasets`
+- InfluxDB databases: :doc:`influxdb`
+- TAP schema: :doc:`tap-schema`

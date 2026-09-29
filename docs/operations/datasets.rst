@@ -77,3 +77,31 @@ For example:
        - "dp1"
        - "dp2"
        - "prompt"
+
+ObsCore exporter configurations
+===============================
+
+Each dataset may have an associated ObsCore exporter configuration URL.
+These configurations are used by services that need to generate IVOA ObsCore records from Butler results, such as SIA (see :dmtn:`300` and :sqr:`095`).
+
+ObsCore exporter configurations are configured via ``config.obscoreConfigs``.
+Each entry is a mapping from a dataset label to the URL of an ObsCore exporter configuration for that dataset.
+This information is added to the service discovery results for each dataset along with the Butler configuration, if any (which is handled automatically by Phalanx).
+
+An example:
+
+.. code-block:: yaml
+
+   config:
+     obscoreConfigs:
+       dp02: "https://example.com/obscore/configs/dp02.yaml"
+       dp1: "https://example.com/obscore/configs/dp02.yaml"
+       dp2: "https://example.com/obscore/configs/dp02.yaml"
+
+Next steps
+==========
+
+- Services: :doc:`services`
+- HiPS service: :doc:`hips`
+- InfluxDB databases: :doc:`influxdb`
+- TAP schema: :doc:`tap-schema`

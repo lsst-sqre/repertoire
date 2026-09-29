@@ -293,3 +293,11 @@ Here is the corresponding override rule:
 
 The ``config.useSubdomains`` setting should then be overridden for each Phalanx environment that uses subdomains to list the applications running in subdomains at that environment.
 Repertoire will choose whether to apply the subdomain overrides before generating a service discovery entry by checking whether the application appears in that list.
+
+Next steps
+==========
+
+- Data collections: :doc:`datasets`
+- HiPS service: :doc:`hips`
+- InfluxDB databases: :doc:`influxdb`
+- TAP schema: :doc:`tap-schema`
