@@ -62,12 +62,14 @@ The resulting object has the following fields:
 ``schema_registry``
     The URL (as a string) of the associated `Confluent Kafka Schema Registry <https://docs.confluent.io/platform/current/schema-registry/index.html>`__ that contains schema information for this database.
 
+.. _influxdb-credentials:
+
 Getting credentials
 ===================
 
 Getting the connection information with credentials for a specific database requires authentication, since the returned information includes the username and password.
 
-First, obtain a Gafaelfawr_ token.
+First, obtain a Gafaelfawr_ token with the ``read:sasquatch`` scope.
 Inside a service, normally this should be a delegated token received as part of a request and used to act on behalf of the user.
 See the `Gafaelfawr documentation on delegated tokens <https://gafaelfawr.lsst.io/user-guide/gafaelfawringress.html#requesting-delegated-tokens>`__ for more information.
 In other environments, this may be a user token created through the token UI, or a notebook token created by Nublado_.

@@ -43,14 +43,14 @@ Here is an example:
 
    dp1:
      description: >-
-       Data Preview 1 contains image and catalog products from the Rubin
+       Data Preview 1 contains image and catalog products from the Example
        Science Pipelines v29 processing of observations obtained with the
-       LSST Commissioning Camera of seven ~1 square degree fields, over seven
+       Commissioning Camera of seven ~1 square degree fields, over seven
        weeks in late 2024.
-     docsUrl: "https://dp1.lsst.io/"
+     docsUrl: "https://dp1.example.com/"
      ivoaRegistry:
-       ivoid: "ivo://org.rubinobs/lsst-dp1/datasets"
-       title: "Rubin Observatory DP1 Datasets"
+       ivoid: "ivo://org.example/lsst-dp1/datasets"
+       title: "Example DP1 Datasets"
        created: "2026-05-20T00:00:00"
        description: >-
          Dataset collection for Data Preview 1, serving as the resolvable
