@@ -13,6 +13,7 @@ It is considered part of Phalanx infrastructure and is normally installed in eve
 
    services
    hips
+   datasets
    tap-schema
 
 .. toctree::
