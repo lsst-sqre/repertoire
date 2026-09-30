@@ -11,6 +11,15 @@ Find changes for the upcoming release in the project's [changelog.d directory](h
 
 <!-- scriv-insert-here -->
 
+<a id='changelog-3.0.1'></a>
+## 3.0.1 (2026-09-30)
+
+### Bug fixes
+
+- Correctly populate the `internal` flag on quota rules when building service discovery information.
+- Remove `RepertoireSettings.from_file` and the client dependency on pyyaml. Technically, this is a backwards-incompatible change, but this method was never used outside of Repertoire.
+- Do not support `quotaRules` in service discovery rules for UI services. Gafaelfawr's quota support is not designed for UI services.
+
 <a id='changelog-3.0.0'></a>
 ## 3.0.0 (2026-09-22)
 
