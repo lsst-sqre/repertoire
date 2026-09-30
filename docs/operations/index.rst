@@ -24,3 +24,9 @@ Repertoire configuration is done via its Helm chart in Phalanx_
    :maxdepth: 1
 
    metrics
+
+.. toctree::
+   :caption: Phalanx documentation
+   :maxdepth: 1
+
+   builder
