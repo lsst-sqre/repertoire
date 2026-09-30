@@ -247,6 +247,7 @@
         "openapi": "https://data.example.com/muster/openapi.json",
         "quota_labels": {
           "muster-quota": {
+            "internal": true,
             "title": "Quota testing"
           }
         },
