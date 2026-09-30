@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from typing import cast
 
 from lxml import etree
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import AliasGenerator, BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 from vo_models.voregistry.models import Registry
 from vo_models.voresource.models import Resource
@@ -138,7 +138,10 @@ class OaiParameters(BaseModel):
         dispatching to the appropriate handler.
     """
 
-    model_config = ConfigDict(populate_by_name=True, alias_generator=to_camel)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        validate_by_name=True,
+    )
 
     from_: str | None = Field(None, alias="from")
     has_duplicate_params: bool = Field(False, exclude=True)

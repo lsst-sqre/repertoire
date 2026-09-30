@@ -5,6 +5,7 @@ from enum import StrEnum
 from typing import Annotated, Literal, Self
 
 from pydantic import (
+    AliasGenerator,
     AnyUrl,
     BaseModel,
     ConfigDict,
@@ -55,7 +56,9 @@ class EnvironmentConfig(BaseModel):
     """General information about the local Phalanx environment."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     name: Annotated[
@@ -124,7 +127,9 @@ class HipsDatasetConfig(BaseModel):
     """Configuration for a single HiPS dataset."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     paths: Annotated[
@@ -148,7 +153,9 @@ class HipsLegacyConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     dataset: Annotated[
@@ -178,7 +185,9 @@ class QuotaLabelConfig(BaseModel):
     """Configuration for a quota label."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     title: Annotated[str, Field(title="Short description")]
@@ -199,7 +208,9 @@ class ServiceConfig(BaseModel):
     """Base configuration for any service."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     title: Annotated[
@@ -303,7 +314,9 @@ class InfluxDatabaseConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     url: Annotated[
@@ -406,7 +419,9 @@ class ApiVersionRule(BaseModel):
     """Discovery generation rule for one API version."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     template: Annotated[
@@ -429,7 +444,9 @@ class BaseServiceRule(ServiceConfig):
     """Base class for rules for deriving URLs."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     template: Annotated[
@@ -477,7 +494,9 @@ class BaseRegistryEntry(BaseModel):
     """Shared fields for all IVOA registry entries."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     ivoid: Annotated[
@@ -557,7 +576,9 @@ class DatasetConfig(BaseModel):
     """Metadata for an available dataset."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     description: Annotated[
@@ -604,7 +625,9 @@ class TapOutputFormatConfig(BaseModel):
     """TAP output format."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     mime: Annotated[str, Field(title="MIME type")]
@@ -694,7 +717,9 @@ class MultiRecordRegistryEntry(BaseModel):
     """Base for registry entries that produce one record per dataset."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     records: Annotated[
@@ -865,7 +890,9 @@ class ServiceOverride(BaseModel):
     """Override to apply atop another rule, changing only the URLs."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     template: Annotated[
@@ -880,7 +907,9 @@ class ApiVersionOverride(BaseModel):
     """URL override for one API version."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     template: Annotated[
@@ -944,7 +973,9 @@ class RepertoireSettings(BaseSettings):
     # be ignored. The Repertoire server configuration based on this class
     # should set extra="forbid" to catch configuration errors.
     model_config = SettingsConfigDict(
-        alias_generator=to_camel, extra="ignore", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="ignore",
+        validate_by_name=True,
     )
 
     applications: Annotated[

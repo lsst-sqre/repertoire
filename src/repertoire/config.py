@@ -7,6 +7,7 @@ from typing import Self
 import yaml
 from pydantic import (
     AliasChoices,
+    AliasGenerator,
     AnyUrl,
     BaseModel,
     ConfigDict,
@@ -34,7 +35,9 @@ class OrgRegistryConfig(BaseModel):
     """Configuration for the organisation registry."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     created: datetime = Field(..., title="Creation timestamp of the registry")
@@ -48,7 +51,9 @@ class RegistryConfig(BaseModel):
     """Configuration for the registry."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     admin_email: str = Field(
@@ -143,7 +148,9 @@ class SentryConfig(BaseModel):
     """
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     enabled: bool = Field(False, title="Whether to send exceptions to Sentry")
@@ -153,7 +160,9 @@ class TapServerConfig(BaseModel):
     """Configuration for a TAP server."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     enabled: bool = Field(
@@ -205,7 +214,9 @@ class TapConfig(BaseModel):
     """Configuration for TAP schema management."""
 
     model_config = ConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     schema_version: str | None = Field(
@@ -247,7 +258,9 @@ class Config(RepertoireSettings):
     """Configuration for Repertoire."""
 
     model_config = SettingsConfigDict(
-        alias_generator=to_camel, extra="forbid", validate_by_name=True
+        alias_generator=AliasGenerator(validation_alias=to_camel),
+        extra="forbid",
+        validate_by_name=True,
     )
 
     ivoa_registry: RegistryConfig | None = Field(
