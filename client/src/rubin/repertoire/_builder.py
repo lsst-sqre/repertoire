@@ -205,7 +205,7 @@ class RepertoireBuilder:
             docs_url=rule.docs_url,
             required_scopes=rule.required_scopes,
             quota_labels={
-                k: QuotaLabel(title=v.title)
+                k: QuotaLabel(title=v.title, internal=v.internal)
                 for k, v in rule.quota_labels.items()
             },
             versions=self._build_versions_from_rules(rule.versions, dataset),
@@ -259,7 +259,7 @@ class RepertoireBuilder:
                     docs_url=self._config.hips.docs_url,
                     required_scopes=self._config.hips.required_scopes,
                     quota_labels={
-                        k: QuotaLabel(title=v.title)
+                        k: QuotaLabel(title=v.title, internal=v.internal)
                         for k, v in self._config.hips.quota_labels.items()
                     },
                     versions={
@@ -406,7 +406,7 @@ class RepertoireBuilder:
             docs_url=rule.docs_url,
             required_scopes=rule.required_scopes,
             quota_labels={
-                k: QuotaLabel(title=v.title)
+                k: QuotaLabel(title=v.title, internal=v.internal)
                 for k, v in rule.quota_labels.items()
             },
             versions=self._build_versions_from_rules(rule.versions),
