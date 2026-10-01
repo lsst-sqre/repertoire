@@ -226,7 +226,7 @@ Data service rules support the following additional keys:
 
 ``ivoaRegistry`` (optional)
     Additional metadata for the IVOA publishing registry.
-    Publishing registry support is still being tested and is not yet documented.
+    See :doc:`ivoa-registry` for more details.
 
 In addition, all Jinja templates within a data service support an additional variable: ``dataset``, which is replaced with the name of the dataset for which the service discovery entry is being generated.
 This allows the service to use separate URLs per dataset.

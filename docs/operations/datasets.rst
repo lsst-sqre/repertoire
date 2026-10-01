@@ -35,7 +35,7 @@ Below that key are the following keys describing the dataset:
 
 ``ivoaRegistry`` (optional)
     Additional metadata for the IVOA publishing registry.
-    Publishing registry support is still being tested and is not yet documented.
+    See :doc:`ivoa-registry` for more details.
 
 Here is an example:
 
