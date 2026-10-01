@@ -17,6 +17,7 @@ Repertoire configuration is done via its Helm chart in Phalanx_
    hips
    datasets
    influxdb
+   ivoa-registry
    tap-schema
 
 .. toctree::
