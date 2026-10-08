@@ -213,6 +213,7 @@
     "idfdev_efd": {
       "credentials_url": "https://example.com/repertoire/discovery/influxdb/idfdev_efd",
       "database": "efd",
+      "description": "Engineering and Facility Database telemetry.",
       "schema_registry": "http://sasquatch-schema-registry.sasquatch:8081/",
       "url": "https://data.example.com/influxdb/"
     },

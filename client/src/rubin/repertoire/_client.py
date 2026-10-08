@@ -267,6 +267,7 @@ class DiscoveryClient:
             return InfluxDatabase(
                 url=info.url,
                 database=info.database,
+                description=info.description,
                 schema_registry=info.schema_registry,
                 local=info.local,
             )
