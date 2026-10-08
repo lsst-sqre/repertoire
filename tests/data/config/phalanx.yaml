@@ -101,6 +101,7 @@ influxdbDatabases:
   idfdev_efd:
     url: "https://data.example.com/influxdb/"
     database: "efd"
+    description: "Engineering and Facility Database telemetry."
     username: "efdreader"
     passwordKey: "idfdev_efd-password"
     schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
