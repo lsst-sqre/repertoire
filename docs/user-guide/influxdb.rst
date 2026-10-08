@@ -59,6 +59,9 @@ The resulting object has the following fields:
 ``database``
     The name of the InfluxDB database to use for queries.
 
+``description``
+    A human-readable description of the contents and purpose of the InfluxDB database.
+
 ``schema_registry``
     The URL (as a string) of the associated `Confluent Kafka Schema Registry <https://docs.confluent.io/platform/current/schema-registry/index.html>`__ that contains schema information for this database.
 
