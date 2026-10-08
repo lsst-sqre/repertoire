@@ -417,6 +417,14 @@ class InfluxDatabase(BaseModel):
         ),
     ]
 
+    description: Annotated[
+        str | None,
+        Field(
+            title="Description",
+            description="Long description of the InfluxDB database",
+        ),
+    ] = None
+
     schema_registry: Annotated[
         HttpUrl,
         Field(

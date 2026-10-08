@@ -337,6 +337,14 @@ class InfluxDatabaseConfig(BaseModel):
         ),
     ]
 
+    description: Annotated[
+        str,
+        Field(
+            title="Description",
+            description="Long description of the InfluxDB database",
+        ),
+    ]
+
     username: Annotated[
         str,
         Field(
