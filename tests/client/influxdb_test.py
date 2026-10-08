@@ -5,9 +5,17 @@ import respx
 from httpx import Request, Response
 from safir.testing.data import Data
 
-from rubin.repertoire import DiscoveryClient
+from rubin.repertoire import DiscoveryClient, InfluxDatabase
 
 from ..support.constants import TEST_BASE_URL
+
+
+def test_missing_description(data: Data) -> None:
+    """Test compatibility with responses that predate descriptions."""
+    response = data.read_json("output/idfdev_efd")
+    del response["description"]
+    info = InfluxDatabase.model_validate(response)
+    assert info.description is None
 
 
 @pytest.mark.asyncio
@@ -40,6 +48,7 @@ async def test_connection_info(data: Data, discovery: DiscoveryClient) -> None:
     for database in ("idfdev_efd", "idfdev_metrics"):
         output = await discovery.influxdb_connection_info(database)
         assert output
+        assert output.description
         data.assert_pydantic_matches(
             output, f"output/{database}", exclude_defaults=True
         )
@@ -51,6 +60,7 @@ async def test_credentials(data: Data, discovery: DiscoveryClient) -> None:
     for database in ("idfdev_efd", "idfdev_metrics"):
         output = await discovery.influxdb_credentials(database, "token")
         assert output
+        assert output.description
         data.assert_pydantic_matches(
             output, f"output/{database}-creds", exclude_defaults=True
         )

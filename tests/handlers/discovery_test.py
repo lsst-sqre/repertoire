@@ -46,6 +46,9 @@ async def test_get_influxdb(data: Data, client: AsyncClient) -> None:
     assert r.status_code == 200, f"error body: {r.text}"
 
     seen = r.json()["influxdb_databases"]["idfdev_efd"]
+    assert (
+        seen["description"] == "Engineering and Facility Database telemetry."
+    )
     url = seen["credentials_url"]
     del seen["credentials_url"]
     data.assert_json_matches(seen, "output/idfdev_efd")
@@ -53,6 +56,9 @@ async def test_get_influxdb(data: Data, client: AsyncClient) -> None:
     r = await client.get(url, headers={"X-Auth-Request-User": "some-user"})
     assert r.status_code == 200, f"error body: {r.text}"
     assert "Access-Control-Allow-Origin" not in r.headers
+    assert r.json()["description"] == (
+        "Engineering and Facility Database telemetry."
+    )
     data.assert_json_matches(r.json(), "output/idfdev_efd-creds")
 
     r = await client.get(
