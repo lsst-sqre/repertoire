@@ -9,6 +9,8 @@ from rubin.repertoire import Discovery, DiscoveryClient
 @pytest.mark.asyncio
 async def test_nublado(data: Data, discovery: DiscoveryClient) -> None:
     nublado = await discovery.build_nublado_dict()
+    for influxdb in nublado["influxdb_databases"].values():
+        assert "description" not in influxdb
     data.assert_json_matches(nublado, "output/nublado")
 
 
