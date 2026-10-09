@@ -417,6 +417,14 @@ class InfluxDatabase(BaseModel):
         ),
     ]
 
+    description: Annotated[
+        str | None,
+        Field(
+            title="Description",
+            description="Long description of the InfluxDB database",
+        ),
+    ] = None
+
     schema_registry: Annotated[
         HttpUrl,
         Field(
@@ -628,7 +636,7 @@ class Discovery(BaseModel):
                 k: v.to_nublado_dict() for k, v in self.datasets.items()
             },
             "influxdb_databases": {
-                k: v.model_dump(mode="json")
+                k: v.model_dump(mode="json", exclude={"description"})
                 for k, v in self.influxdb_databases.items()
             },
             "services": self.services.to_nublado_dict(),

@@ -27,6 +27,9 @@ Below that top-level label, the following keys are supported:
     The name of the database inside InfluxDB.
     This is usually different from the label due to the above-mentioned label convention.
 
+``description`` (required)
+    A human-readable description of the contents and purpose of the InfluxDB database.
+
 ``schemaRegistry`` (required)
     The URL to the Confluent Schema Registry for this InfluxDB database.
     This may be an internal URL that is usable only within the same Kubernetes environment as the Repertoire server.
@@ -54,6 +57,7 @@ Here is an example:
        idfdev_efd:
          url: "https://data-dev.example.com/influxdb/"
          database: "efd"
+         description: "Engineering and Facility Database telemetry."
          username: "efdreader"
          passwordKey: "idfdev_efd-password"
          schemaRegistry: "http://sasquatch-schema-registry.sasquatch:8081"
