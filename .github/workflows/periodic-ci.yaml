@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0 # full history for setuptools_scm
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.2.0
+        uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: ${{ matrix.python }}
           version: ${{ env.UV_VERSION }}
@@ -64,7 +64,7 @@ jobs:
           fetch-depth: 0 # full history for Sphinx
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.2.0
+        uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: ${{ matrix.python }}
           version: ${{ env.UV_VERSION }}
@@ -101,7 +101,7 @@ jobs:
           fetch-depth: 0 # full history for setuptools_scm
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v10.2.0
+        uses: astral-sh/setup-uv@v10.3.0
         with:
           version: ${{ env.UV_VERSION }}
 
