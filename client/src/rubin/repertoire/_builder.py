@@ -118,6 +118,7 @@ class RepertoireBuilder:
         return InfluxDatabase(
             url=influxdb.url,
             database=influxdb.database,
+            description=influxdb.description,
             schema_registry=influxdb.schema_registry,
             local=influxdb.local,
         )
@@ -321,6 +322,7 @@ class RepertoireBuilder:
             result[label] = InfluxDatabaseWithPointer(
                 url=config.url,
                 database=config.database,
+                description=config.description,
                 schema_registry=config.schema_registry,
                 credentials_url=HttpUrl(creds_url),
                 local=config.local,
@@ -512,6 +514,7 @@ class RepertoireBuilderWithSecrets(RepertoireBuilder):
         return InfluxDatabaseWithCredentials(
             url=influxdb.url,
             database=influxdb.database,
+            description=influxdb.description,
             username=influxdb.username,
             password=SecretStr(password.rstrip("\n")),
             schema_registry=influxdb.schema_registry,
