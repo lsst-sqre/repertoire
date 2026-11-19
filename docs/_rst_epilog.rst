@@ -1,7 +1,7 @@
 .. _Butler: https://pipelines.lsst.io/modules/lsst.daf.butler/index.html
 .. _Click: https://click.palletsprojects.com/
 .. _Gafaelfawr: https://gafaelfawr.lsst.io/
-.. _HTTPX: https://www.python-httpx.org/
+.. _HTTPX2: https://pydantic.dev/docs/httpx2/get-started/
 .. _Jinja: https://jinja.palletsprojects.com/en/stable/
 .. _lsst-efd-client: https://efd-client.lsst.io/
 .. _mypy: https://www.mypy-lang.org
@@ -10,6 +10,7 @@
 .. _Phalanx: https://phalanx.lsst.io/
 .. _prek: https://prek.j178.dev/
 .. _pytest: https://docs.pytest.org/en/latest/
+.. _pytest-httpx2: https://github.com/lundberg/pytest-httpx2
 .. _respx: https://lundberg.github.io/respx/guide/
 .. _Sasquatch: https://sasquatch.lsst.io/
 .. _scriv: https://scriv.readthedocs.io/en/stable/

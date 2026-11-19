@@ -3,7 +3,7 @@
 import re
 
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from safir.testing.data import Data
 
 

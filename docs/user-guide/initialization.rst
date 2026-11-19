@@ -109,26 +109,26 @@ If the client knows the base URL for the Repertoire REST API via some other mech
 
 In this case, the environment variable is ignored and may be unset.
 
-Provide an HTTPX client
------------------------
+Provide an HTTPX2 client
+------------------------
 
-By default, Repertoire creates a new HTTPX_ client.
-This is slightly wasteful if the application already has an HTTPX client, since it will create a new connection pool.
+By default, Repertoire creates a new HTTPX2_ client.
+This is slightly wasteful if the application already has an HTTPX2 client, since it will create a new connection pool.
 
-To use an existing HTTPX ``AsyncClient`` for making requests to Repertoire, pass it in as the first argument to the `DiscoveryClient` constructor:
+To use an existing HTTPX2 ``AsyncClient`` for making requests to Repertoire, pass it in as the first argument to the `DiscoveryClient` constructor:
 
 .. code-block:: python
 
-   from httpx import AsyncClient
+   from httpx2 import AsyncClient
    from rubin.repertoire import DiscoveryClient
 
    client = AsyncClient()
    discovery = DiscoveryClient(client)
 
-This is also the pattern to use if the Repertoire client needs custom HTTPX configuration for whatever reason, such as custom timeouts or special headers.
-That configuration can be added to the HTTPX client before passing it into the `DiscoveryClient` constructor.
+This is also the pattern to use if the Repertoire client needs custom HTTPX2 configuration for whatever reason, such as custom timeouts or special headers.
+That configuration can be added to the HTTPX2 client before passing it into the `DiscoveryClient` constructor.
 
-If you provide an HTTPX client, you do not need to call `DiscoveryClient.aclose`.
+If you provide an HTTPX2 client, you do not need to call `DiscoveryClient.aclose`.
 You are responsible for closing the provided client when appropriate.
 
 Override the cache duration

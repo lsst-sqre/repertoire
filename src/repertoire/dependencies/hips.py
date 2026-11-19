@@ -4,7 +4,7 @@ import re
 from typing import Annotated
 
 from fastapi import Depends, Path
-from httpx import AsyncClient, HTTPError
+from httpx2 import AsyncClient, HTTPError
 from jinja2 import Template
 from safir.dependencies.logger import logger_dependency
 from structlog.stdlib import BoundLogger

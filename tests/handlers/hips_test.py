@@ -1,8 +1,13 @@
 """Tests for the repertoire.handlers.hips module and routes."""
 
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from safir.testing.data import Data
+
+pytestmark = [
+    pytest.mark.httpx2(assert_all_called=False),
+    pytest.mark.usefixtures("mock_hips"),
+]
 
 
 @pytest.mark.asyncio

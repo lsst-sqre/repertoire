@@ -24,6 +24,7 @@ dependencies = [
     "click>=8",
     "fastapi>=0.100",
     "google-cloud-storage>=3.4.1",
+    "httpx2>=2",
     "jinja2>=3",
     "lsst-felis>=0.3.0",
     "lxml>=6.0.4",
@@ -62,6 +63,7 @@ dev = [
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
+    "pytest-httpx2",
     "pytest-sugar",
     "respx",
     "testcontainers[postgres]>=4",
@@ -136,12 +138,14 @@ warn_unused_ignores = true
 init_forbid_extra = true
 init_typed = true
 warn_required_dynamic_aliases = true
-warn_untyped_fields = true
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
 asyncio_mode = "strict"
 filterwarnings = []
+markers = [
+    "httpx2: implemented by pytest-httpx2 but not registered correctly"
+]
 # The python_files setting is not for test detection (pytest will pick up any
 # test files named *_test.py without this setting) but to enable special
 # assert processing in any non-test supporting files under tests. We
@@ -184,6 +188,7 @@ required-environments = [
 
 [tool.uv.sources]
 rubin-repertoire = { workspace = true }
+safir = { git = "https://github.com/lsst-sqre/safir" }
 
 [tool.uv.workspace]
 members = ["client"]

@@ -1,7 +1,7 @@
 """Tests for the repertoire.handlers.discovery module and routes."""
 
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 from safir.metrics import MockEventPublisher
 from safir.testing.data import Data
 

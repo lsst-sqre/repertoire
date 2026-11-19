@@ -4,7 +4,7 @@ import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from httpx import AsyncClient, HTTPError
+from httpx2 import AsyncClient, HTTPError
 from pydantic import BaseModel, HttpUrl, ValidationError
 from structlog.stdlib import BoundLogger, get_logger
 

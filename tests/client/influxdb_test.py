@@ -58,7 +58,7 @@ async def test_credentials(data: Data, discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_authentication(data: Data, respx_mock: respx.Router) -> None:
+async def test_authentication(data: Data, httpx2_mock: respx.Router) -> None:
     result = data.read_json("output/idfdev_efd-creds")
     discovery_url = f"{TEST_BASE_URL}repertoire/discovery"
     influxdb_url = f"{TEST_BASE_URL}repertoire/discovery/influxdb/idfdev_efd"
@@ -68,9 +68,9 @@ async def test_authentication(data: Data, respx_mock: respx.Router) -> None:
         assert request.headers["Authorization"] == f"Bearer {token}"
         return Response(200, json=result)
 
-    discovery_response = Response(200, json=data.read_json("output/phalanx"))
-    respx_mock.get(discovery_url).mock(return_value=discovery_response)
-    respx_mock.get(influxdb_url).mock(side_effect=check_request)
+    discovery_response = data.read_json("output/phalanx")
+    httpx2_mock.get(discovery_url).respond(200, json=discovery_response)
+    httpx2_mock.get(influxdb_url).mock(side_effect=check_request)
 
     discovery = DiscoveryClient(base_url=f"{TEST_BASE_URL}repertoire")
     output = await discovery.influxdb_credentials("idfdev_efd", token)
