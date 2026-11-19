@@ -26,6 +26,7 @@ jobs:
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
 
     steps:
       - uses: actions/checkout@v7
@@ -69,7 +70,6 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v10.3.3
         with:
-          python-version: ${{ matrix.python }}
           version: ${{ env.UV_VERSION }}
 
       - name: Update dependencies
