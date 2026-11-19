@@ -12,8 +12,9 @@ When testing software that uses the Repertoire client for service discovery, the
 Prerequisites
 =============
 
-Since the Repertoire client uses HTTPX_, `register_mock_discovery` relies on respx_ to mock the service discovery URL.
-The package being tested must therefore depend on respx_ in whatever dependency group it uses for tests that need service discovery mocking.
+Since the Repertoire client uses HTTPX2_, `register_mock_discovery` relies on respx_ and pytest-httpx2_ to mock the service discovery URL.
+The package being tested must therefore depend on pytest-httpx2 and respx in whatever dependency group it uses for tests that need service discovery mocking.
+See the `Safir documentation <https://safir.lsst.io/user-guide/http-client.html#testing-considerations>`__ for more details about mocking HTTPX2.
 
 The Repertoire client does not itself depend on respx_ and expects the mock router to be passed into `register_mock_discovery`.
 
@@ -29,7 +30,7 @@ It's often sufficient to create one set of mocked results that can be used by th
 - A Python `dict` holding the serialized form of a `Discovery` object (the same as the JSON output produced by the Repertoire server's ``/discovery`` route).
 - A `~pathlib.Path` for a file containing the serialized form of a `Discovery` object in JSON format.
 
-Then, call `register_mock_discovery`, passing in the ``respx_mock`` fixture object and the mocked discovery results.
+Then, call `register_mock_discovery`, passing in the ``httpx2_mock`` fixture object and the mocked discovery results.
 Normally, this is best done in a fixture defined in :file:`tests/conftest.py`.
 For example:
 
@@ -43,11 +44,11 @@ For example:
 
    @pytest.fixture(autouse=True)
    def mock_discovery(
-       respx_mock: respx.Router, monkeypatch: pytest.MonkeyPatch
+       httpx2_mock: respx.Router, monkeypatch: pytest.MonkeyPatch
    ) -> Discovery:
        monkeypatch.setenv("REPERTOIRE_BASE_URL", "https://example.com/repertoire")
        path = Path(__file__).parent / "data" / "discovery.json"
-       return register_mock_discovery(respx_mock, path)
+       return register_mock_discovery(httpx2_mock, path)
 
 This fixture assumes :file:`tests/data/discovery.json` contains the mock service discovery results in JSON format.
 It is set up as an autouse fixture that will affect all tests.

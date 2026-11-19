@@ -4,8 +4,6 @@ import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from httpx import Response
-
 from ._exceptions import RepertoireUrlError
 from ._models import Discovery
 
@@ -32,7 +30,7 @@ def register_mock_discovery(
     respx_mock
         Mock router.
     results
-        Mock results to return when HTTPX code requests service discovery.
+        Mock results to return when HTTPX2 code requests service discovery.
         This can be a `~rubin.repertoire.Discovery` object, the equivalent as
         a `dict` (using the same syntax as parsed JSON), or a `~pathlib.Path`
         to a JSON file.
@@ -66,5 +64,5 @@ def register_mock_discovery(
         if not base_url:
             raise RepertoireUrlError
     url = base_url.rstrip("/") + "/discovery"
-    respx_mock.get(url).mock(return_value=Response(200, json=discovery_json))
+    respx_mock.get(url).respond(200, json=discovery_json)
     return discovery

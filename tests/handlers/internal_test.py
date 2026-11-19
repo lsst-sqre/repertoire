@@ -1,7 +1,7 @@
 """Tests for the repertoire.handlers.internal module and routes."""
 
 import pytest
-from httpx import AsyncClient
+from httpx2 import AsyncClient
 
 from repertoire.dependencies.config import config_dependency
 

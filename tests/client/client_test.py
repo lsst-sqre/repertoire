@@ -5,7 +5,6 @@ from unittest.mock import ANY
 
 import pytest
 import respx
-from httpx import Response
 from safir.testing.data import Data
 from safir.testing.logging import parse_log_tuples
 from structlog.stdlib import BoundLogger
@@ -153,11 +152,10 @@ async def test_versions_for(data: Data, discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_default_client(data: Data, respx_mock: respx.Router) -> None:
+async def test_default_client(data: Data, httpx2_mock: respx.Router) -> None:
     output = data.read_json("output/phalanx")
     base_url = "https://api.example.com/repertoire"
-    response = Response(200, json=output)
-    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+    httpx2_mock.get(base_url + "/discovery").respond(200, json=output)
 
     discovery = DiscoveryClient(base_url=base_url)
     assert await discovery.applications() == output["applications"]
@@ -187,9 +185,9 @@ async def test_minimal(data: Data, discovery: DiscoveryClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cache(data: Data, respx_mock: respx.Router) -> None:
+async def test_cache(data: Data, httpx2_mock: respx.Router) -> None:
     base_url = "https://api.example.com/repertoire"
-    respx_mock.get(base_url + "/discovery").mock(return_value=Response(404))
+    httpx2_mock.get(base_url + "/discovery").respond(404)
 
     # Requesting discovery information with no cache when the service is down
     # should raise an exception.
@@ -199,8 +197,7 @@ async def test_cache(data: Data, respx_mock: respx.Router) -> None:
 
     initial = data.read_json("output/phalanx")
     base_url = "https://api.example.com/repertoire"
-    response = Response(200, json=initial)
-    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+    httpx2_mock.get(base_url + "/discovery").respond(200, json=initial)
 
     discovery = DiscoveryClient(base_url=base_url)
     assert await discovery.applications() == initial["applications"]
@@ -208,8 +205,7 @@ async def test_cache(data: Data, respx_mock: respx.Router) -> None:
     # Replace the discovery information with different information. The client
     # should not see any changes since the information is cached.
     new = data.read_json("output/minimal")
-    response = Response(200, json=new)
-    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+    httpx2_mock.get(base_url + "/discovery").respond(200, json=new)
     assert await discovery.applications() == initial["applications"]
 
     # A new client will see the new information.
@@ -218,11 +214,10 @@ async def test_cache(data: Data, respx_mock: respx.Router) -> None:
 
 
 @pytest.mark.asyncio
-async def test_cache_timeout(data: Data, respx_mock: respx.Router) -> None:
+async def test_cache_timeout(data: Data, httpx2_mock: respx.Router) -> None:
     initial = data.read_json("output/phalanx")
     base_url = "https://api.example.com/repertoire"
-    response = Response(200, json=initial)
-    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+    httpx2_mock.get(base_url + "/discovery").respond(200, json=initial)
 
     timeout = timedelta(seconds=0)
     discovery = DiscoveryClient(base_url=base_url, cache_timeout=timeout)
@@ -231,8 +226,7 @@ async def test_cache_timeout(data: Data, respx_mock: respx.Router) -> None:
     # Since the cache timeout is set to 0, replacing the output should produce
     # an immedate change in the results.
     new = data.read_json("output/minimal")
-    response = Response(200, json=new)
-    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+    httpx2_mock.get(base_url + "/discovery").respond(200, json=new)
     assert await discovery.applications() == []
 
 
@@ -241,11 +235,11 @@ async def test_cache_failure(
     *,
     data: Data,
     logger: BoundLogger,
-    respx_mock: respx.Router,
+    httpx2_mock: respx.Router,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     base_url = "https://api.example.com/repertoire"
-    respx_mock.get(base_url + "/discovery").mock(return_value=Response(404))
+    httpx2_mock.get(base_url + "/discovery").respond(404)
 
     # Try retrieving information when Repertoire is down.
     discovery = DiscoveryClient(
@@ -256,8 +250,7 @@ async def test_cache_failure(
 
     # Configure with real data.
     output = data.read_json("output/phalanx")
-    response = Response(200, json=output)
-    respx_mock.get(base_url + "/discovery").mock(return_value=response)
+    httpx2_mock.get(base_url + "/discovery").respond(200, json=output)
 
     # Now, the client should immediately return real data.
     assert await discovery.applications() == output["applications"]
@@ -265,7 +258,7 @@ async def test_cache_failure(
     # Make Repertoire return an error again. The client should return cached
     # data even though the cache has expired, but it should log a warning.
     caplog.clear()
-    respx_mock.get(base_url + "/discovery").mock(return_value=Response(404))
+    httpx2_mock.get(base_url + "/discovery").respond(404)
     assert await discovery.applications() == output["applications"]
     seen = parse_log_tuples("test", caplog.record_tuples)
     assert seen == [

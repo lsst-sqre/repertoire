@@ -8,7 +8,7 @@ import pytest_asyncio
 import respx
 from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
-from httpx import ASGITransport, AsyncClient
+from httpx2 import ASGITransport, AsyncClient
 from jinja2 import Template
 from pydantic import SecretStr
 from safir.logging import LogLevel, Profile, configure_logging
@@ -70,7 +70,7 @@ async def app(
 
 @pytest_asyncio.fixture
 async def client(app: FastAPI) -> AsyncGenerator[AsyncClient]:
-    """Return an ``httpx.AsyncClient`` configured to talk to the test app."""
+    """Return an ``httpx2.AsyncClient`` configured to talk to the test app."""
     async with AsyncClient(
         base_url="https://example.com/",
         headers={"X-Auth-Request-User": "username"},
@@ -126,10 +126,10 @@ def logger() -> BoundLogger:
     return get_logger("test")
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def mock_hips(
     data: Data,
-    respx_mock: respx.Router,
+    httpx2_mock: respx.Router,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     token = data.read_text("secrets/token", strip=True)
@@ -140,7 +140,7 @@ def mock_hips(
     template = Template(config.hips.source_template)
     for dataset in config.hips.datasets:
         context = {"base_hostname": config.base_hostname, "dataset": dataset}
-        register_mock_hips(data, respx_mock, template.render(**context))
+        register_mock_hips(data, httpx2_mock, template.render(**context))
 
 
 @pytest.fixture(scope="session")

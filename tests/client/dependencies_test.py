@@ -8,7 +8,7 @@ import pytest
 import respx
 from asgi_lifespan import LifespanManager
 from fastapi import Depends, FastAPI
-from httpx import ASGITransport, AsyncClient
+from httpx2 import ASGITransport, AsyncClient
 from safir.dependencies.http_client import http_client_dependency
 from safir.testing.data import Data
 from safir.testing.logging import parse_log_tuples
@@ -26,14 +26,14 @@ async def test_dependency(
     *,
     data: Data,
     logger: BoundLogger,
-    respx_mock: respx.Router,
+    httpx2_mock: respx.Router,
     caplog: pytest.LogCaptureFixture,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     cached_client = None
     output = data.read_json("output/phalanx")
     monkeypatch.setenv("REPERTOIRE_BASE_URL", "https://example.com/repertoire")
-    register_mock_discovery(respx_mock, output)
+    register_mock_discovery(httpx2_mock, output)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
@@ -73,9 +73,9 @@ async def test_dependency(
         }
     ]
 
-    # When the HTTPX client dependency is shut down and recreated, this should
-    # result in a new Gafaelfawr client. Otherwise, the Gafaelfawr client
-    # would try to use the closed HTTPX client.
+    # When the HTTPX2 client dependency is shut down and recreated, this
+    # should result in a new Gafaelfawr client. Otherwise, the Gafaelfawr
+    # client would try to use the closed HTTPX2 client.
     old_client = cached_client
     cached_client = None
     async with LifespanManager(app):

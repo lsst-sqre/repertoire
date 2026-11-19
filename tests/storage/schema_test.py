@@ -63,7 +63,7 @@ async def test_download_schemas_http_success(
     mock_client.__aexit__ = AsyncMock()
 
     with patch(
-        "repertoire.storage.tap_schema.httpx.AsyncClient",
+        "repertoire.storage.tap_schema.AsyncClient",
         return_value=mock_client,
     ):
         result = await storage.download_and_extract(

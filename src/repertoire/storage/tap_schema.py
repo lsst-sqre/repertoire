@@ -8,8 +8,8 @@ import tarfile
 from pathlib import Path
 from urllib.parse import urlsplit
 
-import httpx
-from google.cloud import storage
+import google.cloud.storage
+from httpx2 import AsyncClient, HTTPError
 from structlog.stdlib import BoundLogger
 
 from repertoire.exceptions import (
@@ -133,7 +133,7 @@ class TAPSchemaStorage:
             bucket_name = parsed.netloc
             blob_path = parsed.path.lstrip("/")
 
-            client = storage.Client()
+            client = google.cloud.storage.Client()
             bucket = client.bucket(bucket_name)
             blob = bucket.blob(blob_path)
 
@@ -179,7 +179,7 @@ class TAPSchemaStorage:
             If download fails.
         """
         try:
-            async with httpx.AsyncClient(
+            async with AsyncClient(
                 follow_redirects=True, timeout=300.0
             ) as client:
                 async with client.stream("GET", url) as response:
@@ -199,7 +199,7 @@ class TAPSchemaStorage:
                 bytes_downloaded=downloaded,
             )
 
-        except httpx.HTTPError as e:
+        except HTTPError as e:
             raise TAPSchemaDownloadError(
                 f"Failed to download via HTTP: {e}",
                 url=url,
